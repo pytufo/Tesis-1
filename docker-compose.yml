@@ -1,15 +1,15 @@
 version: "3"
 
 services:
-  web:
-    build: .
+  django:
+    build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./bibloteca/:/usr/src/app
+      - ./backend/:/usr/src/app
     ports:
       - 8000:8000
     env_file:
-      - ./.env.dev
+      - ./backend/.env.dev
     depends_on:
       - db
     environment:
