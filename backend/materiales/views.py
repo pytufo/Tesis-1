@@ -2,7 +2,6 @@ from rest_framework import (
     viewsets,
     status,
     generics,
-    serializers,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 

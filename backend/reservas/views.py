@@ -9,8 +9,7 @@ from .models import Reservas, Prestamos
 
 from .serializers import (
     ListReservaSerializer,
-    PrestamosSerializer,
-    ReservasSerializer,
+    PrestamosSerializer,    
     CreateReservaserializer,
 )
 

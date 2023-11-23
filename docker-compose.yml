@@ -18,10 +18,30 @@ services:
   db:
     image: postgres:15
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - ./postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=3Nano094
       - POSTGRES_DB=bibloteca
-volumes:
+
+  react:
+    build: 
+      context: ./frontend
+      args:
+      - NODE_ENV=development
+    environment:
+      - NODE_ENV=development
+
+    
+    ports:
+      - "19006:19006"
+      - "19001:19001"
+      - "19002:19002"
+    volumes:
+      - ./frontend:/opt/frontend/app:delegated
+      - ./frontend/package.json:/opt/frontend/package.json
+      - ./frontend/package-lock.json:/opt/frontend/package-lock.json
+      - notused:/opt/frontend/app/node_modules
+volumes:  
   postgres_data:
+  notused:

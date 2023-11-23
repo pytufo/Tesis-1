@@ -8,7 +8,6 @@ from materiales.models import (
     Genero,
     TipoMaterial,
 )
-from accounts.serializers import ProfileSerializer
 from accounts.models import User
 
 

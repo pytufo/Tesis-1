@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+""" class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "first_name", "last_name", "password", "email", "role"]
@@ -27,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
         )
         return user
+ """
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -43,17 +44,23 @@ class UserLoginSerializer(serializers.Serializer):
         pass
 
     def validate(self, data):
-        user = authenticate(username=data["email"], password=data["password"])
+        user = authenticate(
+            username=data["email"],
+            password=data["password"],
+        )
 
         if user is None:
             raise serializers.ValidationError("Usuario o contraseña invalidos")
 
+        """ if user.is_active is False:
+            raise serializers.ValidationError("Usuario no habilitado ") """
         try:
             refresh = RefreshToken.for_user(user)
             refresh_token = str(refresh)
             access_token = str(refresh.access_token)
 
             validation = {
+                "user": user,
                 "access": access_token,
                 "refresh": refresh_token,
                 "email": user.email,
@@ -78,20 +85,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password")
+        fields = ("email", "password")
 
     def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data["username"], email=validated_data["email"]
-        )
+        user = User.objects.create(email=validated_data["email"])
 
         user.set_password(validated_data["password"])
         user.save()
 
         return user
-
-
-class UserListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("email", "role")

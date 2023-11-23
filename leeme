@@ -1,0 +1,16 @@
+- Compilar la imagen:
+    $ docker-compose up -d --build
+
+- Dar de alta la imagel docker:
+    $ docker-compose up -d
+
+- (si da error por no encontrar la bd):
+    en directorio raiz ejecutar:
+    source .env/bin/activate 
+    docker-compose exec web python manage.py migrate
+    (por ultimo desactivar el entorno virtual con: 
+        $ deactivate
+    )
+
+- iniciar sesion en postgres:
+    $ docker-compose exec db pqsl --username=postgres --db=bibloteca

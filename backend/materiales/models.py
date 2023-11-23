@@ -19,6 +19,7 @@ class Ejemplar(models.Model):
         blank=True,
         null=True,
         help_text="Estado de Ejemplar",
+        default="d"
     )
 
     class Meta:
