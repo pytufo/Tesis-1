@@ -1,5 +1,5 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
+from .permissions import IsActive
 from rest_framework.generics import GenericAPIView
 from rest_framework import status, generics
 from rest_framework.response import Response
@@ -66,3 +66,6 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = (AllowAny,)
 
+
+class ProfileView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated, IsActive)

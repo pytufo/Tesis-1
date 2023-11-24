@@ -19,7 +19,7 @@ class Ejemplar(models.Model):
         blank=True,
         null=True,
         help_text="Estado de Ejemplar",
-        default="d"
+        default="d",
     )
 
     class Meta:
@@ -38,11 +38,11 @@ class Articulo(models.Model):
     descripcion = models.CharField(max_length=200)
     tipo = models.ManyToManyField("TipoMaterial", related_name="tipo", blank=True)
     editorial = models.ManyToManyField(
-        "Editorial", related_name="editorial", blank=True
+        "Editorial", related_name="editorial", blank=False
     )
-    autor = models.ManyToManyField("Autor", related_name="autor", blank=True)
-    carrera = models.ManyToManyField("Carrera", related_name="carrera", blank=True)
-    genero = models.ManyToManyField("Genero", related_name="genero", blank=True)
+    autor = models.ManyToManyField("Autor", related_name="autor", blank=False)
+    carrera = models.ManyToManyField("Carrera", related_name="carrera", blank=False)
+    genero = models.ManyToManyField("Genero", related_name="genero", blank=False)
 
     # Metadata
     class Meta:
@@ -79,7 +79,7 @@ class Autor(models.Model):
         return reverse("autor-view", args=[str(self.id)])
 
     def __str__(self):
-        return "%s, %s" % (self.nombre, self.apellido)
+        return "%s, %s" % (self.apellido, self.nombre)
 
 
 class TipoMaterial(models.Model):

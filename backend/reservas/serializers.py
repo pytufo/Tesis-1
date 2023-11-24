@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from materiales.serializers import ArticuloNameSerializer, ownerSerializer
+from materiales.serializers import ownerSerializer
 from .models import Reservas, Prestamos, Ejemplar
 
 

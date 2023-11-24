@@ -20,10 +20,10 @@ RUN pip install -r requirements.txt
 COPY ./entrypoint.sh .
 RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
+RUN chown -R postgres:postgres /var/lib/postgresql/data
 
 # Copiar el proyecto en el contenedor
 COPY . .
-
 ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
 
 # Configurar variables de entorno si es necesario

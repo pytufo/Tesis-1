@@ -41,66 +41,46 @@ class TipoMaterialSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ArticuloSerializer(serializers.ModelSerializer):
+""" class ownerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Articulo
-        fields = "__all__"
-        read_only_fields = ["cant_d"]
-
-
-class ListArticuloSerializer(serializers.ModelSerializer):
-    tipo = TipoMaterialSerializer(many=True)
-    editorial = EditorialSerializer(many=True)
-    autor = AutorSerializer(many=True)
-    carrera = CarreraSerializer(many=True)
-    genero = GeneroSerializer(many=True)
-
-    """self_queryset = Ejemplar.objects.annotate(cant_ejemplares=Sum(Ejemplar))
-    print(self_queryset)
-     """
-
-    class Meta:
-        model = Articulo
-        fields = (
-            "id",
-            "titulo",
-            "descripcion",
-            "tipo",
-            "editorial",
-            "carrera",
-            "genero",
-            "autor",
-        )
-
-
-class ArticuloNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Articulo
-        fields = ["id", "titulo"]
-
-
-class ListEjemplarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ejemplar
-        fields = ("id", "articulo", "estado")
+        model = User
+        fields = ["username", "email", "role"]
+ """
 
 
 class EjemplarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ejemplar
-        fields = ("id", "articulo", "estado")
+        fields = "__all__"
 
 
-class EjemplarArticuloSerializer(serializers.ModelSerializer):
-    articulo = ArticuloNameSerializer()
+class ArticuloSerializer(serializers.ModelSerializer):
+    # ejemplar = EjemplarSerializer(write_only=True)
 
     class Meta:
-        model = Ejemplar
-        fields = ["id", "articulo", "estado"]
-        read_only_fields = ["estado"]
+        model = Articulo
+        fields = [
+            "titulo",
+            "descripcion",
+            "tipo",
+            "editorial",
+            "autor",
+            "carrera",
+            "genero",            
+        ]
 
 
-class ownerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username", "email", "role"]
+"""
+    def create(self, validated_data):
+        ejemplar_data = validated_data.pop("ejemplar", None)
+        titulo = validated_data.get("titulo")
+        articulo_existente = Articulo.objects.filter(titulo=titulo).first()
+
+        if articulo_existente:
+            articulo = articulo_existente
+        else:
+            articulo = Articulo.objects.create(**validated_data)
+
+        if ejemplar_data:
+            Ejemplar.objects.create(articulo=articulo, **ejemplar_data)
+ """

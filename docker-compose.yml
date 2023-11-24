@@ -17,12 +17,13 @@ services:
 
   db:
     image: postgres:15
+    user: "1000:1000"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=3Nano094
-      - POSTGRES_DB=bibloteca
+      - POSTGRES_DB=db
 
   react:
     build: 

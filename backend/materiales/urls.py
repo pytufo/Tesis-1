@@ -1,19 +1,27 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
+# from . import views
+from .views import (
+    AutorViewSet,
+    ArticuloViewSet,
+    CarreraViewSet,
+    EditorialViewSet,
+    EjemplarViewSet,
+    GeneroViewSet,
+    TipoMaterialViewSet,
+)
+
+# Creamos un enrutador para registrar los "ViewSets" ya que hasta ahora hay tambien vistas "generics".
+
+router = DefaultRouter()
+router.register(r"autor", AutorViewSet)
+router.register(r"articulo", ArticuloViewSet)
+router.register(r"carrera", CarreraViewSet)
+router.register(r"editorial", EditorialViewSet)
+router.register(r"ejemplar", EjemplarViewSet)
+router.register(r"genero", GeneroViewSet)
+router.register(r"tipo", TipoMaterialViewSet)
 urlpatterns = [
-    path("articulo/", views.ListArticuloView.as_view(), name="List_Articulos"),
-    path(
-        "articulo/create/", views.CreateArticuloView.as_view(), name="Create_Articulo"
-    ),
-    path(
-        "articulo/<int:pk>/", views.DetailArticuloView.as_view(), name="Articulo_detail"
-    ),
-    path("ejemplar/", views.ListEjemplarView.as_view(), name="List_Ejemplar"),
-    path(
-        "ejemplar/create/", views.CreateEjemplarView.as_view(), name="Create_Ejemplar"
-    ),
-    path(
-        "ejemplar/<int:pk>/", views.DetailEjemplarView.as_view(), name="Ejemplar_detail"
-    ),
+    path("materiales/", include(router.urls)),
 ]

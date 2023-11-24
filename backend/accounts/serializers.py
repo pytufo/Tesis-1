@@ -8,12 +8,12 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-""" class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "first_name", "last_name", "password", "email", "role"]
+        fields = ["username", "first_name", "last_name", "password", "email"]
 
-
+""" 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
