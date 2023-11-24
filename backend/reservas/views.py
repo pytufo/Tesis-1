@@ -3,13 +3,11 @@ from rest_framework import generics, serializers, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
-# from django.db.models import Count, Sum, Q
-
 from .models import Reservas, Prestamos
 
 from .serializers import (
     ListReservaSerializer,
-    PrestamosSerializer,    
+    PrestamosSerializer,
     CreateReservaserializer,
 )
 

@@ -60,7 +60,7 @@ class AutorViewSet(viewsets.ModelViewSet):
 
 
 class ArticuloViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    permission_classes = (AllowAny, IsSuperUserOrReadOnly)
     serializer_class = ArticuloSerializer
     queryset = Articulo.objects.all()
 
