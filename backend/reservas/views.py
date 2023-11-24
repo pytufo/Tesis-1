@@ -1,22 +1,29 @@
 from django.shortcuts import render
-from rest_framework import generics, serializers, status
+
+from rest_framework import generics, serializers, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-
-from .models import Reservas, Prestamos
+from materiales.permissions import IsSuperUserOrReadOnly
+from .models import Reserva, Prestamo
 
 from .serializers import (
-    ListReservaSerializer,
+    ReservasSerializer,
     PrestamosSerializer,
-    CreateReservaserializer,
 )
 
 # Create your views here.
 
 
-class ReservasView(generics.ListAPIView):
-    serializer_class = ListReservaSerializer
-    queryset = Reservas.objects.all()
+class ReservaViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsSuperUserOrReadOnly,)
+    serializer_class = ReservasSerializer
+    queryset = Reserva.objects.all()
+
+
+class PrestamoViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsSuperUserOrReadOnly,)
+    serializer_class = PrestamosSerializer
+    queryset = Prestamo.objects.all()
 
 
 """ class ReservasSearchView(generics.ListAPIView):
@@ -35,7 +42,7 @@ class ReservasView(generics.ListAPIView):
             )
 
         return queryset
- """
+
 
 
 class ReservaCreateView(generics.ListCreateAPIView):
@@ -86,3 +93,6 @@ class ReservaDetailView(generics.RetrieveUpdateDestroyAPIView):
 class CreatePrestamoView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PrestamosSerializer
     queryset = Prestamos.objects.all()
+
+
+"""

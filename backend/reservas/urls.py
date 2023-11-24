@@ -1,9 +1,16 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from .views import (
+    ReservaViewSet,
+    PrestamoViewSet,
+)
+
+router = DefaultRouter()
+router.register(r"reserva", ReservaViewSet, basename="reserva")
+router.register(r"prestamo", PrestamoViewSet, basename="prestamo")
 
 urlpatterns = [
-    path("", views.ReservasView.as_view(), name="reservas"),
-    path("Create/", views.ReservaCreateView.as_view(), name="reservas"),
-    path("<int:pk>/", views.ReservaDetailView.as_view(), name="Reserva"),
+    path(r"", include(router.urls)),
     # path("search/", views.ReservasSearchView.as_view(), name="reservas-search"),
 ]

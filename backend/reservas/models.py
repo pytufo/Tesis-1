@@ -4,7 +4,7 @@ from materiales.models import Articulo, Ejemplar
 from django.urls import reverse
 
 
-class Reservas(models.Model):
+class Reserva(models.Model):
     fecha_inicio = models.DateField(auto_now_add=True)
     fecha_fin = models.DateField(auto_now_add=False)
     owner = models.ForeignKey(User, related_name="Reservas", on_delete=models.CASCADE)
@@ -16,13 +16,13 @@ class Reservas(models.Model):
         return reverse("reservas-view", args=[str(self.id)])
 
     def __str__(self):
-        return self.articulo
+        return self.articulo.titulo
 
     class Meta:
         ordering = ["fecha_fin"]
 
 
-class Prestamos(models.Model):
+class Prestamo(models.Model):
     fecha_inicio = models.DateField(auto_now_add=True)
     fecha_fin = models.DateField(auto_now_add=False)
     created_by = models.ForeignKey(User, related_name="Autor", on_delete=models.CASCADE)
@@ -34,8 +34,8 @@ class Prestamos(models.Model):
     def get_absolute_url(self):
         return reverse("prestamos-view", args=[str(self.id)])
 
-    def _str__(self):
-        return self.articulo
+    def __str__(self):
+        return f"Prestamo de {self.ejemplar} ({self.fecha_inicio} - {self.fecha_fin})"
 
     class Meta:
         ordering = ["fecha_fin"]

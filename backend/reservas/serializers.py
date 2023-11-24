@@ -1,29 +1,16 @@
 from rest_framework import serializers
 
-from materiales.serializers import ownerSerializer
-from .models import Reservas, Prestamos, Ejemplar
 
-
-class CreateReservaserializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reservas
-        fields = ["fecha_fin", "owner", "articulo"]
-        read_only_fields = ["owner"]
+from .models import Reserva, Prestamo
 
 
 class ReservasSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Ejemplar
-        fields = ["id", "articulo", "estado"]
-
-
-class ListReservaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reservas
-        fields = ("fecha_fin", "owner", "articulo")
+        model = Reserva
+        fields = ["__all__"]
 
 
 class PrestamosSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Prestamos
+        model = Prestamo
         fields = "__all__"

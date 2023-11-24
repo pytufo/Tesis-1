@@ -11,7 +11,7 @@ from .views import (
     GeneroViewSet,
     TipoMaterialViewSet,
 )
-
+from reservas import views
 # Creamos un enrutador para registrar los "ViewSets" ya que hasta ahora hay tambien vistas "generics".
 
 router = DefaultRouter()
@@ -24,4 +24,5 @@ router.register(r"genero", GeneroViewSet)
 router.register(r"tipo", TipoMaterialViewSet)
 urlpatterns = [
     path("materiales/", include(router.urls)),
+    path("movimientos/", include('reservas.urls')),
 ]

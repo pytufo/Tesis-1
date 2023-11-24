@@ -1,7 +1,5 @@
 from rest_framework import (
     viewsets,
-    status,
-    generics,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsSuperUserOrReadOnly
