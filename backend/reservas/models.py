@@ -4,7 +4,7 @@ from materiales.models import Articulo, Ejemplar
 from django.urls import reverse
 
 
-class Reserva(models.Model):
+class Reserva(models.Model):    
     fecha_inicio = models.DateField(auto_now_add=True)
     fecha_fin = models.DateField(auto_now_add=False)
     owner = models.ForeignKey(User, related_name="Reservas", on_delete=models.CASCADE)

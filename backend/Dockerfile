@@ -16,4 +16,5 @@ COPY entrypoint.sh /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
 ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
 
-CMD [ "sh", "-c", "python manage.py runserver 0.0.0.0:8000" ]
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "tu_proyecto.wsgi:application"]

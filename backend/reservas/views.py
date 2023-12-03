@@ -1,27 +1,26 @@
 from django.shortcuts import render
 
-from rest_framework import generics, serializers, status, viewsets
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework import viewsets
 from materiales.permissions import IsSuperUserOrReadOnly
 from .models import Reserva, Prestamo
 
 from .serializers import (
     ReservasSerializer,
-    PrestamosSerializer,
+    PrestamosSerializer,    
 )
 
 # Create your views here.
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = ReservasSerializer
     queryset = Reserva.objects.all()
 
 
+
 class PrestamoViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = PrestamosSerializer
     queryset = Prestamo.objects.all()
 

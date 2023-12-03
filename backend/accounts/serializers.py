@@ -8,10 +8,10 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class userSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "first_name", "last_name", "password", "email"]
+        fields = "__all__"
 
 """ 
 class UserSerializer(serializers.ModelSerializer):

@@ -6,5 +6,6 @@ urlpatterns = [
     path("api/", include("materiales.urls")),
     # path("api/", include("reservas.urls")),
     path("auth/", include("accounts.urls")),
+    # path("admin/", include("dashboard.urls")),
     # path("api/reservas/", include("reservas.urls")),
 ]

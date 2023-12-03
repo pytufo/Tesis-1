@@ -11,6 +11,7 @@ from materiales.models import (
 from accounts.models import User
 
 
+
 class AutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Autor
@@ -41,13 +42,6 @@ class TipoMaterialSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-""" class ownerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username", "email", "role"]
- """
-
-
 class EjemplarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ejemplar
@@ -69,18 +63,3 @@ class ArticuloSerializer(serializers.ModelSerializer):
             "genero",            
         ]
 
-
-"""
-    def create(self, validated_data):
-        ejemplar_data = validated_data.pop("ejemplar", None)
-        titulo = validated_data.get("titulo")
-        articulo_existente = Articulo.objects.filter(titulo=titulo).first()
-
-        if articulo_existente:
-            articulo = articulo_existente
-        else:
-            articulo = Articulo.objects.create(**validated_data)
-
-        if ejemplar_data:
-            Ejemplar.objects.create(articulo=articulo, **ejemplar_data)
- """

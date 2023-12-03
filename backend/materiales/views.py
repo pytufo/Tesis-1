@@ -1,9 +1,20 @@
+from faker import Faker
+from django_filters.rest_framework import DjangoFilterBackend
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from materiales.models import Articulo, Editorial, Autor, TipoMaterial, Genero, Carrera
 from rest_framework import (
     viewsets,
+    generics,
 )
-from rest_framework.permissions import AllowAny, IsAuthenticated
+
+fake = Faker()
+
+from rest_framework.permissions import AllowAny
 from .permissions import IsSuperUserOrReadOnly
-from rest_framework.response import Response
+
 
 from materiales.serializers import (
     ArticuloSerializer,
@@ -27,46 +38,91 @@ from materiales.models import (
 )
 
 
+@csrf_exempt
+@require_POST
+def generar_datos_aleatorios(request):
+    for _ in range(5):
+        Editorial.objects.create(nombre=fake.company())
+
+    for _ in range(10):
+        Autor.objects.create(nombre=fake.first_name(), apellido=fake.last_name())
+
+    for _ in range(3):
+        TipoMaterial.objects.create(nombre=fake.word())
+
+    for _ in range(3):
+        Genero.objects.create(nombre=fake.word())
+
+    for _ in range(5):
+        Carrera.objects.create(nombre=fake.word())
+
+    for _ in range(10):
+        articulo = Articulo.objects.create(
+            titulo=fake.sentence(),
+            descripcion=fake.paragraph(),
+        )
+        articulo.editorial.set(Editorial.objects.order_by("?")[:3])
+        articulo.autor.set(Autor.objects.order_by("?")[:2])
+        articulo.tipo.set(TipoMaterial.objects.order_by("?")[:1])
+        articulo.genero.set(Genero.objects.order_by("?")[:1])
+        articulo.carrera.set(Carrera.objects.order_by("?")[:1])
+
+    return JsonResponse({"message": "Datos aleatorios generados exitosamente"})
+
+
 class CarreraViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = CarreraSerializer
     queryset = Carrera.objects.all()
 
 
 class GeneroViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = GeneroSerializer
     queryset = Genero.objects.all()
 
 
 class EditorialViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = EditorialSerializer
     queryset = Editorial.objects.all()
 
 
 class TipoMaterialViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = TipoMaterialSerializer
     queryset = TipoMaterial.objects.all()
 
 
 class AutorViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = AutorSerializer
     queryset = Autor.objects.all()
 
 
 class ArticuloViewSet(viewsets.ModelViewSet):
-    permission_classes = (AllowAny, IsSuperUserOrReadOnly)
+    # permission_classes = (AllowAny, IsSuperUserOrReadOnly)
     serializer_class = ArticuloSerializer
     queryset = Articulo.objects.all()
 
 
 class EjemplarViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsSuperUserOrReadOnly,)
+    # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = EjemplarSerializer
     queryset = Ejemplar.objects.all()
+
+
+class DetalleEjemplar(generics.ListAPIView):
+    queryset = Ejemplar.objects.all()
+    serializer_class = EjemplarSerializer
+
+
+class EjemplarFilter(generics.ListAPIView):
+    queryset = Ejemplar.objects.all()
+    serializer_class = EjemplarSerializer
+    # filterset_class = [django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["articulo", "estado"]
 
 
 """ 

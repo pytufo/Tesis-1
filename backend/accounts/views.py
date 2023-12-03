@@ -1,3 +1,10 @@
+from faker import Faker
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+fake = Faker()
+
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsActive
 from rest_framework.generics import GenericAPIView
@@ -9,11 +16,29 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from accounts.serializers import (
+    userSerializer,
     UserLoginSerializer,
     RegisterSerializer,
 )
 
 from .models import User
+
+
+@csrf_exempt
+@require_POST
+def generar_aleatorios(request):
+    for _ in range(10):
+        User.objects.create(
+            email=fake.email(),
+            password=fake.password(),
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            role=fake.random_element(elements=(1, 2, 3, 4, 5, 6)),
+            is_active=fake.boolean(),
+            is_staff=fake.boolean(),
+        )
+
+    return JsonResponse({"message": "Usuarios aleatorios generados exitosamente"})
 
 
 class UserLoginView(generics.CreateAPIView):
@@ -67,5 +92,7 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
 
 
-class ProfileView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, IsActive)
+class userView(generics.ListAPIView):
+    serializer_class = userSerializer
+    queryset = User.objects.all()
+
