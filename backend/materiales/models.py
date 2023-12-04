@@ -5,21 +5,23 @@ from accounts.models import User
 
 class Ejemplar(models.Model):
     # Definimos los estados
-    ESTADO = (
-        ("d", "Disponible"),
-        ("n", "No disponible"),
+    DISPONIBLE = 1
+    NO_DISPONE = 0
+    ESTADO_CHOICES = (
+        (DISPONIBLE, "Disponible"),
+        (NO_DISPONE, "No disponible"),
     )
     # Campos
     articulo = models.ForeignKey(
         "Articulo", on_delete=models.CASCADE, null=False, related_name="reserva"
     )
-    estado = models.CharField(
+    estado = models.IntegerField(
         max_length=1,
-        choices=ESTADO,
+        choices=ESTADO_CHOICES,
         blank=True,
-        null=True,
+        null=False,
         help_text="Estado de Ejemplar",
-        default="d",
+        default=DISPONIBLE,
     )
 
     class Meta:

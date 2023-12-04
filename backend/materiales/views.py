@@ -1,5 +1,4 @@
 from faker import Faker
-from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -66,7 +65,12 @@ def generar_datos_aleatorios(request):
         articulo.tipo.set(TipoMaterial.objects.order_by("?")[:1])
         articulo.genero.set(Genero.objects.order_by("?")[:1])
         articulo.carrera.set(Carrera.objects.order_by("?")[:1])
-
+    for _ in range(20):
+        articulo = Articulo.objects.order_by("?")[:1].first()
+        ejemplar = Ejemplar.objects.create(
+            articulo=articulo,
+            estado=fake.boolean(),
+        )
     return JsonResponse({"message": "Datos aleatorios generados exitosamente"})
 
 
@@ -115,14 +119,6 @@ class EjemplarViewSet(viewsets.ModelViewSet):
 class DetalleEjemplar(generics.ListAPIView):
     queryset = Ejemplar.objects.all()
     serializer_class = EjemplarSerializer
-
-
-class EjemplarFilter(generics.ListAPIView):
-    queryset = Ejemplar.objects.all()
-    serializer_class = EjemplarSerializer
-    # filterset_class = [django_filters.rest_framework.DjangoFilterBackend]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ["articulo", "estado"]
 
 
 """ 

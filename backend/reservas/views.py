@@ -1,22 +1,38 @@
 from django.shortcuts import render
 
-from rest_framework import viewsets
-from materiales.permissions import IsSuperUserOrReadOnly
+from rest_framework import viewsets, filters, generics
+
 from .models import Reserva, Prestamo
+from materiales.serializers import EjemplarSerializer
+from materiales.models import Ejemplar
+
 
 from .serializers import (
     ReservasSerializer,
-    PrestamosSerializer,    
+    PrestamosSerializer,
 )
 
 # Create your views here.
+
+
+class EjemplarFilter(generics.ListAPIView):
+    queryset = Ejemplar.objects.all()
+    serializer_class = EjemplarSerializer
+    # filterset_class = [django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["^articulo__titulo", "estado"]
+
+
+
+
+
+
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = ReservasSerializer
     queryset = Reserva.objects.all()
-
 
 
 class PrestamoViewSet(viewsets.ModelViewSet):

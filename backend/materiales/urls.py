@@ -10,8 +10,7 @@ from .views import (
     EjemplarViewSet,
     GeneroViewSet,
     TipoMaterialViewSet,
-    generar_datos_aleatorios,
-    EjemplarFilter,
+    generar_datos_aleatorios,    
 )
 from reservas import views
 
@@ -26,8 +25,7 @@ router.register(r"ejemplar", EjemplarViewSet)
 router.register(r"genero", GeneroViewSet)
 router.register(r"tipo", TipoMaterialViewSet)
 urlpatterns = [
-    path(r"articulo/", include(router.urls)),
-    path("buscar/", EjemplarFilter.as_view(), name="ejemplar_search"),
+    path(r"articulo/", include(router.urls)),    
     path("movimientos/", include("reservas.urls")),
     path("generar/", generar_datos_aleatorios, name="generar"),
 ]

@@ -54,8 +54,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=True)
     role = models.PositiveSmallIntegerField(
         choices=role, blank=True, null=True, default=6
-    )
-    date_joined = models.DateTimeField(auto_now_add=True)
+    )    
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
