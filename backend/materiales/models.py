@@ -15,7 +15,7 @@ class Ejemplar(models.Model):
     articulo = models.ForeignKey(
         "Articulo", on_delete=models.CASCADE, null=False, related_name="reserva"
     )
-    estado = models.IntegerField(        
+    estado = models.IntegerField(
         choices=ESTADO_CHOICES,
         blank=True,
         null=False,
@@ -24,17 +24,17 @@ class Ejemplar(models.Model):
     )
 
     class Meta:
-        ordering = ["articulo"]
+        ordering = ["estado", "articulo"]
 
     def __str__(self):
-        return "%s" % (self.articulo)
+        return "%s %s" % (self.estado, self.articulo)
 
     def get_absolute_url(self):
         return reverse("ejemplar_detail", args=[str(self.id, self.articulo)])
 
 
 class Articulo(models.Model):
-    # Campos
+    # Materiales
     titulo = models.CharField(max_length=200)
     descripcion = models.CharField(max_length=200)
     tipo = models.ManyToManyField("TipoMaterial", related_name="tipo", blank=True)

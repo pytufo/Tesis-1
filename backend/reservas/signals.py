@@ -11,6 +11,9 @@ from .models import Reserva, Prestamo
 def actualizar_estado_ejemplar(sender, instance, **kwargs):
     ejemeplar = instance.ejemplar
     ejemeplar.estado = Ejemplar.NO_DISPONE
+    ejemeplar.save()
+
+
 
 
 post_save.connect(actualizar_estado_ejemplar, sender=Reserva)

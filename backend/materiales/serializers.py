@@ -11,7 +11,6 @@ from materiales.models import (
 from accounts.models import User
 
 
-
 class AutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Autor
@@ -49,17 +48,21 @@ class EjemplarSerializer(serializers.ModelSerializer):
 
 
 class ArticuloSerializer(serializers.ModelSerializer):
-    # ejemplar = EjemplarSerializer(write_only=True)
+    cantidad_existente = serializers.SerializerMethodField()
 
     class Meta:
         model = Articulo
         fields = [
+            "id",
             "titulo",
             "descripcion",
             "tipo",
             "editorial",
             "autor",
             "carrera",
-            "genero",            
+            "genero",
+            "cantidad_existente",
         ]
 
+    def get_cantidad_existente(self, obj):
+        return Ejemplar.objects.filter(articulo=obj.id).count()

@@ -23,12 +23,6 @@ class ArticuloFilter(generics.ListAPIView):
     search_fields = ["^articulo__titulo", "estado"]
 
 
-
-
-
-
-
-
 class ReservaViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = ReservasSerializer
