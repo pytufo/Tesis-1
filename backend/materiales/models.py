@@ -15,8 +15,7 @@ class Ejemplar(models.Model):
     articulo = models.ForeignKey(
         "Articulo", on_delete=models.CASCADE, null=False, related_name="reserva"
     )
-    estado = models.IntegerField(
-        max_length=1,
+    estado = models.IntegerField(        
         choices=ESTADO_CHOICES,
         blank=True,
         null=False,

@@ -4,7 +4,7 @@ from rest_framework import viewsets, filters, generics
 
 from .models import Reserva, Prestamo
 from materiales.serializers import EjemplarSerializer
-from materiales.models import Ejemplar
+from materiales.models import Articulo
 
 
 from .serializers import (
@@ -15,8 +15,8 @@ from .serializers import (
 # Create your views here.
 
 
-class EjemplarFilter(generics.ListAPIView):
-    queryset = Ejemplar.objects.all()
+class ArticuloFilter(generics.ListAPIView):
+    queryset = Articulo.objects.all()
     serializer_class = EjemplarSerializer
     # filterset_class = [django_filters.rest_framework.DjangoFilterBackend]
     filter_backends = [filters.SearchFilter]

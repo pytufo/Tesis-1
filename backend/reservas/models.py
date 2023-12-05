@@ -1,22 +1,22 @@
 from django.db import models
 from accounts.models import User
-from materiales.models import Articulo, Ejemplar
+from materiales.models import Ejemplar
 from django.urls import reverse
 
 
-class Reserva(models.Model):    
+class Reserva(models.Model):
     fecha_inicio = models.DateField(auto_now_add=True)
     fecha_fin = models.DateField(auto_now_add=False)
     owner = models.ForeignKey(User, related_name="Reservas", on_delete=models.CASCADE)
-    articulo = models.ForeignKey(
-        Articulo, related_name="articulo", on_delete=models.CASCADE
+    ejemplar = models.ForeignKey(
+        Ejemplar, related_name="Ejemplar", on_delete=models.CASCADE
     )
 
     def get_absolute_url(self):
         return reverse("reservas-view", args=[str(self.id)])
 
     def __str__(self):
-        return self.articulo.titulo
+        return self.ejemplar.articulo
 
     class Meta:
         ordering = ["fecha_fin"]

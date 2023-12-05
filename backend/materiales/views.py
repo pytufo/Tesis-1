@@ -67,7 +67,7 @@ def generar_datos_aleatorios(request):
         articulo.carrera.set(Carrera.objects.order_by("?")[:1])
     for _ in range(20):
         articulo = Articulo.objects.order_by("?")[:1].first()
-        ejemplar = Ejemplar.objects.create(
+        Ejemplar.objects.create(
             articulo=articulo,
             estado=fake.boolean(),
         )
