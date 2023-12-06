@@ -8,7 +8,15 @@ from materiales.models import (
     Genero,
     TipoMaterial,
 )
+from reservas.models import Reserva, Prestamo
 from accounts.models import User
+
+from .utils import (
+    get_cantidad_disponible,
+    get_cantidad_en_reserva,
+    get_cantidad_existente,
+    get_estado,
+)
 
 
 class AutorSerializer(serializers.ModelSerializer):
@@ -49,6 +57,9 @@ class EjemplarSerializer(serializers.ModelSerializer):
 
 class ArticuloSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
+    cantidad_en_reserva = serializers.SerializerMethodField()
+    cantidad_disponible = serializers.SerializerMethodField()
+    estado = serializers.SerializerMethodField()
 
     class Meta:
         model = Articulo
@@ -62,7 +73,19 @@ class ArticuloSerializer(serializers.ModelSerializer):
             "carrera",
             "genero",
             "cantidad_existente",
+            "cantidad_en_reserva",
+            "cantidad_disponible",
+            "estado",
         ]
 
     def get_cantidad_existente(self, obj):
-        return Ejemplar.objects.filter(articulo=obj.id).count()
+        return get_cantidad_existente(obj)
+
+    def get_cantidad_en_reserva(self, obj):
+        return get_cantidad_en_reserva(obj)
+
+    def get_cantidad_disponible(self, obj):
+        return get_cantidad_disponible(obj)
+
+    def get_estado(self, obj):
+        return get_estado(obj)

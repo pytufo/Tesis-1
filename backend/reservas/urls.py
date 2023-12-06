@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ReservaViewSet,
     PrestamoViewSet,
+    # create_fake,
     # EjemplarFilter
 )
 
@@ -13,6 +14,7 @@ router.register(r"prestamo", PrestamoViewSet, basename="prestamo")
 
 urlpatterns = [
     path(r"", include(router.urls)),
+    # path("generar/", create_fake, name="generate fake data")
     # path("buscar/", EjemplarFilter.as_view(), name="ejemplar_search"),
     # path("search/", views.ReservasSearchView.as_view(), name="reservas-search"),
 ]

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from .utils import get_cantidad_existente, get_cantidad_disponible
 from materiales.models import Articulo, Editorial, Autor, TipoMaterial, Genero, Carrera
 from rest_framework import (
     viewsets,
