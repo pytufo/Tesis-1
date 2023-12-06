@@ -4,17 +4,18 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST """
 # from rest_framework.exceptions import ValidationError
 
-from materiales.utils import get_cantidad_disponible
+from materiales.utils import get_estado
 
 from rest_framework import viewsets, filters, generics, status
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from .models import Reserva, Prestamo
 from accounts.models import User
 from materiales.models import Articulo
 from materiales.serializers import EjemplarSerializer
 
-# from materiales.utils import get_cantidad_disponible
 
 # fake = Faker()
 
@@ -40,12 +41,13 @@ def create_fake(request):
  """
 
 
-class ArticuloFilter(generics.ListAPIView):
-    queryset = Articulo.objects.all()
-    serializer_class = EjemplarSerializer
+class ArticuloFilter(viewsets.ModelViewSet):
+    queryset = Reserva.objects.all()
+    serializer_class = ReservasSerializer
     # filterset_class = [django_filters.rest_framework.DjangoFilterBackend]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ["^articulo__titulo", "estado"]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    # filterset_fields = ["articulo", "owner"]
+    search_fields = ["articulo__titulo", "owner__email"]
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
@@ -57,7 +59,14 @@ class ReservaViewSet(viewsets.ModelViewSet):
         articulo_id = request.data.get("articulo")
         articulo = Articulo.objects.get(pk=articulo_id)
 
-        cantidad_disponible = get_cantidad_disponible(articulo)
+        estado = get_estado(articulo)
+        if estado:
+            "No disponible"
+            return Response(
+                {"message": "No hay ejemeplares disponibles para la reserva. "}
+            )
+        return super().create(request, *args, **kwargs)
+        """ cantidad_disponible = get_cantidad_disponible(articulo)
         if cantidad_disponible < 1:
             return Response(
                 {
@@ -65,6 +74,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 }
             )
         return super().create(request, *args, **kwargs)
+ """
 
 
 class PrestamoViewSet(viewsets.ModelViewSet):

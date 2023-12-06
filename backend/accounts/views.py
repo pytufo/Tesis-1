@@ -8,8 +8,10 @@ fake = Faker()
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsActive
 from rest_framework.generics import GenericAPIView
-from rest_framework import status, generics
+from rest_framework import status, generics, viewsets
 from rest_framework.response import Response
+
+from materiales.utils import get_validar_limite_reservas
 
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -92,7 +94,34 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
 
 
+""" 
 class userView(generics.ListAPIView):
     serializer_class = userSerializer
     queryset = User.objects.all()
 
+    def get(self, request, * args, **kwargs):
+        queryset = self.filter_queryset() """
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = userSerializer
+    queryset = User.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        data = []
+        for user in queryset:
+            cantidad_reservas, cantidad_prestamos = get_validar_limite_reservas(user)
+
+            # Agrega la información al objeto user
+            user_data = {
+                "id": user.id,
+                "username": user.username,
+                "cantidad_reservas": cantidad_reservas,
+                "cantidad_prestamos": cantidad_prestamos,
+            }
+
+            data.append(user_data)
+
+        return Response(data)

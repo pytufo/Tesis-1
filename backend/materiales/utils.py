@@ -1,4 +1,6 @@
 from materiales.models import Articulo, Ejemplar
+from accounts.models import User
+from reservas.models import Reserva, Prestamo
 
 
 def get_cantidad_existente(obj):
@@ -6,9 +8,17 @@ def get_cantidad_existente(obj):
 
 
 def get_cantidad_en_reserva(obj):
-    from reservas.models import Reserva
-
     return Reserva.objects.filter(articulo=obj.id).count()
+
+
+def get_validar_limite_reservas(obj):
+    reservas_usuario = Reserva.objects.filter(owner=obj.id)
+    prestamo_usuario = Prestamo.objects.filter(owner=obj.id)
+
+    cantidad_reservas = reservas_usuario.count()
+    cantidad_prestamos = prestamo_usuario.count()
+
+    return cantidad_reservas, cantidad_prestamos
 
 
 def get_cantidad_disponible(obj):
