@@ -60,6 +60,7 @@ class ArticuloSerializer(serializers.ModelSerializer):
     cantidad_en_reserva = serializers.SerializerMethodField()
     cantidad_disponible = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Articulo

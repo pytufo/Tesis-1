@@ -2,16 +2,39 @@ from .models import User
 from materiales.models import Articulo, Ejemplar
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-
+from materiales.utils import (
+    get_reservas_prestamos_usuario,
+    get_limite_reservas_prestamo,
+)
 from rest_framework import serializers
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-class userSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
+    cantidad_reservas = serializers.SerializerMethodField()
+    cantidad_prestamos = serializers.SerializerMethodField()
+    limite = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = "__all__"
+        fields = [
+            "username",
+            "email",
+            "cantidad_reservas",
+            "cantidad_prestamos",
+            "limite",
+        ]
+
+    def get_cantidad_reservas(self, obj):
+        return get_reservas_prestamos_usuario(obj)[0]
+
+    def get_cantidad_prestamos(self, obj):
+        return get_reservas_prestamos_usuario(obj)[1]
+
+    def get_limite(self, obj):
+        return get_limite_reservas_prestamo(obj)
+
 
 """ 
 class UserSerializer(serializers.ModelSerializer):

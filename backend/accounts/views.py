@@ -11,14 +11,14 @@ from rest_framework.generics import GenericAPIView
 from rest_framework import status, generics, viewsets
 from rest_framework.response import Response
 
-from materiales.utils import get_validar_limite_reservas
+from materiales.utils import get_reservas_prestamos_usuario
 
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from accounts.serializers import (
-    userSerializer,
+    UserProfileSerializer,
     UserLoginSerializer,
     RegisterSerializer,
 )
@@ -104,24 +104,25 @@ class userView(generics.ListAPIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = userSerializer
+    serializer_class = UserProfileSerializer
     queryset = User.objects.all()
 
-    def list(self, request, *args, **kwargs):
+"""     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         data = []
         for user in queryset:
-            cantidad_reservas, cantidad_prestamos = get_validar_limite_reservas(user)
+            cantidad_reservas, cantidad_prestamos = get_reservas_prestamos_usuario(user)
 
             # Agrega la información al objeto user
             user_data = {
                 "id": user.id,
                 "username": user.username,
+                "email": user.email,
                 "cantidad_reservas": cantidad_reservas,
                 "cantidad_prestamos": cantidad_prestamos,
             }
 
             data.append(user_data)
 
-        return Response(data)
+        return Response(data) """
