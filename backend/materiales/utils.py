@@ -24,9 +24,9 @@ def get_cantidad_disponible(obj):
 
 def get_estado(obj):
     cantidad_disponible = get_cantidad_disponible(obj)
-    if cantidad_disponible > 0:
+    if cantidad_disponible > 1:
         return "Disponible"
-    elif cantidad_disponible == 0:
+    elif cantidad_disponible == 1:
         return "Lectura"
     else:
         return "No Disponible"
@@ -34,6 +34,7 @@ def get_estado(obj):
 
 # Segun el resultado del seguimiento, establecemos un limite de reservas y prestamos para los usuarios.
 # Hay que filtrar que el usuario no exeda un limite de reservas y prestamos
+# Y por ultimo chequeamos que la el usuario no realize la misma reserva...
 
 
 def get_reservas_prestamos_usuario(obj):
@@ -47,7 +48,7 @@ def get_reservas_prestamos_usuario(obj):
 
 
 def get_limite_reservas_prestamo(obj):
-    limite = 4
+    limite = 3
     cantidad_reservas = get_reservas_prestamos_usuario(obj)[0]
     cantidad_prestamos = get_reservas_prestamos_usuario(obj)[1]
 
@@ -55,3 +56,7 @@ def get_limite_reservas_prestamo(obj):
         return "Excede"
     else:
         return "Dispone"
+
+
+def usuario_tiene_reserva_pendiente(usuario, material):
+    return Reserva.objects.filter(owner=usuario, material=material).exists()

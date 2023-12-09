@@ -4,7 +4,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST """
 # from rest_framework.exceptions import ValidationError
 
-from materiales.utils import get_estado, get_limite_reservas_prestamo
+from materiales.utils import (
+    get_estado,
+    get_limite_reservas_prestamo,
+    usuario_tiene_reserva_pendiente,
+)
 
 from rest_framework import viewsets, filters, generics, status
 from rest_framework.response import Response
@@ -57,13 +61,18 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         material_id = request.data.get("material")
-        material = Material.objects.get(pk=material_id)
         usuario_id = request.data.get("owner")
-        usuario = User.objects.get(pk=usuario_id)
-        limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
 
+        material = Material.objects.get(pk=material_id)
+        usuario = User.objects.get(pk=usuario_id)
+
+        limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
         estado = get_estado(material)
-        if estado == "No disponible":
+
+        if usuario_tiene_reserva_pendiente(usuario, material):
+            return Response({"message": "Ya tienes una reserva para este material..."})
+
+        if estado == "No Disponible" or estado == "Lectura":
             return Response(
                 {"message": "No hay ejemeplares disponibles para la reserva. "}
             )
@@ -74,15 +83,6 @@ class ReservaViewSet(viewsets.ModelViewSet):
             )
 
         return super().create(request, *args, **kwargs)
-        """ cantidad_disponible = get_cantidad_disponible(material)
-        if cantidad_disponible < 1:
-            return Response(
-                {
-                    "message": "No hay ejemeplares disponibles para la reserva. ¿Desea colocarse en la proxima lista de espera?"
-                }
-            )
-        return super().create(request, *args, **kwargs)
- """
 
 
 class PrestamoViewSet(viewsets.ModelViewSet):
