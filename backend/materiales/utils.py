@@ -1,4 +1,4 @@
-from materiales.models import Articulo, Ejemplar
+from materiales.models import Material, Ejemplar
 from accounts.models import User
 from reservas.models import Reserva, Prestamo
 
@@ -8,11 +8,11 @@ from reservas.models import Reserva, Prestamo
 
 
 def get_cantidad_existente(obj):
-    return Ejemplar.objects.filter(articulo=obj.id).count()
+    return Ejemplar.objects.filter(material=obj.id).count()
 
 
 def get_cantidad_en_reserva(obj):
-    return Reserva.objects.filter(articulo=obj.id).count()
+    return Reserva.objects.filter(material=obj.id).count()
 
 
 def get_cantidad_disponible(obj):
@@ -24,9 +24,9 @@ def get_cantidad_disponible(obj):
 
 def get_estado(obj):
     cantidad_disponible = get_cantidad_disponible(obj)
-    if cantidad_disponible > 1:
+    if cantidad_disponible > 0:
         return "Disponible"
-    elif cantidad_disponible == 1:
+    elif cantidad_disponible == 0:
         return "Lectura"
     else:
         return "No Disponible"
@@ -51,7 +51,7 @@ def get_limite_reservas_prestamo(obj):
     cantidad_reservas = get_reservas_prestamos_usuario(obj)[0]
     cantidad_prestamos = get_reservas_prestamos_usuario(obj)[1]
 
-    if (cantidad_reservas + cantidad_prestamos) > limite:
-        return "Exede"
+    if (cantidad_reservas + cantidad_prestamos) >= limite:
+        return "Excede"
     else:
         return "Dispone"

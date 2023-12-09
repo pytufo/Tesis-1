@@ -4,14 +4,14 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ReservaViewSet,
     PrestamoViewSet,
-    ArticuloFilter,
+    MaterialFilter,
     # create_fake,
 )
 
 router = DefaultRouter()
 router.register(r"reserva", ReservaViewSet, basename="reserva")
 router.register(r"prestamo", PrestamoViewSet, basename="prestamo")
-router.register(r"buscar", ArticuloFilter, basename="buscar")
+router.register(r"buscar", MaterialFilter, basename="buscar")
 
 urlpatterns = [
     path(r"", include(router.urls)),

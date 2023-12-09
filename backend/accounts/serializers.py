@@ -1,5 +1,5 @@
 from .models import User
-from materiales.models import Articulo, Ejemplar
+from materiales.models import Material, Ejemplar
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from materiales.utils import (
@@ -89,7 +89,7 @@ class UserLoginSerializer(serializers.Serializer):
                 "email": user.email,
                 "role": user.role,
                 "reservas": serializers.PrimaryKeyRelatedField(
-                    many=True, queryset=Articulo.objects.all()
+                    many=True, queryset=Material.objects.all()
                 ),
                 "en propiedad": serializers.PrimaryKeyRelatedField(
                     many=True, queryset=Ejemplar.objects.all()

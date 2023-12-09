@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from materiales.models import (
     Ejemplar,
-    Articulo,
+    Material,
     Autor,
     Carrera,
     Editorial,
@@ -55,7 +55,7 @@ class EjemplarSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ArticuloSerializer(serializers.ModelSerializer):
+class MaterialSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
     cantidad_en_reserva = serializers.SerializerMethodField()
     cantidad_disponible = serializers.SerializerMethodField()
@@ -63,7 +63,7 @@ class ArticuloSerializer(serializers.ModelSerializer):
     
 
     class Meta:
-        model = Articulo
+        model = Material
         fields = [
             "id",
             "titulo",

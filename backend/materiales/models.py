@@ -4,7 +4,7 @@ from accounts.models import User
 
 
 class Ejemplar(models.Model):
-    # Definimos los estados
+    # Definimos los ecurlstados
     DISPONIBLE = 1
     NO_DISPONE = 0
     ESTADO_CHOICES = (
@@ -12,8 +12,8 @@ class Ejemplar(models.Model):
         (NO_DISPONE, "No disponible"),
     )
     # Campos
-    articulo = models.ForeignKey(
-        "Articulo", on_delete=models.CASCADE, null=False, related_name="reserva"
+    material = models.ForeignKey(
+        "Material", on_delete=models.CASCADE, null=False, related_name="reserva"
     )
     estado = models.IntegerField(
         choices=ESTADO_CHOICES,
@@ -24,16 +24,16 @@ class Ejemplar(models.Model):
     )
 
     class Meta:
-        ordering = ["estado", "articulo"]
+        ordering = ["estado", "material"]
 
     def __str__(self):
-        return "%s %s" % (self.estado, self.articulo)
+        return "%s %s" % (self.estado, self.material)
 
     def get_absolute_url(self):
-        return reverse("ejemplar_detail", args=[str(self.id, self.articulo)])
+        return reverse("ejemplar_detail", args=[str(self.id, self.material)])
 
 
-class Articulo(models.Model):
+class Material(models.Model):
     # Materiales
     titulo = models.CharField(max_length=200)
     descripcion = models.CharField(max_length=200)
@@ -53,7 +53,7 @@ class Articulo(models.Model):
         return self.titulo
 
     def get_absolute_url(self):
-        return reverse("detail_articulo", args=[str(self.id)])
+        return reverse("detail_material", args=[str(self.id)])
 
 
 class Editorial(models.Model):

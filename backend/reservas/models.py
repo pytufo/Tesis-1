@@ -4,7 +4,7 @@ from django.db import models
 
 
 from accounts.models import User
-from materiales.models import Ejemplar, Articulo
+from materiales.models import Ejemplar, Material
 
 # from materiales.utils import get_cantidad_disponible
 
@@ -16,12 +16,12 @@ class Reserva(models.Model):
     fecha_inicio = models.DateField(auto_now_add=True)
     fecha_fin = models.DateField(auto_now_add=False)
     owner = models.ForeignKey(User, related_name="usuario", on_delete=models.CASCADE)
-    articulo = models.ForeignKey(
-        Articulo, related_name="articulo", on_delete=models.CASCADE
+    material = models.ForeignKey(
+        Material, related_name="material", on_delete=models.CASCADE
     )
 
     """ def save(self, *args, **kwargs):
-        cantidad_disponible = get_cantidad_disponible(self.articulo)
+        cantidad_disponible = get_cantidad_disponible(self.material)
 
         if cantidad_disponible < 1:
             raise ValidationError("No hay ejemplares disponibles para la reserva.")
@@ -32,7 +32,7 @@ class Reserva(models.Model):
         return reverse("reservas-view", args=[str(self.id)])
 
     def __str__(self):
-        return str(self.articulo.titulo)
+        return str(self.material.titulo)
 
     class Meta:
         ordering = ["fecha_fin"]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from materiales.serializers import ArticuloSerializer
+from materiales.serializers import MaterialSerializer
 from .models import Reserva, Prestamo
 
 
@@ -13,7 +13,7 @@ class ReservasSerializer(serializers.ModelSerializer):
             "fecha_inicio",
             "fecha_fin",
             "owner",
-            "articulo",
+            "material",
         ]
 
 

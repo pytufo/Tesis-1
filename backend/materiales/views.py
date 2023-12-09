@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .utils import get_cantidad_existente, get_cantidad_disponible
-from materiales.models import Articulo, Editorial, Autor, TipoMaterial, Genero, Carrera
+from materiales.models import Material, Editorial, Autor, TipoMaterial, Genero, Carrera
 from rest_framework import (
     viewsets,
     generics,
@@ -17,7 +17,7 @@ from .permissions import IsSuperUserOrReadOnly
 
 
 from materiales.serializers import (
-    ArticuloSerializer,
+    MaterialSerializer,
     TipoMaterialSerializer,
     AutorSerializer,
     CarreraSerializer,
@@ -28,7 +28,7 @@ from materiales.serializers import (
 
 from accounts.models import User
 from materiales.models import (
-    Articulo,
+    Material,
     Ejemplar,
     TipoMaterial,
     Autor,
@@ -57,19 +57,19 @@ def generar_datos_aleatorios(request):
         Carrera.objects.create(nombre=fake.word())
 
     for _ in range(10):
-        articulo = Articulo.objects.create(
+        material = Material.objects.create(
             titulo=fake.sentence(),
             descripcion=fake.paragraph(),
         )
-        articulo.editorial.set(Editorial.objects.order_by("?")[:3])
-        articulo.autor.set(Autor.objects.order_by("?")[:2])
-        articulo.tipo.set(TipoMaterial.objects.order_by("?")[:1])
-        articulo.genero.set(Genero.objects.order_by("?")[:1])
-        articulo.carrera.set(Carrera.objects.order_by("?")[:1])
+        material.editorial.set(Editorial.objects.order_by("?")[:3])
+        material.autor.set(Autor.objects.order_by("?")[:2])
+        material.tipo.set(TipoMaterial.objects.order_by("?")[:1])
+        material.genero.set(Genero.objects.order_by("?")[:1])
+        material.carrera.set(Carrera.objects.order_by("?")[:1])
     for _ in range(20):
-        articulo = Articulo.objects.order_by("?")[:1].first()
+        material = Material.objects.order_by("?")[:1].first()
         Ejemplar.objects.create(
-            articulo=articulo,
+            material=material,
             estado=fake.boolean(),
         )
     return JsonResponse({"message": "Datos aleatorios generados exitosamente"})
@@ -105,10 +105,10 @@ class AutorViewSet(viewsets.ModelViewSet):
     queryset = Autor.objects.all()
 
 
-class ArticuloViewSet(viewsets.ModelViewSet):
+class MaterialViewSet(viewsets.ModelViewSet):
     # permission_classes = (AllowAny, IsSuperUserOrReadOnly)
-    serializer_class = ArticuloSerializer
-    queryset = Articulo.objects.all()
+    serializer_class = MaterialSerializer
+    queryset = Material.objects.all()
 
 
 class EjemplarViewSet(viewsets.ModelViewSet):
@@ -124,19 +124,19 @@ class DetalleEjemplar(generics.ListAPIView):
 
 """ 
 
-class CreateArticuloView(generics.ListCreateAPIView):
+class CreateMaterialView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated, IsSuperuser)
-    serializer_class = ArticuloSerializer
-    queryset = Articulo.objects.all()
+    serializer_class = MaterialSerializer
+    queryset = Material.objects.all()
 
 
-class DetailArticuloView(generics.RetrieveUpdateDestroyAPIView):
+class DetailMaterialView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsSuperuser)
-    serializer_class = ArticuloSerializer
-    queryset = Articulo.objects.all()
+    serializer_class = MaterialSerializer
+    queryset = Material.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
-        super(DetailArticuloView, self).retrieve(request, *args, **kwargs)
+        super(DetailMaterialView, self).retrieve(request, *args, **kwargs)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
@@ -148,7 +148,7 @@ class DetailArticuloView(generics.RetrieveUpdateDestroyAPIView):
         return Response(response)
 
     def patch(self, request, *args, **kwargs):
-        super(DetailArticuloView, self).patch(request, *args, **kwargs)
+        super(DetailMaterialView, self).patch(request, *args, **kwargs)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
