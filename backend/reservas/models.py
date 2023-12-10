@@ -19,15 +19,6 @@ class Reserva(models.Model):
     material = models.ForeignKey(
         Material, related_name="material", on_delete=models.CASCADE
     )
-
-    """ def save(self, *args, **kwargs):
-        cantidad_disponible = get_cantidad_disponible(self.material)
-
-        if cantidad_disponible < 1:
-            raise ValidationError("No hay ejemplares disponibles para la reserva.")
-
-        super().save(*args, **kwargs) """
-
     def get_absolute_url(self):
         return reverse("reservas-view", args=[str(self.id)])
 

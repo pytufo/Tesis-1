@@ -2,7 +2,7 @@ from .models import User
 from materiales.models import Material, Ejemplar
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from materiales.utils import (
+from reservas.utils import (
     get_reservas_prestamos_usuario,
     get_limite_reservas_prestamo,
 )

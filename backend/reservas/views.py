@@ -4,11 +4,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST """
 # from rest_framework.exceptions import ValidationError
 
-from materiales.utils import (
-    get_estado,
+from .utils import (
     get_limite_reservas_prestamo,
     usuario_tiene_reserva_pendiente,
+    get_reserva_proxima_a_espirar,
 )
+from materiales.utils import (
+    get_estado,
+)
+
 
 from rest_framework import viewsets, filters, generics, status
 from rest_framework.response import Response
@@ -45,7 +49,7 @@ def create_fake(request):
  """
 
 
-class MaterialFilter(viewsets.ModelViewSet):
+class ReservaFilter(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()
     serializer_class = ReservasSerializer
     # filterset_class = [django_filters.rest_framework.DjangoFilterBackend]
@@ -73,6 +77,15 @@ class ReservaViewSet(viewsets.ModelViewSet):
             return Response({"message": "Ya tienes una reserva para este material..."})
 
         if estado == "No Disponible" or estado == "Lectura":
+            reserva_proxima = get_reserva_proxima_a_espirar(material)
+            if reserva_proxima:
+                serializer = ReservasSerializer(reserva_proxima)
+                return Response(
+                    {
+                        "message": "No hay ejemplares disponibles para la reserva. Reserva próxima a expirar:",
+                        "reserva_proxima": serializer.data,
+                    }
+                )
             return Response(
                 {"message": "No hay ejemeplares disponibles para la reserva. "}
             )

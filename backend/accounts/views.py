@@ -11,8 +11,6 @@ from rest_framework.generics import GenericAPIView
 from rest_framework import status, generics, viewsets
 from rest_framework.response import Response
 
-from materiales.utils import get_reservas_prestamos_usuario
-
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
