@@ -44,3 +44,12 @@ def get_reserva_proxima_a_espirar(material):
     reserva_proxima = reservas.first() if reservas.exists() else None
 
     return reserva_proxima
+
+
+""" 
+
+def agregar_a_lista_espera(usuario, material):
+    if material.id not in LISTA_DE_ESPERA:
+        LISTA_DE_ESPERA[material.id] = []
+
+    LISTA_DE_ESPERA[material.id].append(usuario) """

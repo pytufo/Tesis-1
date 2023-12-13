@@ -21,6 +21,20 @@ class MaterialSerializer(serializers.ModelSerializer):
         fields = ["id", "titulo"]
 
 
+class ReservaCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reserva
+        fields = ["fecha_fin", "owner", "material"]
+        read_only_fields = ["material"]
+
+    def __init__(self, *args, **kwargs):
+        material_pk = kwargs.pop("material_pk", None)
+        super().__init__(*args, **kwargs)
+
+        if material_pk is not None:
+            self.fields["material"].queryset = Material.objects.filter(pk=material_pk)
+
+
 class ReservasSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reserva

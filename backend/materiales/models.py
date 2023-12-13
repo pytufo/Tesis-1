@@ -30,7 +30,7 @@ class Ejemplar(models.Model):
         return "%s %s" % (self.estado, self.material)
 
     def get_absolute_url(self):
-        return reverse("ejemplar_detail", args=[str(self.id, self.material)])
+        return reverse("ejemplar_detail", args=[str(self.id), (self.material.id)])
 
 
 class Material(models.Model):
