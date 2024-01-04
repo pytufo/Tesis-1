@@ -1,5 +1,5 @@
 from materiales.models import Ejemplar
-from reservas.models import Reserva
+from reservas.models import Reserva, Prestamo, ListaEspera
 
 
 # Definimos consultas para el seguimiento de los materiales (cantidades de prestamos, reservas, etc)
@@ -12,6 +12,10 @@ def get_cantidad_existente(obj):
 
 def get_cantidad_en_reserva(obj):
     return Reserva.objects.filter(material=obj.id).count()
+
+
+def get_cantidad_en_espera(obj):
+    return ListaEspera.objects.filter(material=obj.id).count()
 
 
 def get_cantidad_disponible(obj):
@@ -29,4 +33,3 @@ def get_estado(obj):
         return "Lectura"
     else:
         return "No Disponible"
-

@@ -13,7 +13,7 @@ from .views import (
     TipoMaterialViewSet,
     generar_datos_aleatorios,
 )
-from reservas.views import ReservaViewSet, PrestamoViewSet
+from reservas.views import ReservaViewSet, PrestamoViewSet, ListaDeEsperaviewset
 
 
 # Creamos un enrutador para registrar los "ViewSets" ya que hasta ahora hay tambien vistas "generics".
@@ -42,7 +42,12 @@ urlpatterns = [
         name="reservar-material",
     ),
     path(
-        "material/<int:material_pk>/prestar/",
+        "material/<int:material_pk>/reservar/espera/",
+        ListaDeEsperaviewset.as_view({"get": "retrieve", "post": "create"}),
+        name="espera-material",
+    ),
+    path(
+        "material/<int:material_pk>/entregar/",
         PrestamoViewSet.as_view({"post": "create"}),
         name="prestar-material",
     ),

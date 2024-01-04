@@ -11,6 +11,7 @@ from materiales.models import (
 from reservas.models import Reserva, Prestamo
 from accounts.models import User
 
+from reservas.utils import get_cantidad_en_espera, get_limite_epera
 from .utils import (
     get_cantidad_disponible,
     get_cantidad_en_reserva,
@@ -58,9 +59,10 @@ class EjemplarSerializer(serializers.ModelSerializer):
 class MaterialSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
     cantidad_en_reserva = serializers.SerializerMethodField()
+    cantidad_en_espera = serializers.SerializerMethodField()
     cantidad_disponible = serializers.SerializerMethodField()
+    limite_espera = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
-    
 
     class Meta:
         model = Material
@@ -75,7 +77,9 @@ class MaterialSerializer(serializers.ModelSerializer):
             "genero",
             "cantidad_existente",
             "cantidad_en_reserva",
+            "cantidad_en_espera",
             "cantidad_disponible",
+            "limite_espera",
             "estado",
         ]
 
@@ -90,3 +94,9 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     def get_estado(self, obj):
         return get_estado(obj)
+
+    def get_cantidad_en_espera(self, obj):
+        return get_cantidad_en_espera(obj)
+
+    def get_limite_espera(self, obj):
+        return get_limite_epera(obj)

@@ -5,13 +5,16 @@ from .views import (
     ReservaViewSet,
     PrestamoViewSet,
     ReservaFilter,
+    ListaDeEsperaviewset,
     # create_fake,
 )
 
 router = DefaultRouter()
 router.register(r"reserva", ReservaViewSet, basename="reserva")
 router.register(r"prestamo", PrestamoViewSet, basename="prestamo")
+router.register(r"reserva/espera", ListaDeEsperaviewset, basename="espera")
 router.register(r"buscar", ReservaFilter, basename="buscar")
+
 
 urlpatterns = [
     path(r"", include(router.urls)),

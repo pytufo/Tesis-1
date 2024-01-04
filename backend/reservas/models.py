@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 
 # from django.core.exceptions import ValidationError
@@ -14,11 +15,12 @@ from django.urls import reverse
 
 class Reserva(models.Model):
     fecha_inicio = models.DateField(auto_now_add=True)
-    fecha_fin = models.DateField(auto_now_add=False)
+    fecha_fin = models.DateField(auto_now_add=False, blank=True, null=True)
     owner = models.ForeignKey(User, related_name="usuario", on_delete=models.CASCADE)
     material = models.ForeignKey(
         Material, related_name="material", on_delete=models.CASCADE
     )
+
     def get_absolute_url(self):
         return reverse("reservas-view", args=[str(self.id)])
 
@@ -27,6 +29,16 @@ class Reserva(models.Model):
 
     class Meta:
         ordering = ["fecha_fin"]
+
+
+class ListaEspera(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, on_delete=models.CASCADE)
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_fin = models.DateField()
+
+    def __str__(self):
+        return f"Lista de espera para {self.material} - {self.usuario}"
 
 
 class Prestamo(models.Model):

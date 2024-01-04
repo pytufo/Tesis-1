@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Reserva, Prestamo
+from .models import Reserva, Prestamo, ListaEspera
 from materiales.models import Material
 from accounts.models import User
 
@@ -25,7 +25,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reserva
         fields = ["fecha_fin", "owner", "material"]
-        read_only_fields = ["material"]
+        read_only_fields = ["material", "fecha_fin"]
 
     def __init__(self, *args, **kwargs):
         material_pk = kwargs.pop("material_pk", None)
@@ -45,6 +45,13 @@ class ReservasSerializer(serializers.ModelSerializer):
             "owner",
             "material",
         ]
+
+
+class ListaDeEsperaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListaEspera
+        fields = ["fecha_fin", "owner", "material"]
+        read_only_fields = ["material", "fecha_fin"]
 
 
 class PrestamosSerializer(serializers.ModelSerializer):
