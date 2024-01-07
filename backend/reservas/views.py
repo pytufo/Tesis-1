@@ -72,7 +72,7 @@ class ReservaViewSet(viewsets.ViewSet):
 
         if usuario_tiene_reserva_pendiente(usuario, material):
             return Response(
-                {"message": "Ya tienes una rese410rva para este material..."}
+                {"message": "Ya tienes una reserva para este material..."}
             )
 
         ### Obtenemos el estado del material dando opcion para una "lista de espera" obteniendo el material proximo a liberarse.

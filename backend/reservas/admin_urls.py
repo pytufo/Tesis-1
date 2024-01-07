@@ -11,12 +11,13 @@ router.register(r"reserva", ReservaViewSet)
 router.register(r"prestamo", PrestamoViewSet)
 
 prestamo_router = NestedDefaultRouter(router, r"reserva", lookup="reserva")
-prestamo_router.register(r"entrega", PrestamoViewSet, basename="entregar-material")
+prestamo_router.register(r"reserva", ReservaViewSet, basename="entregar-material")
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path(r"", include(router.urls)),
     path(
         "reserva/<int:reserva_pk>/entregar/",
-        PrestamoViewSet.as_view({"get": "retrieve", "post": "create"}),
+        PrestamoViewSet.as_view({"get": "retrieve", "post": "create_prestamo"}),
+        name="entrega-material",
     ),
 ]

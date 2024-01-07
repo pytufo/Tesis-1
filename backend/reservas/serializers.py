@@ -57,4 +57,10 @@ class ListaDeEsperaSerializer(serializers.ModelSerializer):
 class PrestamosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prestamo
-        fields = "__all__"
+        fields = [
+            "id",
+            "fecha_fin",
+            "created_by",
+            "owner",
+            "ejemplar",
+        ]

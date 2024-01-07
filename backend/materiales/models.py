@@ -4,30 +4,16 @@ from accounts.models import User
 
 
 class Ejemplar(models.Model):
-    # Definimos los ecurlstados
-    DISPONIBLE = 1
-    NO_DISPONE = 0
-    ESTADO_CHOICES = (
-        (DISPONIBLE, "Disponible"),
-        (NO_DISPONE, "No disponible"),
-    )
     # Campos
     material = models.ForeignKey(
         "Material", on_delete=models.CASCADE, null=False, related_name="reserva"
     )
-    estado = models.IntegerField(
-        choices=ESTADO_CHOICES,
-        blank=True,
-        null=False,
-        help_text="Estado de Ejemplar",
-        default=DISPONIBLE,
-    )
 
     class Meta:
-        ordering = ["estado", "material"]
+        ordering = ["material"]
 
     def __str__(self):
-        return "%s %s" % (self.estado, self.material)
+        return "%s" % (self.material)
 
     def get_absolute_url(self):
         return reverse("ejemplar_detail", args=[str(self.id), (self.material.id)])
