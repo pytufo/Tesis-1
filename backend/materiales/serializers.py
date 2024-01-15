@@ -8,8 +8,7 @@ from materiales.models import (
     Genero,
     TipoMaterial,
 )
-from reservas.models import Reserva, Prestamo
-from accounts.models import User
+
 
 from reservas.utils import get_cantidad_en_espera, get_limite_epera
 from .utils import (
@@ -18,6 +17,7 @@ from .utils import (
     get_cantidad_en_prestamo,
     get_cantidad_existente,
     get_estado,
+    get_estado_ejemplar,
 )
 
 
@@ -52,9 +52,24 @@ class TipoMaterialSerializer(serializers.ModelSerializer):
 
 
 class EjemplarSerializer(serializers.ModelSerializer):
+    estado = serializers.SerializerMethodField()
+
     class Meta:
         model = Ejemplar
-        fields = "__all__"
+        fields = ["id", "material", "estado"]
+
+    def get_estado(self, obj):
+        return get_estado_ejemplar(obj)
+    
+class EjemplarMaterialSerializer(serializers.ModelSerializer):
+    estado = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ejemplar
+        fields = ["id", "estado"]
+
+    def get_estado(self, obj):
+        return get_estado_ejemplar(obj)
 
 
 class MaterialSerializer(serializers.ModelSerializer):

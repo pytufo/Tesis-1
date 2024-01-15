@@ -52,3 +52,13 @@ def get_reserva_proxima_a_espirar(material):
     reserva_proxima = reservas.first() if reservas.exists() else None
 
     return reserva_proxima
+
+
+### Logica para los prestamos
+
+# validacion del ejemplar a prestar
+def finalizar_prestamo(prestamo):
+    ejemplar = prestamo.ejemplar
+    
+
+    

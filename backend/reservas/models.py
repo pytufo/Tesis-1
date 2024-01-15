@@ -43,7 +43,7 @@ class ListaEspera(models.Model):
 
 class Prestamo(models.Model):
     fecha_inicio = models.DateField(auto_now_add=True)
-    fecha_fin = models.DateField(auto_now_add=False)
+    fecha_fin = models.DateField(auto_now_add=False, blank=True, null=True)
     created_by = models.ForeignKey(User, related_name="Autor", on_delete=models.CASCADE)
     owner = models.ForeignKey(User, related_name="Prestamos", on_delete=models.CASCADE)
     ejemplar = models.ForeignKey(

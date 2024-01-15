@@ -13,7 +13,7 @@ from .views import (
     TipoMaterialViewSet,
     generar_datos_aleatorios,
 )
-from reservas.views import ReservaViewSet, PrestamoViewSet, ListaDeEsperaviewset
+from reservas.views import ReservaViewSet, ListaDeEsperaviewset, PrestamoViewSet
 
 
 # Creamos un enrutador para registrar los "ViewSets" ya que hasta ahora hay tambien vistas "generics".
@@ -30,6 +30,7 @@ router.register(r"tipo", TipoMaterialViewSet)
 
 material_router = NestedDefaultRouter(router, r"material", lookup="material")
 material_router.register(r"reserva", ReservaViewSet, basename="reservar-material")
+material_router.register(r"prestar", PrestamoViewSet, basename="prestar-ejemplar")
 # material_router.register(r"autor", AutorViewSet, basename="material-autor")
 
 # material_router.register(r"autor",)
@@ -37,19 +38,26 @@ material_router.register(r"reserva", ReservaViewSet, basename="reservar-material
 urlpatterns = [
     path(r"", include(router.urls)),
     path(
+        "material/<int:material_pk>/ejemplares/",
+        MaterialViewSet.as_view(
+            {
+                "get": "retrieve_material",
+            }
+        ),
+    ),
+    path(
+        "ejemplar/<int:ejemplar_pk>/prestar/",
+        PrestamoViewSet.as_view({"get": "retrieve_ejemplar", "post": "create"}),
+    ),
+    path(
         "material/<int:material_pk>/reservar/",
-        ReservaViewSet.as_view({"get": "retrieve", "post": "create"}),
+        ReservaViewSet.as_view({"get": "retrieve_material", "post": "create"}),
         name="reservar-material",
     ),
     path(
         "material/<int:material_pk>/reservar/espera/",
         ListaDeEsperaviewset.as_view({"get": "retrieve", "post": "create"}),
         name="espera-material",
-    ),
-    path(
-        "material/<int:material_pk>/entregar/",
-        PrestamoViewSet.as_view({"post": "create"}),
-        name="prestar-material",
     ),
     path("generar/", generar_datos_aleatorios, name="generar"),
     # path("movimientos/", include("reservas.urls")),

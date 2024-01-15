@@ -1,8 +1,12 @@
+
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .models import Reserva, Prestamo, ListaEspera
-from materiales.models import Material
+from materiales.serializers import EjemplarSerializer
+
+from materiales.models import Material, Ejemplar
 from accounts.models import User
 
 # from materiales.serializers import MaterialSerializer
@@ -21,10 +25,16 @@ class MaterialSerializer(serializers.ModelSerializer):
         fields = ["id", "titulo"]
 
 
+class MaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EjemplarSerializer
+        fields = ["id", "material"]
+
+
 class ReservaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reserva
-        fields = ["fecha_fin", "owner", "material"]
+        fields = ["id", "fecha_fin", "owner", "material"]
         read_only_fields = ["material", "fecha_fin"]
 
     def __init__(self, *args, **kwargs):
@@ -64,3 +74,22 @@ class PrestamosSerializer(serializers.ModelSerializer):
             "owner",
             "ejemplar",
         ]
+
+
+
+
+
+class PrestamoCreateSerializer(serializers.ModelSerializer):
+    # ejemplar = serializers.PrimaryKeyRelatedField(queryset=Ejemplar.objects.none())
+
+    class Meta:
+        model = Prestamo
+        fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar"]
+        read_only_fields = ["ejemplar"]
+
+    def __init__(self, *args, **kwargs):
+        ejemplar_pk = kwargs.pop("ejemplar_pk", None)
+        super().__init__(*args, **kwargs)
+
+        if ejemplar_pk is not None:
+            self.fields["ejemplar"].queryset = Ejemplar.objects.filter(pk=ejemplar_pk)

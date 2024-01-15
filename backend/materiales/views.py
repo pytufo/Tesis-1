@@ -3,12 +3,18 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .utils import get_cantidad_existente, get_cantidad_disponible
+from .utils import (
+    get_cantidad_existente,
+    get_cantidad_disponible,
+    get_ejemplares_de_material,
+)
 from materiales.models import Material, Editorial, Autor, TipoMaterial, Genero, Carrera
 from rest_framework import (
     viewsets,
     generics,
 )
+from rest_framework.response import Response
+
 
 fake = Faker()
 
@@ -24,6 +30,7 @@ from materiales.serializers import (
     GeneroSerializer,
     EditorialSerializer,
     EjemplarSerializer,
+    EjemplarMaterialSerializer,
 )
 
 from accounts.models import User
@@ -110,16 +117,23 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     queryset = Material.objects.all()
 
+    def retrieve_material(self, request, material_pk=None):
+        material = Material.objects.get(pk=material_pk)
+        serializer = MaterialSerializer(material)
+
+        ejemplares = get_ejemplares_de_material(material)
+        ejemplares_serializer = EjemplarMaterialSerializer(ejemplares, many=True)
+        response_data = {
+            "material": serializer.data,
+            "ejemplares": ejemplares_serializer.data,
+        }
+        return Response(response_data)
+
 
 class EjemplarViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = EjemplarSerializer
     queryset = Ejemplar.objects.all()
-
-
-class DetalleEjemplar(generics.ListAPIView):
-    queryset = Ejemplar.objects.all()
-    serializer_class = EjemplarSerializer
 
 
 """ 
