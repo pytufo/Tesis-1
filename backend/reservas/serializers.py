@@ -1,10 +1,9 @@
-
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .models import Reserva, Prestamo, ListaEspera
 from materiales.serializers import EjemplarSerializer
+from materiales.utils import get_ejemplares_de_material
 
 from materiales.models import Material, Ejemplar
 from accounts.models import User
@@ -25,7 +24,7 @@ class MaterialSerializer(serializers.ModelSerializer):
         fields = ["id", "titulo"]
 
 
-class MaterialSerializer(serializers.ModelSerializer):
+class MaterialEjemplaresSerializer(serializers.ModelSerializer):
     class Meta:
         model = EjemplarSerializer
         fields = ["id", "material"]
@@ -76,7 +75,15 @@ class PrestamosSerializer(serializers.ModelSerializer):
         ]
 
 
+class EntregaEjemplarReserva(serializers.ModelSerializer):
+    # ejemplar = serializers.PrimaryKeyRelatedField(queryset=Ejemplar.objects.none())
+    
+    class Meta:
+        model = Prestamo
+        fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar"]
+        
 
+        
 
 
 class PrestamoCreateSerializer(serializers.ModelSerializer):
@@ -85,7 +92,6 @@ class PrestamoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prestamo
         fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar"]
-        read_only_fields = ["ejemplar"]
 
     def __init__(self, *args, **kwargs):
         ejemplar_pk = kwargs.pop("ejemplar_pk", None)

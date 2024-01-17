@@ -17,6 +17,7 @@ from .utils import (
 from materiales.utils import (
     get_estado,
     get_ejemplares_de_material,
+    get_ejemplares_disponibles,
     get_estado_ejemplar,
 )
 
@@ -43,6 +44,8 @@ from materiales.models import Material, Ejemplar
 from .serializers import (
     ReservasSerializer,
     PrestamosSerializer,
+    MaterialEjemplaresSerializer,
+    EntregaEjemplarReserva,
     PrestamoCreateSerializer,
     ReservaCreateSerializer,
     ListaDeEsperaSerializer,
@@ -55,7 +58,43 @@ class ReservaViewSet(viewsets.ModelViewSet):
     serializer_class = ReservaCreateSerializer
     queryset = Reserva.objects.all()
 
-    def retrieve_material(self, request, material_pk=None):
+    def retrieve_material(self, request, *args, **kwargs):
+        try:
+            reserva = self.get_object()
+            material = reserva.material
+
+            ejemplares_disponibles = get_ejemplares_disponibles(material)
+
+            # Puedes adaptar la lógica según tus necesidades para obtener ejemplares disponibles
+
+            # Aquí devuelves la información sobre el material y ejemplares disponibles
+            serializer_material = MaterialSerializer(
+                material, context={"request": request}
+            )
+            serializer_ejemplares = EjemplarSerializer(
+                ejemplares_disponibles, many=True, context={"request": request}
+            )
+
+            response_data = {
+                "material": serializer_material.data,
+                "ejemplares_disponibles": serializer_ejemplares.data,
+            }
+
+            return Response(response_data)
+
+        except Reserva.DoesNotExist:
+            return Response(
+                {"message": "La reserva no existe"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        except Exception as e:
+            return Response(
+                {"message": f"Error al obtener información de la reserva: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    """ def retrieve_material(self, request, material_pk=None):
         material = Material.objects.get(pk=material_pk)
         serializer = MaterialSerializer(material)
 
@@ -66,7 +105,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
             "ejemplares": ejemplares_serializer.data,
         }
 
-        return Response(response_data)
+        return Response(response_data) """
 
     def create(self, request, material_pk=None):
         usuario_id = request.data.get("owner")
@@ -175,6 +214,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrestamoFilter
 
+    @action(detail=True, methods=["get"])
     def retrieve_ejemplar(self, request, ejemplar_pk=None):
         ejemplar = Ejemplar.objects.get(pk=ejemplar_pk)
         serializer = EjemplarSerializer(ejemplar)
@@ -184,12 +224,6 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     def devolucion(self, request, pk=None):
         try:
             prestamo = self.get_object()
-
-            """ if prestamo.fecha_fin is not None:
-                return Response(
-                    {"message": "El préstamo ya ha sido devuelto"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                ) """
 
             prestamo.fecha_fin = timezone.now().date()
             prestamo.save()
@@ -209,6 +243,8 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    # Un prestamo puede ser de dos maneras: Presencial-inmediata o Entrega de reserva
+    # @action(detail=False, methods=["post"])
     def create(self, request, ejemplar_pk=None):
         # definimos los campos de "prestamo"
         created_by_id = request.data.get("created_by")
@@ -246,4 +282,61 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # Un prestamo puede ser de dos maneras: Presencial-inmediata o Retiro de reserva
+    def retrieve_reserva(self, request, reserva_pk=None):
+        try:
+            reserva = Reserva.objects.get(pk=reserva_pk)
+            material = reserva.material
+            ejemplares_disponibles = Ejemplar.objects.filter(material=material)
+
+            serializer_reserva = ReservasSerializer(reserva)
+            serializer_ejemplares = EjemplarSerializer(
+                ejemplares_disponibles, many=True, context={"request": request}
+            )
+
+            response_data = {
+                "reserva": serializer_reserva.data,
+                "ejemplares_disponibles": serializer_ejemplares.data,
+            }
+
+            return Response(response_data)
+
+        except Reserva.DoesNotExist:
+            return Response(
+                {"message": "La reserva no existe"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        except Exception as e:
+            return Response(
+                {"message": f"Error al procesar la solicitud: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(detail=True, methods=["post"])
+    def entregar_ejemplar_reserva(self, request, reserva_pk=None):
+        try:
+            reserva_data = self.retrieve_reserva(request, reserva_pk).data
+            material = reserva_data["reserva"]["material"]
+            ejemplares_disponibles = reserva_data["ejemplares_disponibles"]
+
+            # Añadir el conjunto de consultas al campo de opción en el serializer principal
+            serializer = EntregaEjemplarReserva(data=request.data)
+            serializer.fields["ejemplar"] = ejemplares_disponibles
+
+            serializer.is_valid(raise_exception=True)
+
+            # Guardar el préstamo
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Reserva.DoesNotExist:
+            return Response(
+                {"message": "La reserva no existe"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Exception as e:
+            return Response(
+                {"message": f"Error al entregar ejemplar desde reserva: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

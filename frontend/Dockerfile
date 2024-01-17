@@ -5,19 +5,19 @@ ENV NODE_ENV $NODE_ENV
 
 ARG PORT=19006
 ENV PORT $PORT
-EXPOSE $PORT 19001 19002
+EXPOSE $PORT
 
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-ENV PATH /home/node/.npm-global/bin:$PATH
+# Crear directorio de la aplicación
+WORKDIR /opt/frontend/app
 
-RUN mkdir /opt/frontend
-WORKDIR /opt/frontend
-ENV PATH /opt/frontend/.bin${PATH}
+# Copiar solo los archivos de configuración necesarios
 COPY ./package.json ./package-lock.json ./
+
+# Instalar dependencias
 RUN npm install
 
-WORKDIR /opt/frontend/app
-COPY ./ .
+# Copiar el resto de la aplicación
+COPY . .
 
-ENTRYPOINT [ "npm", "run" ]
-CMD [ "web" ]
+# Entrypoint para iniciar la aplicación
+ENTRYPOINT [ "npm", "run", "web" ]

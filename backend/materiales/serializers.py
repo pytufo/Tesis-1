@@ -18,6 +18,7 @@ from .utils import (
     get_cantidad_existente,
     get_estado,
     get_estado_ejemplar,
+    
 )
 
 
@@ -60,7 +61,8 @@ class EjemplarSerializer(serializers.ModelSerializer):
 
     def get_estado(self, obj):
         return get_estado_ejemplar(obj)
-    
+
+
 class EjemplarMaterialSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
 
@@ -98,8 +100,9 @@ class MaterialSerializer(serializers.ModelSerializer):
             "cantidad_en_espera",
             "cantidad_disponible",
             "limite_espera",
-            "estado",
+            "estado",            
         ]
+
 
     def get_cantidad_existente(self, obj):
         return get_cantidad_existente(obj)

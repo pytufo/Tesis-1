@@ -2,8 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter  #
 
-from .views import (    
-    PrestamoFilter,
+from .views import (
     ReservaViewSet,
     PrestamoViewSet,
     # create_fake,
@@ -19,9 +18,12 @@ reserva_router.register(r"prestamo", PrestamoViewSet, basename="entregar-ejempla
 urlpatterns = [
     path(r"", include(router.urls)),
     path(
-        "reservas/<int:pk>/entrega_reserva/",
-        ReservaViewSet.as_view(
-            {"get": "retrieve_material", "post": "create_prestamo_de_reserva"}
+        "reservas/<int:reserva_pk>/entregar_ejemplar/",
+        PrestamoViewSet.as_view(
+            {
+                "get": "retrieve_reserva",
+                "post": "entregar_ejemplar_reserva",
+            }
         ),
         name="entrega_reserva",
     ),
@@ -34,8 +36,4 @@ urlpatterns = [
         ),
         name="prestamo-devolucion",
     ),
-    # path("reservas/<int:reserva_pk>/", {"get":})
-    # path("buscar/", ArticuloFilter.as_view(), name="ejemplar_search"),
-    # path("generar/", create_fake, name="generate fake data")
-    # path("search/", views.ReservasSearchView.as_view(), name="reservas-search"),
 ]
