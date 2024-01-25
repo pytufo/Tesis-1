@@ -18,7 +18,6 @@ from .utils import (
     get_cantidad_existente,
     get_estado,
     get_estado_ejemplar,
-    
 )
 
 
@@ -83,6 +82,13 @@ class MaterialSerializer(serializers.ModelSerializer):
     limite_espera = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
 
+    # Ya que por defecto los subcampos de material serian indices, convertimos estos en cadenas de texto correspondiente a cada campo
+    tipo = TipoMaterialSerializer(many=True, read_only=True)
+    editorial = EditorialSerializer(many=True, read_only=True)
+    autor = AutorSerializer(many=True, read_only=True)
+    carrera = CarreraSerializer(many=True, read_only=True)
+    genero = GeneroSerializer(many=True, read_only=True)
+
     class Meta:
         model = Material
         fields = [
@@ -100,9 +106,8 @@ class MaterialSerializer(serializers.ModelSerializer):
             "cantidad_en_espera",
             "cantidad_disponible",
             "limite_espera",
-            "estado",            
+            "estado",
         ]
-
 
     def get_cantidad_existente(self, obj):
         return get_cantidad_existente(obj)

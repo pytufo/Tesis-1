@@ -2,11 +2,16 @@ const API_BASE_URL = "http://localhost:8000/";
 
 const API_ROUTES = {
   MATERIALES: "material/",
-  DETALLE_MATERIAL: "material/{material_pk/",
+  DETALLE_MATERIAL: "material/{material_pk/}",
   RESERVAR_MATERIAL: "material/{material_pk}/reservar/",
   EJEMPLARES: "ejemplar/",
   PRESTAMOS: "movimientos/prestamo/",
-  RESERVAS: "movimientos/reserva/",
+  RESERVAS: "movimientos/reservas/",
 };
 
-export { API_BASE_URL, API_ROUTES };
+const AUTH_ROUTES = {
+  USUARIOS: "auth/users/",
+  DETALLE_USUARIO: "auth/users/{account_pk}/",
+};
+
+export { API_BASE_URL, API_ROUTES, AUTH_ROUTES };

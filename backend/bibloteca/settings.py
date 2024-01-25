@@ -89,10 +89,15 @@ ROOT_URLCONF = "bibloteca.urls"
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ["http://127.0.0.1:5173", "http://127.0.0.1:19006"]
+CORS_ORIGIN_WHITELIST = [
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:19006",
+    "http://localhost:19006",
+]
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:19006",
+    "http://localhost:19006",
 ]
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST", "").split(" ") + ["localhost"]

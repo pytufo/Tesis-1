@@ -28,6 +28,9 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import PrestamoFilter
 
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 # from rest_framework.filters import SearchFilter
 
 from .models import Reserva, Prestamo, ListaEspera
@@ -54,7 +57,7 @@ from .serializers import (
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
-    # permission_classes = (IsSuperUserOrReadOnly,)
+    permission_classes = [IsAuthenticated]
     serializer_class = ReservaCreateSerializer
     queryset = Reserva.objects.all()
 
@@ -94,24 +97,10 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    """ def retrieve_material(self, request, material_pk=None):
-        material = Material.objects.get(pk=material_pk)
-        serializer = MaterialSerializer(material)
-
-        ejemplares = get_ejemplares_de_material(material)
-        ejemplares_serializer = EjemplarSerializer(ejemplares, many=True)
-        response_data = {
-            "material": serializer.data,
-            "ejemplares": ejemplares_serializer.data,
-        }
-
-        return Response(response_data) """
-
     def create(self, request, material_pk=None):
-        usuario_id = request.data.get("owner")
+        usuario = request.user
 
-        material = Material.objects.get(pk=material_pk)
-        usuario = User.objects.get(pk=usuario_id)
+        material = Material.objects.get(pk=material_pk)        
 
         limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
         estado = get_estado(material)
@@ -177,7 +166,7 @@ class ListaDeEsperaviewset(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def create(self, request, material_pk=None):
-        usuario_id = request.data.get("owner")
+        usuario_id = request.user
         material = Material.objects.get(pk=material_pk)
         usuario = User.objects.get(pk=usuario_id)
 

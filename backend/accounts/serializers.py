@@ -25,6 +25,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "cantidad_reservas",
             "cantidad_prestamos",
             "limite",
+            "is_active",
+            "role",
         ]
 
     def get_cantidad_reservas(self, obj):
@@ -87,6 +89,7 @@ class UserLoginSerializer(serializers.Serializer):
                 "user": user,
                 "access": access_token,
                 "refresh": refresh_token,
+                "id": user.id,
                 "email": user.email,
                 "role": user.role,
                 "reservas": serializers.PrimaryKeyRelatedField(

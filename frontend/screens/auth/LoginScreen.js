@@ -1,26 +1,37 @@
-import { Button, TextInput, View } from "react-native";
-import React, { useState } from "react";
-import axios from "axios";
+import { Text, Button, TextInput, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import AuthServices from "../../services/AuthServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useUser } from "../../contexts/UserContext";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ setIsLoggedIn, navigation }) => {
+  const { storeUserInfo } = useUser();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:8000/auth/login/",
-        { email, password }
-      );
-      await AsyncStorage.setItem("access_token", response.data.token);
-      navigation.navigate("Home");
+      const user = await AuthServices.login(email, password);
+      console.log("Respuesta: ", user);
+      if (user.access_token) {
+        await AsyncStorage.setItem("access_token", user.access_token);
+        storeUserInfo(user);
+        setIsLoggedIn(true);
+      } else {
+        console.log("Token null o invalido");
+      }
     } catch (error) {
-      alert("error o Acceso denegado");
+      console.log("error al autenticar: ", error);
     }
   };
+
+  const navigateToSignup = () => {
+    navigation.navigate("Signup");
+  };
+
   return (
-    <View>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <TextInput placeholder="Email" onChangeText={setEmail} />
       <TextInput
         placeholder="Password"
@@ -28,6 +39,7 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={setPassword}
       />
       <Button title="Login" onPress={handleLogin} />
+      <Text onPress={navigateToSignup}>¿No tienes cuenta? Regístrate aquí</Text>
     </View>
   );
 };

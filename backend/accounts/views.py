@@ -7,12 +7,14 @@ fake = Faker()
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsActive
+from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework import status, generics, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 
 from accounts.serializers import (
@@ -57,7 +59,8 @@ class UserLoginView(generics.CreateAPIView):
                 "success": True,
                 "refresh_token": str(refresh),
                 "access_token": str(access_token),
-                "authenticatedUser": {
+                "user": {
+                    "id": user.id,
                     "email": user.email,
                     "role": user.role,
                 },
@@ -71,19 +74,23 @@ class UserLoginView(generics.CreateAPIView):
         )
 
 
-class LogoutView(GenericAPIView):
+class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         try:
-            refresh_token = request.data.get("refresh_token")
-            token = RefreshToken(refresh_token)
+            access_token = request.data.get("access_token")
+            token = RefreshToken(access_token)
             token.blacklist()
             return Response(
-                {"message": "sesion cerrada exitosamente."}, status=status.HTTP_200_OK
+                {"message": "Sesion cerrada exitosamente."}, status=status.HTTP_200_OK
             )
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": f"Error al cerrar sesion: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class RegisterView(generics.CreateAPIView):
@@ -92,18 +99,18 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
 
 
-""" 
-class userView(generics.ListAPIView):
-    serializer_class = userSerializer
-    queryset = User.objects.all()
-
-    def get(self, request, * args, **kwargs):
-        queryset = self.filter_queryset() """
-
-
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
+
+    @action(detail=True, methods=["put"])
+    def activar(self, request, pk=None):
+        user = self.get_object()
+        user.is_active = True
+        user.save()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
 
 """     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

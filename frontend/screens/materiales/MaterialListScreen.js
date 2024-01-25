@@ -4,8 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 
-const MaterialListScreen = () => {
-  const navigation = useNavigation();
+const MaterialListScreen = ({ navigation }) => {
   const [material, setMaterial] = useState([]);
 
   useEffect(() => {
@@ -24,7 +23,7 @@ const MaterialListScreen = () => {
   }, []);
 
   const handleMaterialPress = (materialId) => {
-    navigation.navigate("DetalleMaterialScreen", { materialId });
+    navigation.navigate("DetalleMaterial", { materialId });
   };
   return (
     <View>
