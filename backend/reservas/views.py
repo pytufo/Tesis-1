@@ -100,7 +100,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
     def create(self, request, material_pk=None):
         usuario = request.user
 
-        material = Material.objects.get(pk=material_pk)        
+        material = Material.objects.get(pk=material_pk)
 
         limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
         estado = get_estado(material)
@@ -305,13 +305,22 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     def entregar_ejemplar_reserva(self, request, reserva_pk=None):
         try:
             reserva_data = self.retrieve_reserva(request, reserva_pk).data
-            material = reserva_data["reserva"]["material"]
             ejemplares_disponibles = reserva_data["ejemplares_disponibles"]
 
-            # Añadir el conjunto de consultas al campo de opción en el serializer principal
-            serializer = EntregaEjemplarReserva(data=request.data)
-            serializer.fields["ejemplar"] = ejemplares_disponibles
+            created_by = request.user
 
+            if not ejemplares_disponibles:
+                return Response({"message": "No se encuentran ejemplares disponibles"})
+            fecha_fin_default = (timezone.now() + timedelta(days=7)).date()
+            ejemplar_a_entregaar = ejemplares_disponibles[0]
+            prestamo_data = {
+                "created_by": created_by.id,
+                "owner": reserva_data["reserva"]["owner"],
+                "ejemplar": ejemplar_a_entregaar["id"],
+                "fecha_fin": fecha_fin_default,
+            }
+
+            serializer = PrestamoCreateSerializer(data=prestamo_data)
             serializer.is_valid(raise_exception=True)
 
             # Guardar el préstamo

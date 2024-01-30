@@ -4,6 +4,7 @@ from reservas.models import Reserva, Prestamo, ListaEspera
 
 # Definimos consultas para el seguimiento de los ejemplares (cantidades de prestamos, reservas, etc) y asignamos un estado segun el criterio del seguimiento. y tambien establecemos parametros de vencimiento en los prestamos.
 
+
 def get_ejemplares_de_material(material):
     return Ejemplar.objects.filter(material=material)
 
@@ -28,9 +29,10 @@ def get_ejemplares_disponibles(material):
 
     for ejemplar in ejemplares:
         if get_estado_ejemplar(ejemplar) == "Disponible":
-            ejemplares_disponibles.append(ejemplar)
+            ejemplares_disponibles.append(ejemplar.id)
 
     return ejemplares_disponibles
+
 
 # Definimos consultas para el seguimiento de los materiales (cantidades de prestamos, reservas, etc)
 # Al final del seguimiento definimos un estado del material asignandole "Disponible", "Lectura", "No Disponible"

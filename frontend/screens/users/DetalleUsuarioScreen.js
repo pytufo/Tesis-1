@@ -6,17 +6,26 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 import { API_BASE_URL, AUTH_ROUTES } from "../../constants/API";
+import { useUser } from "../../contexts/UserContext";
 
 const DetalleUsuarioScreen = () => {
   const route = useRoute();
   const { userId } = route.params;
   const [detalleUsuario, setDetalleUsuario] = useState(null);
 
+  const {userInfo} = useUser()
+  const accessToken = userInfo.access_token;
+
   useEffect(() => {
     const fethDetalleUsuario = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}${AUTH_ROUTES.USUARIOS}${userId}/`
+          `${API_BASE_URL}${AUTH_ROUTES.USUARIOS}${userId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         console.log("usuario:", response);
         setDetalleUsuario(response.data);

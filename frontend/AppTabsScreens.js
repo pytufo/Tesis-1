@@ -9,6 +9,8 @@ import ProfileScreen from "./screens/users/ProfileScreen";
 import { useUser } from "./contexts/UserContext";
 import UsersListScreen from "./screens/users/UsersListScreen";
 import DetalleUsuarioScreen from "./screens/users/DetalleUsuarioScreen";
+import DetalleReservaScreen from "./screens/movimientos/DetalleReservaScreen";
+import DetallePrestamoScreen from "./screens/movimientos/DetallePrestamoScreen";
 
 const AppTabs = createBottomTabNavigator();
 
@@ -25,7 +27,15 @@ const AppTabsScreen = ({ setIsLoggedIn, setUserData }) => {
             component={DetalleUsuarioScreen}
           />
           <AppTabs.Screen name="Prestamos" component={PrestamosScreen} />
+          <AppTabs.Screen
+            name="DetallePrestamo"
+            component={DetallePrestamoScreen}
+          />
           <AppTabs.Screen name="Reservas" component={ReservasScreen} />
+          <AppTabs.Screen
+            name="DetalleReserva"
+            component={DetalleReservaScreen}
+          />
         </>
       ) : (
         <>

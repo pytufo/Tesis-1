@@ -3,26 +3,26 @@ import { Text, View, FlatList, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
+import MovimientosServices from "../../services/MovimientosServices";
+import { useUser } from "../../contexts/UserContext";
 
 const ReservasScreen = ({ navigation }) => {
   const [reserva, setReserva] = useState([]);
-
+  const { userInfo } = useUser();
   useEffect(() => {
     const fetchReserva = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.RESERVAS}`
-        );
-        console.log(response);
-        setReserva(response.data);
+        const access_token = userInfo.access_token;
+        const response = await MovimientosServices.listarReservas(access_token);        
+        setReserva(response);
       } catch (error) {
-        console.log("Error al obtener los prestamos:", error);
+        console.log("Error al obtener las reservas:", error);
       }
     };
     fetchReserva();
-  }, []);
-  const handleReservaPress = (prestamoId) => {
-    navigation.navigate("DetallePrestamo", { prestamoId });
+  }, [userInfo.access_token]);
+  const handleReservaPress = (reservaId) => {
+    navigation.navigate("DetalleReserva", { reservaId });
   };
   return (
     <View>

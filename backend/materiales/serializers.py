@@ -18,6 +18,7 @@ from .utils import (
     get_cantidad_existente,
     get_estado,
     get_estado_ejemplar,
+    get_ejemplares_disponibles,
 )
 
 
@@ -81,6 +82,7 @@ class MaterialSerializer(serializers.ModelSerializer):
     cantidad_disponible = serializers.SerializerMethodField()
     limite_espera = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
+    ejemplares_disponibles = serializers.SerializerMethodField()
 
     # Ya que por defecto los subcampos de material serian indices, convertimos estos en cadenas de texto correspondiente a cada campo
     tipo = TipoMaterialSerializer(many=True, read_only=True)
@@ -107,6 +109,7 @@ class MaterialSerializer(serializers.ModelSerializer):
             "cantidad_disponible",
             "limite_espera",
             "estado",
+            "ejemplares_disponibles",
         ]
 
     def get_cantidad_existente(self, obj):
@@ -129,3 +132,6 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     def get_limite_espera(self, obj):
         return get_limite_epera(obj)
+
+    def get_ejemplares_disponibles(self, obj):
+        return get_ejemplares_disponibles(obj)
