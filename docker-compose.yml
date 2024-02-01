@@ -28,9 +28,10 @@ services:
 
   react:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./frontend/Dockerfile
     ports:
+      - "8081:8081"
       - "19006:19006"
       - "19001:19001"
       - "19002:19002"

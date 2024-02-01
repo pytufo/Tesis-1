@@ -11,13 +11,14 @@ EXPOSE $PORT
 WORKDIR /opt/frontend/app
 
 # Copiar solo los archivos de configuración necesarios
-COPY ./package.json ./package-lock.json ./
+COPY ./frontend/package.json ./frontend/package-lock.json ./
 
 # Instalar dependencias
+RUN npm install -g expo-cli@latest
 RUN npm install
 
 # Copiar el resto de la aplicación
-COPY . .
+COPY ./frontend .
 
 # Entrypoint para iniciar la aplicación
-ENTRYPOINT [ "npm", "run", "web" ]
+ENTRYPOINT [ "npx", "expo", "start", "--web"]
