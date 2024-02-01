@@ -1,5 +1,13 @@
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from "react-native";
 import React, { useEffect, useState } from "react";
+import { tableStyles } from "../../constants/Colors";
+
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 import axios from "axios";
 
@@ -23,23 +31,36 @@ const PrestamosScreen = ({ navigation }) => {
   const handlePrestamoPress = (prestamoId) => {
     navigation.navigate("DetallePrestamo", { prestamoId });
   };
-  return (
-    <View>
-      <Text>Listado de Prestamos:</Text>
-      <FlatList
-        data={prestamo}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handlePrestamoPress(item.id)}>
-            <View>
-              <Text>Ejemplar: {item.ejemplar}</Text>
-              <Text>Usuario: {item.owner}</Text>
-              <Text>Fecha finalizacion: {item.fecha_fin}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+
+  const renderTableHeader = () => (
+    <View style={tableStyles.tableHeader}>
+      <Text style={tableStyles.headerText}>Ejemplar</Text>
+      <Text style={tableStyles.headerText}>Usuario</Text>
+      <Text style={tableStyles.headerText}>Fecha finalizacion</Text>
     </View>
+  );
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => handlePrestamoPress(item.id)}>
+      <View style={tableStyles.tableRow}>
+        <Text style={tableStyles.cell}>{item.ejemplar}</Text>
+        <Text style={tableStyles.cell}>{item.owner}</Text>
+        <Text style={tableStyles.cell}>{item.fecha_fin}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <ScrollView>
+      <View>
+        {renderTableHeader()}
+        <FlatList
+          data={prestamo}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+        />
+      </View>
+    </ScrollView>
   );
 };
 

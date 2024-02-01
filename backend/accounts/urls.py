@@ -10,7 +10,7 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r"users", UserViewSet, basename="buscar")
+router.register(r"users", UserViewSet, basename="users")
 urlpatterns = [
     path("", include(router.urls)),
     path("login/", UserLoginView.as_view(), name="login"),

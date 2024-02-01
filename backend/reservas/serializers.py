@@ -25,6 +25,7 @@ class MaterialSerializer(serializers.ModelSerializer):
 
 
 class MaterialEjemplaresSerializer(serializers.ModelSerializer):
+    material = MaterialSerializer(many=True, read_only=True)
     class Meta:
         model = EjemplarSerializer
         fields = ["id", "material"]

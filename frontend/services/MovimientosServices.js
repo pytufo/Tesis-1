@@ -1,7 +1,7 @@
 import { API_BASE_URL, API_ROUTES } from "../constants/API";
 
 const MovimientosServices = {
-  listarReservas: async (accessToken) => {
+  listarReservas: async (accessToken, materialId) => {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ROUTES.RESERVAS}`, {
         method: "GET",
