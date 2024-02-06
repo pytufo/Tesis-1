@@ -10,7 +10,7 @@ pytz==2022.6
 sqlparse==0.4.3
 tomli==2.0.1
 psycopg2-binary==2.9.6
-gunicorn==21.2.0
+gunicorn==20.1.0
 django_filter==23.4
 faker==20.1.0
 drf_nested_routers==0.93.4
