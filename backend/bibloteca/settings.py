@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 
 from pathlib import Path
-from dj_database_url
+import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 
@@ -103,7 +103,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST", "").split(" ") + ["localhost"]
-#ALLOWED_HOSTS = ["django-project.eba-tmhvachc.us-west-2.elasticbeanstalk.com"]
+# ALLOWED_HOSTS = ["django-project.eba-tmhvachc.us-west-2.elasticbeanstalk.com"]
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # "rest_framework.authentication.BasicAuthentication",
@@ -123,18 +123,16 @@ WSGI_APPLICATION = "bibloteca.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-	dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-	"""
+    "default": {dj_database_url.config(default=os.environ.get("DATABASE_URL"))}
+}
+"""
         "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
         "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
         "HOST": os.environ.get("SQL_HOST", "localhost"),
         "PORT": os.environ.get("SQL_PORT", "5432"),
         "USER": os.environ.get("SQL_USER", "user"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),"""
-    }
-}
-
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+    """
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=45),
@@ -201,7 +199,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
