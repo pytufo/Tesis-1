@@ -1,6 +1,7 @@
 build:
-  docker:
-    web: backend/Dockerfile
+  django:
+    docker:
+      web: backend/Dockerfile
   config:
     Aptfile: Aptfile
   frontend:
