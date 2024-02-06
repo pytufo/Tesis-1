@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+
 import os
 
 from pathlib import Path
@@ -101,13 +102,13 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST", "").split(" ") + ["localhost"]
-
+#ALLOWED_HOSTS = ["django-project.eba-tmhvachc.us-west-2.elasticbeanstalk.com"]
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # "rest_framework.authentication.BasicAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"]
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 

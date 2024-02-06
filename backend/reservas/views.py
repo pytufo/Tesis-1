@@ -42,7 +42,7 @@ from materiales.models import Material, Ejemplar
 
 # fake = Faker()
 
-# from materiales.serializers import EjemplarSerializer
+# from materiales.serializers im port EjemplarSerializer
 
 from .serializers import (
     ReservasSerializer,
