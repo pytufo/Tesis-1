@@ -17,4 +17,4 @@ RUN chmod +x /usr/src/app/entrypoint.sh
 ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
 
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "tu_proyecto.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "bibloteca.wsgi:application"]
