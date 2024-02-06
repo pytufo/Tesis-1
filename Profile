@@ -1,1 +1,1 @@
-web: gunicorn backend.bibloteca.wsgi:application --chdir backend
+web: gunicorn bibloteca.wsgi:application --chdir backend
