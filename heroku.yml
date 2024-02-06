@@ -1,9 +1,0 @@
-build:
-  django:
-    docker:
-      web: backend/Dockerfile
-  config:
-    Aptfile: Aptfile
-  frontend:
-    docker:
-      web: frontend/Dockerfile
