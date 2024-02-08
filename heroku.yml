@@ -1,5 +1,4 @@
 build:
   docker:
-    web: backend
-  config:
-    - backend/Dockerfile
+    web: backend/Dockerfile
+    frontend: frontend/Dockerfile
