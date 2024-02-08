@@ -10,6 +10,7 @@ if [ "$DATABASE" = "postgres" ]; then
   echo "PostgreSQL started"
 
   echo "Aplliying migrations..."
+  
   python manage.py makemigrations
   python manage.py migrate
 

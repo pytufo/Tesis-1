@@ -7,14 +7,16 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install -y netcat
 
-COPY . .
+COPY ./backend/requirements.txt /app/backend/requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/backend/requirements.txt
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+COPY ./backend /app
 
-COPY entrypoint.sh /usr/src/app/entrypoint.sh
-RUN chmod +x /usr/src/app/entrypoint.sh
-ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
+
+
+COPY ./backend/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT [ "/app/entrypoint.sh" ]
 
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "bibloteca.wsgi:application"]
