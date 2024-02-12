@@ -1,1 +1,1 @@
-web: gunicorn backend.wsgi:application -f docker-compose.yml up
+web: gunicorn backend.bibloteca.wsgi:application -f docker-compose.yml up
