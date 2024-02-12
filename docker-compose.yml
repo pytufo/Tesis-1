@@ -3,9 +3,9 @@ version: "3"
 services:
   django:
     build:
-      image: tesis-master_db_1
+      context: .
       dockerfile: ./backend/Dockerfile
-    command: gunicorn backend.wsgi:application -b 0.0.0.0:8000
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend/:/app
     ports:
@@ -16,7 +16,6 @@ services:
       - db
     environment:
       - DJANGO_DB_HOST=db
-      - $PORT:8000
 
   db:
     image: postgres:14-alpine
@@ -39,7 +38,8 @@ services:
     volumes:
       - ./web-build/opt/frontend/app
       - ./frontend/package.json:/opt/frontend/package.json
-      - ./frontend/package-lock.json:/opt/frontend/package-lock.json
+      - ./frontend/package.json:/opt/frontend/package-lock.json
 
 volumes:
   postgres_data:
+

@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y netcat
 COPY ./backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --upgrade pip && pip install -r /app/backend/requirements.txt
 
-COPY ./backend /app
+COPY . /app
 
 
 

@@ -37,8 +37,7 @@ services:
       - "19002:19002"
     volumes:
       - ./web-build/opt/frontend/app
-      - ./frontend/package.json:/opt/frontend/package.json
-      - ./frontend/package-lock.json:/opt/frontend/package-lock.json
+      - ./frontend/package.json:/opt/frontend/
 
 volumes:
   postgres_data:
