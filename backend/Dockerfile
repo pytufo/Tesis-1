@@ -7,14 +7,14 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install -y netcat
 
-COPY ./backend/requirements.txt /app/backend/requirements.txt
+COPY backend/requirements.txt /app/backend/requirements.txt
+
 RUN pip install --upgrade pip && pip install -r /app/backend/requirements.txt
 
-COPY . /app
+COPY backend ./app/backend/
 
 
-
-COPY ./backend/entrypoint.sh /app/entrypoint.sh
+COPY backend/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT [ "/app/entrypoint.sh" ]
 
