@@ -1,3 +1,19 @@
+.env
+.vscode
+
+.docker-compose_copy.yml
+.docker-compose.yml
+
+/backend/Dockerfile
+/backend/.env.dev
+/backend/.env.prod.db
+/backend/bibloteca/settings.py
+
+
+
+/frontend/Dockerfile
+/frontend/constants/API.js
+
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

@@ -76,8 +76,7 @@ def generar_datos_aleatorios(request):
     for _ in range(20):
         material = Material.objects.order_by("?")[:1].first()
         Ejemplar.objects.create(
-            material=material,
-            estado=fake.boolean(),
+            material=material,            
         )
     return JsonResponse({"message": "Datos aleatorios generados exitosamente"})
 

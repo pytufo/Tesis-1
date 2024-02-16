@@ -46,8 +46,7 @@ from materiales.models import Material, Ejemplar
 
 from .serializers import (
     ReservasSerializer,
-    PrestamosSerializer,
-    MaterialEjemplaresSerializer,
+    PrestamosSerializer,    
     EntregaEjemplarReserva,
     PrestamoCreateSerializer,
     ReservaCreateSerializer,
@@ -108,7 +107,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
         ### El usuario no podrá resepetir una reserva.
 
         if usuario_tiene_reserva_pendiente(usuario, material):
-            return Response({"message": "Ya tienes una reserva para este material..."})
+            return Response({"message": "Ya tienes una reserva para este material..."}, status=status.HTTP_400_BAD_REQUEST)
 
         ### Obtenemos el estado del material dando opcion para una "lista de espera" obteniendo el material proximo a liberarse.
         ### solicitando una confirmacion para crearla
@@ -130,7 +129,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
         if limite_reservas_prestamo == "Excede":
             return Response(
-                {"message": "El usuario ha excedido el limite de reservas o prestamos"}
+                {"message": "El usuario ha excedido el limite de reservas o prestamos"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         ### Establecemos un limite para la "fecha_fin" por defecto de 1 dia.
@@ -277,7 +276,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             material = reserva.material
             ejemplares_disponibles = Ejemplar.objects.filter(material=material)
 
-            serializer_reserva = ReservasSerializer(reserva)
+            serializer_reserva = ReservaCreateSerializer(reserva)
             serializer_ejemplares = EjemplarSerializer(
                 ejemplares_disponibles, many=True, context={"request": request}
             )
@@ -312,12 +311,13 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             if not ejemplares_disponibles:
                 return Response({"message": "No se encuentran ejemplares disponibles"})
             fecha_fin_default = (timezone.now() + timedelta(days=7)).date()
-            ejemplar_a_entregaar = ejemplares_disponibles[0]
+            
+            ejemplar_a_entregar = ejemplares_disponibles[0]
             prestamo_data = {
                 "created_by": created_by.id,
-                "owner": reserva_data["reserva"]["owner"],
-                "ejemplar": ejemplar_a_entregaar["id"],
-                "fecha_fin": fecha_fin_default,
+                "owner": {"id": reserva_data["reserva"]["owner"]["id"]},
+                
+
             }
 
             serializer = PrestamoCreateSerializer(data=prestamo_data)

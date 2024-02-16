@@ -21,4 +21,7 @@ export const tableStyles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
+  activeCell: {
+    backgroundColor: "#ddd"
+  }
 });

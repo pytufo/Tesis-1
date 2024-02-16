@@ -40,7 +40,13 @@ const DetalleUsuarioScreen = () => {
   const handleActivarCuenta = async () => {
     try {
       await axios.put(
-        `${API_BASE_URL}${AUTH_ROUTES.USUARIOS}${userId}/activar/`
+        `${API_BASE_URL}${AUTH_ROUTES.USUARIOS}${userId}/activar/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
       );
       setDetalleUsuario((prevUsuario) => ({
         ...prevUsuario,
@@ -59,7 +65,7 @@ const DetalleUsuarioScreen = () => {
           <Text>Detalles del usuario </Text>
           <Text> Nombre: {detalleUsuario.username}</Text>
           <Text> Apellido: {detalleUsuario.last_name}</Text>
-          <Text> E-Mail: {detalleUsuario.email}</Text>
+          <Text> E-Moil: {detalleUsuario.email}</Text>
           <Text> role: {detalleUsuario.role}</Text>
           {detalleUsuario.is_active ? (
             <Text> Cuenta activada</Text>

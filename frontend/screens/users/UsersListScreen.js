@@ -9,43 +9,32 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { API_BASE_URL, AUTH_ROUTES } from "../../constants/API";
 import { tableStyles } from "../../constants/Colors";
 
 import { useUser } from "../../contexts/UserContext";
+import AuthServices from "../../services/AuthServices";
 
 const UsersListScreen = ({ navigation }) => {
   const [user, setUser] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const { userInfo } = useUser();
-  const accessToken = userInfo.access_token;
+  const { userInfo } = useUser();  
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}${AUTH_ROUTES.USUARIOS}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
+        const access_token = userInfo.access_token;
+        const response = await AuthServices.listarUsuarios(
+          access_token,
+          searchQuery
         );
-        setUser(response.data);
+        setUser(response);
+        console.log(response)
       } catch (error) {
         console.log("Error al obtener los usuarios", error);
       }
     };
     fetchUser();
-  }, []);
-
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-    const filteredUsers = user.filter((item) =>
-      item.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setUser(filteredUsers);
-  };
+  }, [userInfo.access_token, searchQuery]);
 
   const renderTableHeader = () => (
     <View style={tableStyles.tableHeader}>
@@ -79,7 +68,7 @@ const UsersListScreen = ({ navigation }) => {
           style={styles.searchInput}
           placeholder="Buscar usuarios..."
           value={searchQuery}
-          onChangeText={handleSearch}          
+          onChangeText={(text) => setSearchQuery(text)}
         />
       </View>
       <ScrollView>

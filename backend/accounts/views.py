@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 fake = Faker()
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .permissions import IsActive
+from .permissions import IsActive, IsSuperuser
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework import status, generics, viewsets
@@ -100,6 +100,7 @@ class RegisterView(generics.CreateAPIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsSuperuser]
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
 

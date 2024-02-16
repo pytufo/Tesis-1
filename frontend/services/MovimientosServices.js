@@ -18,7 +18,7 @@ const MovimientosServices = {
       throw error;
     }
   },
-  entregarEjemplarReserva: async (accessToken, reservaId) => {
+  entregarEjemplarReserva: async (accessToken, reservaId, prestamoData) => {
     try {
       const response = await fetch(
         `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`,
@@ -28,7 +28,7 @@ const MovimientosServices = {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ reservaId: reservaId }),
+          body: JSON.stringify(prestamoData),
         }
       );
       const data = await response.json();

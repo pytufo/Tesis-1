@@ -6,8 +6,7 @@ const ProfileScreen = () => {
   const { userInfo } = useUser();
   console.log("user: ", userInfo);
   return (
-    <View>
-      <Text>Perfil del usuario: </Text>
+    <View>      
       {userInfo && (
         <>          
           <Text>Email: {userInfo.user.email}</Text>

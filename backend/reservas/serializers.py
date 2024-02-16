@@ -2,36 +2,22 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .models import Reserva, Prestamo, ListaEspera
-from materiales.serializers import EjemplarSerializer
+
 from materiales.utils import get_ejemplares_de_material
 
 from materiales.models import Material, Ejemplar
+from materiales.serializers import MaterialSerializer, EjemplarSerializer
 from accounts.models import User
+from accounts.serializers import UserProfileSerializer
 
 # from materiales.serializers import MaterialSerializer
 # from accounts.serializers import UserProfileSerializer
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "email"]
-
-
-class MaterialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Material
-        fields = ["id", "titulo"]
-
-
-class MaterialEjemplaresSerializer(serializers.ModelSerializer):
-    material = MaterialSerializer(many=True, read_only=True)
-    class Meta:
-        model = EjemplarSerializer
-        fields = ["id", "material"]
-
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
+    owner = UserProfileSerializer()
+    material = MaterialSerializer()
     class Meta:
         model = Reserva
         fields = ["id", "fecha_fin", "owner", "material"]
@@ -65,6 +51,8 @@ class ListaDeEsperaSerializer(serializers.ModelSerializer):
 
 
 class PrestamosSerializer(serializers.ModelSerializer):
+    
+
     class Meta:
         model = Prestamo
         fields = [
@@ -89,7 +77,8 @@ class EntregaEjemplarReserva(serializers.ModelSerializer):
 
 class PrestamoCreateSerializer(serializers.ModelSerializer):
     # ejemplar = serializers.PrimaryKeyRelatedField(queryset=Ejemplar.objects.none())
-
+    owner = UserProfileSerializer()
+    ejemplar = EjemplarSerializer()
     class Meta:
         model = Prestamo
         fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar"]

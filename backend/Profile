@@ -1,1 +1,0 @@
-web: gunicorn bibloteca.wsgi:application --chdir backend

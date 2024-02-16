@@ -34,7 +34,8 @@ const PrestamosScreen = ({ navigation }) => {
 
   const renderTableHeader = () => (
     <View style={tableStyles.tableHeader}>
-      <Text style={tableStyles.headerText}>Ejemplar</Text>
+      <Text style={tableStyles.headerText}>ID_Ejemplar</Text>
+      <Text style={tableStyles.headerText}>Material</Text>
       <Text style={tableStyles.headerText}>Usuario</Text>
       <Text style={tableStyles.headerText}>Fecha finalizacion</Text>
     </View>
@@ -43,8 +44,9 @@ const PrestamosScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handlePrestamoPress(item.id)}>
       <View style={tableStyles.tableRow}>
-        <Text style={tableStyles.cell}>{item.ejemplar}</Text>
-        <Text style={tableStyles.cell}>{item.owner}</Text>
+      <Text style={tableStyles.cell}>{item.id}</Text>
+        <Text style={tableStyles.cell}>{item.ejemplar.material.titulo}</Text>
+        <Text style={tableStyles.cell}>{item.owner.email}</Text>
         <Text style={tableStyles.cell}>{item.fecha_fin}</Text>
       </View>
     </TouchableOpacity>

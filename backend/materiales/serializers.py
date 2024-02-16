@@ -52,15 +52,7 @@ class TipoMaterialSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class EjemplarSerializer(serializers.ModelSerializer):
-    estado = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Ejemplar
-        fields = ["id", "material", "estado"]
-
-    def get_estado(self, obj):
-        return get_estado_ejemplar(obj)
 
 
 class EjemplarMaterialSerializer(serializers.ModelSerializer):
@@ -135,3 +127,15 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     def get_ejemplares_disponibles(self, obj):
         return get_ejemplares_disponibles(obj)
+
+
+class EjemplarSerializer(serializers.ModelSerializer):
+    estado = serializers.SerializerMethodField()
+    material = MaterialSerializer()
+
+    class Meta:
+        model = Ejemplar
+        fields = ["id", "material", "estado"]
+
+    def get_estado(self, obj):
+        return get_estado_ejemplar(obj)

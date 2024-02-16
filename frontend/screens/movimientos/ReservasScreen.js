@@ -44,8 +44,8 @@ const ReservasScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleReservaPress(item.id)}>
       <View style={tableStyles.tableRow}>
-        <Text style={tableStyles.cell}>{item.material}</Text>
-        <Text style={tableStyles.cell}>{item.owner}</Text>
+        <Text style={tableStyles.cell}>{item.material.titulo}</Text>
+        <Text style={tableStyles.cell}>{item.owner.email}</Text>
         <Text style={tableStyles.cell}>{item.fecha_fin}</Text>
       </View>
     </TouchableOpacity>

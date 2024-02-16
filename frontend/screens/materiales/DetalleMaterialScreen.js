@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, FlatList, TouchableOpacity } from "react-native";
+import { Text, View, Button } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 import { toast } from "react-toastify";
-import { Button } from "react-native-paper";
+
 import { useUser } from "../../contexts/UserContext";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,8 +35,16 @@ const DetalleMaterialScreen = () => {
   const handleReservarMaterial = async () => {
     try {
       const access_token = userInfo.access_token;
-      await MaterialServices.reservar(access_token, materialId);
-      toast.success("La reserva ha sido creada exitosamente");
+      const response = await MaterialServices.reservar(
+        access_token,
+        materialId
+      );
+      
+      if (response && response.message) {
+        toast.error(response.message);
+      } else {
+        toast.success(response.message)
+      }
     } catch (error) {
       console.error("Error al realizar la reserva del material", error);
     }
@@ -48,7 +56,7 @@ const DetalleMaterialScreen = () => {
           <Text> Detalles del material:</Text>
           <Text> Titulo: {detalleMaterial.titulo} </Text>
           <Text>
-            editorial:
+            Editorial:
             {detalleMaterial.editorial.map((editorial) => (
               <Text key={editorial.id}>{editorial.nombre}</Text>
             ))}
