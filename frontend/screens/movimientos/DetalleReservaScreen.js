@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 
 const DetalleReservaScreen = () => {
   const route = useRoute();
-  const [detalleReserva, setDetalleReserva] = useState(null);
+  const [detalleReserva, setDetalleReserva] = useState({});
   const [ejemplaresDisponibles, setEjemplaresDisponibles] = useState([]);
   const [selectedEjemplar, setSelectedEjemplar] = useState();
   const { reservaId } = route.params;
@@ -20,48 +20,64 @@ const DetalleReservaScreen = () => {
     const fetchDetalleReserva = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`,
+          `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           }
         );
-        setDetalleReserva(response.data);
-        setEjemplaresDisponibles(response.data.ejemplares_disponibles);
-        console.log(response.data)
+        setDetalleReserva(response.data || {});        
+        console.log(response.data);
       } catch (error) {
         console.error("Error al obtener los datos de la reserva");
       }
     };
 
+    const fetchEjemplaresDisponibles = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );        
+        setEjemplaresDisponibles(response.data.ejemplares_disponibles);
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error al obtener los ejemplares disponibles");
+      }
+    };
+    fetchEjemplaresDisponibles();
     fetchDetalleReserva();
   }, [reservaId, accessToken]);
 
   const handleEntregarEjemplar = async () => {
-    try {
+    try {      
       const access_token = userInfo.access_token;
+      
       if (!selectedEjemplar) {
         console.error("Seleccciona un ejemplar a entregar");
         return;
       }
 
-      const owner_id = detalleReserva.reserva.owner.id;
+      const owner_id = detalleReserva.owner.id;
 
-      const prestamoData={
+      const prestamoData = {
         created_by: userInfo.user.id,
         owner: owner_id,
         ejemplar: selectedEjemplar,
-        
-      }
+      };
       const response = await MovimientosServices.entregarEjemplarReserva(
         access_token,
         reservaId,
         prestamoData
       );
       toast.success("El prestamo ha sido creado exitosamente");
-      console.log(response)
-      console.log(prestamoData)
+      console.log(response);
+      console.log(prestamoData);
     } catch (error) {
       console.error("Error al entregar el ejemplar");
     }
@@ -72,14 +88,14 @@ const DetalleReservaScreen = () => {
       {detalleReserva ? (
         <View>
           <Text>Detalles de la reserva</Text>
-          <Text>Solicitante:{detalleReserva.reserva.owner.email}</Text>
-          <Text>Material: {detalleReserva.reserva.material.titulo}</Text>
-          <Text>Finalizacion: {detalleReserva.reserva.fecha_fin}</Text>
+          <Text>Solicitante:{detalleReserva.owner?.email}</Text>
+          <Text>Material: {detalleReserva.material?.titulo}</Text>
+          <Text>Finalizacion: {detalleReserva.fecha_fin}</Text>
 
           <Text>Selecciona un ejemplar: </Text>
           <Picker
-            selectedValue={selectedEjemplar}
-            onValueChange={(itemValue) => setSelectedEjemplar(itemValue)}
+            selectedValue={(selectedEjemplar)}
+            onValueChange={(itemValue) => setSelectedEjemplar(Number(itemValue))}
           >
             {ejemplaresDisponibles.map((ejemplar, index) => (
               <Picker.Item

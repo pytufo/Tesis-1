@@ -17,33 +17,47 @@ const DetalleMaterialScreen = () => {
   const [detalleMaterial, setDetalleMaterial] = useState(null);
 
   const { userInfo } = useUser();
+  const accessToken = userInfo.access_token;
 
   useEffect(() => {
     const fetchDetalleMaterial = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}/`
+          `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         setDetalleMaterial(response.data);
+        console.log(response);
       } catch (error) {
         console.error("Error al obtener detales del material", error);
       }
     };
     fetchDetalleMaterial();
-  }, [materialId]);
+  }, [materialId, accessToken]);
 
   const handleReservarMaterial = async () => {
     try {
       const access_token = userInfo.access_token;
+      const owner_id = userInfo.id;
+      /*
+      const reservaData = {
+        owner: userInfo.user.id,
+        material: detalleMaterial.id,
+      }; */
       const response = await MaterialServices.reservar(
         access_token,
-        materialId
+        materialId,
+        { id: owner_id }
       );
-      
+      console.log(response);
       if (response && response.message) {
-        toast.error(response.message);
+        toast.success(response.message);
       } else {
-        toast.success(response.message)
+        toast.error(response.message);
       }
     } catch (error) {
       console.error("Error al realizar la reserva del material", error);

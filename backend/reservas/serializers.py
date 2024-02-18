@@ -16,8 +16,8 @@ from accounts.serializers import UserProfileSerializer
 
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
-    owner = UserProfileSerializer()
-    material = MaterialSerializer()
+    owner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    material = serializers.PrimaryKeyRelatedField(queryset=Material.objects.all())
     class Meta:
         model = Reserva
         fields = ["id", "fecha_fin", "owner", "material"]
@@ -32,15 +32,12 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
 
 class ReservasSerializer(serializers.ModelSerializer):
+    material = MaterialSerializer()
+    owner = UserProfileSerializer()
+
     class Meta:
         model = Reserva
-        fields = [
-            "id",
-            "fecha_inicio",
-            "fecha_fin",
-            "owner",
-            "material",
-        ]
+        fields = ["id", "fecha_fin", "owner", "material"]
 
 
 class ListaDeEsperaSerializer(serializers.ModelSerializer):
@@ -50,8 +47,9 @@ class ListaDeEsperaSerializer(serializers.ModelSerializer):
         read_only_fields = ["material", "fecha_fin"]
 
 
-class PrestamosSerializer(serializers.ModelSerializer):
-    
+class PrestamosSerializer(serializers.ModelSerializer):    
+    owner = UserProfileSerializer()
+    ejemplar = EjemplarSerializer()
 
     class Meta:
         model = Prestamo
@@ -77,12 +75,11 @@ class EntregaEjemplarReserva(serializers.ModelSerializer):
 
 class PrestamoCreateSerializer(serializers.ModelSerializer):
     # ejemplar = serializers.PrimaryKeyRelatedField(queryset=Ejemplar.objects.none())
-    owner = UserProfileSerializer()
-    ejemplar = EjemplarSerializer()
+    
     class Meta:
         model = Prestamo
         fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar"]
-
+        
     def __init__(self, *args, **kwargs):
         ejemplar_pk = kwargs.pop("ejemplar_pk", None)
         super().__init__(*args, **kwargs)

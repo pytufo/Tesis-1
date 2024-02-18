@@ -23,6 +23,7 @@ const ReservasScreen = ({ navigation }) => {
         const access_token = userInfo.access_token;
         const response = await MovimientosServices.listarReservas(access_token);
         setReserva(response);
+        console.log(response)
       } catch (error) {
         console.log("Error al obtener las reservas:", error);
       }

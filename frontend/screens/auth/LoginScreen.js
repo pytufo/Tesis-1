@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import AuthServices from "../../services/AuthServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../../contexts/UserContext";
+import { toast } from "react-toastify";
 
 const LoginScreen = ({ setIsLoggedIn, navigation }) => {
   const { storeUserInfo } = useUser();
@@ -19,6 +20,7 @@ const LoginScreen = ({ setIsLoggedIn, navigation }) => {
         storeUserInfo(user);
         setIsLoggedIn(true);
       } else {
+        toast.error("usuario o contraseña incorrectos");
         console.log("Token null o invalido");
       }
     } catch (error) {

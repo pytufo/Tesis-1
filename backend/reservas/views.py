@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 
 
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from django.utils import timezone
 from rest_framework.decorators import action
 
@@ -46,7 +46,7 @@ from materiales.models import Material, Ejemplar
 
 from .serializers import (
     ReservasSerializer,
-    PrestamosSerializer,    
+    PrestamosSerializer,
     EntregaEjemplarReserva,
     PrestamoCreateSerializer,
     ReservaCreateSerializer,
@@ -56,9 +56,21 @@ from .serializers import (
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = ReservaCreateSerializer
     queryset = Reserva.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        reservas = Reserva.objects.all()
+        serializer = ReservasSerializer(
+            reservas, context={"request": request}, many=True
+        )
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        reserva = Reserva.objects.get(pk=pk)
+        serializer = ReservasSerializer(reserva)
+        return Response(serializer.data)
 
     def retrieve_material(self, request, *args, **kwargs):
         try:
@@ -98,59 +110,77 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
     def create(self, request, material_pk=None):
         usuario = request.user
+        try:
 
-        material = Material.objects.get(pk=material_pk)
+            material = Material.objects.get(pk=material_pk)
 
-        limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
-        estado = get_estado(material)
+            limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
+            estado = get_estado(material)
 
-        ### El usuario no podrá resepetir una reserva.
+            ### El usuario no podrá resepetir una reserva.
 
-        if usuario_tiene_reserva_pendiente(usuario, material):
-            return Response({"message": "Ya tienes una reserva para este material..."}, status=status.HTTP_400_BAD_REQUEST)
+            if usuario_tiene_reserva_pendiente(usuario, material):
+                return Response(
+                    {"message": "Ya tienes una reserva para este material..."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        ### Obtenemos el estado del material dando opcion para una "lista de espera" obteniendo el material proximo a liberarse.
-        ### solicitando una confirmacion para crearla
+            ### Obtenemos el estado del material dando opcion para una "lista de espera" obteniendo el material proximo a liberarse.
+            ### solicitando una confirmacion para crearla
 
-        if estado == "No Disponible" or estado == "Lectura":
-            reserva_proxima = get_reserva_proxima_a_espirar(material)
-            if reserva_proxima:
-                serializer = ReservasSerializer(reserva_proxima)
+            if estado == "No Disponible" or estado == "Lectura":
+                reserva_proxima = get_reserva_proxima_a_espirar(material)
+                if reserva_proxima:
+                    serializer = ReservasSerializer(reserva_proxima)
+                    return Response(
+                        {
+                            "message": "No hay ejemplares disponibles para la reserva. Reserva próxima a expirar:",
+                            "reserva_proxima": serializer.data,
+                        }
+                    )
+                else:
+                    return Response(
+                        {"message": "No hay ejemplares disponibles para la reserva. "}
+                    )
+
+            if limite_reservas_prestamo == "Excede":
                 return Response(
                     {
-                        "message": "No hay ejemplares disponibles para la reserva. Reserva próxima a expirar:",
-                        "reserva_proxima": serializer.data,
-                    }
-                )
-            else:
-                return Response(
-                    {"message": "No hay ejemplares disponibles para la reserva. "}
+                        "message": "El usuario ha excedido el limite de reservas o prestamos"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        if limite_reservas_prestamo == "Excede":
+            ### Establecemos un limite para la "fecha_fin" por defecto de 1 dia.
+            fecha_fin_default = (timezone.now() + timedelta(days=1)).date()
+
+            data = {
+                "owner": usuario.id,
+                "material": material.id,
+                "fecha_fin": fecha_fin_default,
+            }
+
+            # data = request.data.copy()
+            # data["fecha_fin"] = fecha_fin_default
+
+            serializer = ReservaCreateSerializer(data=data, material_pk=material_pk)
+            serializer.is_valid(raise_exception=True)
+
+            serializer.validated_data["fecha_fin"] = fecha_fin_default
+            serializer.save(material=material)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Material.DoesNotExist:
             return Response(
-                {"message": "El usuario ha excedido el limite de reservas o prestamos"}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "La reserva no existe"},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
-        ### Establecemos un limite para la "fecha_fin" por defecto de 1 dia.
-        fecha_fin_default = (timezone.now() + timedelta(days=1)).date()
-
-        data = {
-            "owner": usuario.id,
-            "material": material.id,
-            "fecha_fin": fecha_fin_default,
-        }
-
-        # data = request.data.copy()
-        # data["fecha_fin"] = fecha_fin_default
-
-        serializer = ReservaCreateSerializer(data=data, material_pk=material_pk)
-        serializer.is_valid(raise_exception=True)
-
-        serializer.validated_data["fecha_fin"] = fecha_fin_default
-        serializer.save(material=material)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {"message": f"Error al obtener información de la reserva: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class ListaDeEsperaviewset(viewsets.ModelViewSet):
@@ -202,9 +232,21 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrestamoFilter
 
+    def list(self, request, *args, **kwargs):
+        prestamos = Prestamo.objects.all()
+        serializer = PrestamosSerializer(
+            prestamos, context={"request": request}, many=True
+        )
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        prestamo = Prestamo.objects.get(pk=pk)
+        serializer = PrestamosSerializer(prestamo)
+        return Response(serializer.data)
+
     @action(detail=True, methods=["get"])
-    def retrieve_ejemplar(self, request, ejemplar_pk=None):
-        ejemplar = Ejemplar.objects.get(pk=ejemplar_pk)
+    def retrieve_ejemplar(self, request, pk=None):
+        ejemplar = Ejemplar.objects.get(pk=pk)
         serializer = EjemplarSerializer(ejemplar)
         return Response(serializer.data)
 
@@ -307,17 +349,29 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             ejemplares_disponibles = reserva_data["ejemplares_disponibles"]
 
             created_by = request.user
+            owner = reserva_data["reserva"]["owner"]
+            fecha_fin_reserva_str = reserva_data["reserva"]["fecha_fin"]
+
+            fecha_fin_reserva = datetime.strptime(
+                fecha_fin_reserva_str, "%Y-%m-%d"
+            ).date()
+
+            if fecha_fin_reserva < timezone.now().date():
+                return Response(
+                    {"message": "La reserva ha expirado"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             if not ejemplares_disponibles:
                 return Response({"message": "No se encuentran ejemplares disponibles"})
             fecha_fin_default = (timezone.now() + timedelta(days=7)).date()
-            
-            ejemplar_a_entregar = ejemplares_disponibles[0]
+
+            #
             prestamo_data = {
                 "created_by": created_by.id,
-                "owner": {"id": reserva_data["reserva"]["owner"]["id"]},
-                
-
+                "ejemplar": ejemplares_disponibles[0]["id"],
+                "owner": owner,
+                "fecha_fin": fecha_fin_default,
             }
 
             serializer = PrestamoCreateSerializer(data=prestamo_data)
@@ -325,6 +379,10 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
             # Guardar el préstamo
             serializer.save()
+
+            reserva = Reserva.objects.get(id=reserva_pk)
+            reserva.fecha_fin = timezone.now()
+            reserva.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

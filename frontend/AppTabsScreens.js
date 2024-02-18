@@ -12,41 +12,53 @@ import DetalleUsuarioScreen from "./screens/users/DetalleUsuarioScreen";
 import DetalleReservaScreen from "./screens/movimientos/DetalleReservaScreen";
 import DetallePrestamoScreen from "./screens/movimientos/DetallePrestamoScreen";
 
+import Ionicons from 'react-native-vector-icons/Ionicons'
+
 const AppTabs = createBottomTabNavigator();
 
 const AppTabsScreen = ({ setIsLoggedIn, setUserData }) => {
   const { userInfo } = useUser();
-
+  
   return (
     <AppTabs.Navigator>
       {userInfo.user && userInfo.user.role === 1 ? (
         <>
-          <AppTabs.Screen name="Usuarios" component={UsersListScreen} />
-          <AppTabs.Screen
-            name="DetalleUsuario"
-            component={DetalleUsuarioScreen}
-          />
-          <AppTabs.Screen name="Prestamos" component={PrestamosScreen} />
-          <AppTabs.Screen
-            name="DetallePrestamo"
-            component={DetallePrestamoScreen}
-          />
           <AppTabs.Screen name="Reservas" component={ReservasScreen} />
-          <AppTabs.Screen
-            name="DetalleReserva"
-            component={DetalleReservaScreen}
-          />
+          <AppTabs.Screen name="Prestamos" component={PrestamosScreen} />
+          <AppTabs.Screen name="Usuarios" component={UsersListScreen} />
         </>
       ) : (
         <>
           <AppTabs.Screen name="Perfil" component={ProfileScreen} />
           <AppTabs.Screen name="Materiales" component={MaterialListScreen} />
+        </>
+      )}
+
+      {userInfo.user && userInfo.user.role === 1 && (
+        <>
+          <AppTabs.Screen
+            name="DetalleUsuario"
+            component={DetalleUsuarioScreen}
+            options={{ tabBarVisible: false }}
+          />
+          <AppTabs.Screen
+            name="DetallePrestamo"
+            component={DetallePrestamoScreen}
+            options={{ tabBarVisible: false }}
+          />
           <AppTabs.Screen
             name="DetalleMaterial"
             component={DetalleMaterialScreen}
+            options={{ tabBarVisible: false }}
+          />
+          <AppTabs.Screen
+            name="DetalleReserva"
+            component={DetalleReservaScreen}
+            options={{ tabBarVisible: false }}
           />
         </>
       )}
+
       <AppTabs.Screen
         name="Logout"
         children={(props) => (

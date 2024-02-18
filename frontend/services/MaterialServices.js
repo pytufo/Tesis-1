@@ -10,10 +10,9 @@ const MaterialServices = {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data = await response.json();      
+      const data = await response.json();
 
-
-      const buscarMaterial = data.filter(material =>
+      const buscarMaterial = data.filter((material) =>
         material.titulo.toLowerCase().includes(searchQuery.toLowerCase())
       );
       return buscarMaterial;
@@ -25,7 +24,7 @@ const MaterialServices = {
       throw error;
     }
   },
-  reservar: async (accessToken, materialId) => {
+  reservar: async (accessToken, materialId, userId) => {
     try {
       const response = await fetch(
         `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}/reservar/`,
@@ -35,11 +34,15 @@ const MaterialServices = {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ accessToken: accessToken }),
+          body: JSON.stringify({
+            material: { id: materialId },
+            owner: { id: userId },
+          }),
         }
       );
       const data = await response.json();
-      console.log(data)
+      console.log(response);
+      console.log(data);
       return data;
     } catch (error) {
       console.error("Error al reservar el material:", error);

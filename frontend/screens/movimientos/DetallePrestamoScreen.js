@@ -4,6 +4,9 @@ import { useRoute } from "@react-navigation/native";
 import { useUser } from "../../contexts/UserContext";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
+import { Button } from "react-native";
+import MovimientosServices from "../../services/MovimientosServices";
+import { toast } from "react-toastify";
 const DetallePrestamoScreen = () => {
   const route = useRoute();
   const [detallePrestamo, setDetallePrestamo] = useState(null);
@@ -16,29 +19,51 @@ const DetallePrestamoScreen = () => {
     const fetchDetallePrestamo = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.PRESTAMOS}${prestamoId}`,
+          `${API_BASE_URL}${API_ROUTES.PRESTAMOS}${prestamoId}/`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           }
         );
-        setDetallePrestamo(response.data);
+        setDetallePrestamo(response.data || {});
+        console.log(response.data);
       } catch (error) {
         console.error("Error al obtener los datos del prestamo");
       }
     };
     fetchDetallePrestamo();
   }, [prestamoId, accessToken]);
+  const handleFinalizarPrestamo = async () => {
+    try {
+      const access_token = userInfo.access_token;
+
+      const response = await MovimientosServices.finalizarPrestamo(
+        access_token,
+        prestamoId
+      );
+      console.log(response);
+      if (response && response.message) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.error("Error al finalizar el prestamo");
+    }
+  };
   return (
     <View>
       {detallePrestamo ? (
         <View>
-          <Text>Entregado por: {detallePrestamo
-          .created_by}</Text>
-          <Text>Usuario: {detallePrestamo.owner}</Text>
-          <Text>Ejemplar: {detallePrestamo.ejemplar}</Text>
-          <Text>Finalizacion: {detallePrestamo.fecha_fin}</Text>
+          <Text> Entregado por: {detallePrestamo.created_by}</Text>
+          <Text> Usuario: {detallePrestamo.owner?.email}</Text>
+          <Text> Ejemplar: {detallePrestamo.ejemplar?.id} </Text>
+
+          <Text> Material: </Text>
+          <Text> {detallePrestamo.ejemplar?.material.titulo} </Text>
+          <Text> Finalizacion: {detallePrestamo.fecha_fin}</Text>
+          <Button title="Finalizar" onPress={handleFinalizarPrestamo} />
         </View>
       ) : (
         <Text>Cargando prestamo...</Text>
