@@ -12,9 +12,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    usuario_reservas = serializers.SerializerMethodField()
     cantidad_reservas = serializers.SerializerMethodField()
+    usuario_prestamos = serializers.SerializerMethodField()
     cantidad_prestamos = serializers.SerializerMethodField()
     limite = serializers.SerializerMethodField()
+    role = serializers.CharField(source='get_role_display', read_only=True)
 
     class Meta:
         model = User
@@ -23,17 +26,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "cantidad_reservas",
+            "usuario_reservas",
             "cantidad_prestamos",
+            "usuario_prestamos",
             "limite",
             "is_active",
             "role",
         ]
 
     def get_cantidad_reservas(self, obj):
-        return get_reservas_prestamos_usuario(obj)[0]
+        return get_reservas_prestamos_usuario(obj)["cantidad_reservas"]
 
     def get_cantidad_prestamos(self, obj):
-        return get_reservas_prestamos_usuario(obj)[1]
+        return get_reservas_prestamos_usuario(obj)["cantidad_prestamos"]
+
+    def get_usuario_reservas(self, obj):
+        return get_reservas_prestamos_usuario(obj)["reservas_usuario"]
+
+    def get_usuario_prestamos(self, obj):
+        return get_reservas_prestamos_usuario(obj)["prestamos_usuario"]
 
     def get_limite(self, obj):
         return get_limite_reservas_prestamo(obj)

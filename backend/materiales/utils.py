@@ -15,7 +15,7 @@ def get_estado_ejemplar(obj):
     prestamo = Prestamo.objects.filter(ejemplar=obj).order_by("-fecha_inicio").first()
 
     if prestamo:
-        if prestamo.fecha_fin and prestamo.fecha_fin < timezone.now().date():
+        if prestamo.fecha_fin and prestamo.fecha_fin < timezone.now():
             estado = "Disponible"
         else:
             estado = "En prestamo"
@@ -75,9 +75,9 @@ def get_cantidad_disponible(obj):
 
 def get_estado(obj):
     cantidad_disponible = get_cantidad_disponible(obj)
-    if cantidad_disponible > 1:
+    if cantidad_disponible >= 2:
         return "Disponible"
+    elif cantidad_disponible <= 1:
+        return "Solo Lectura"
     elif cantidad_disponible == 1:
-        return "Lectura"
-    else:
-        return "No Disponible"
+        return "Disponible (Lista de espera)"

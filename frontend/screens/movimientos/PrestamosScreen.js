@@ -11,6 +11,8 @@ import { tableStyles } from "../../constants/Colors";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 import axios from "axios";
 
+import moment from 'moment'
+
 const PrestamosScreen = ({ navigation }) => {
   const [prestamo, setPrestamo] = useState([]);
 
@@ -44,10 +46,14 @@ const PrestamosScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handlePrestamoPress(item.id)}>
       <View style={tableStyles.tableRow}>
-      <Text style={tableStyles.cell}>{item.id}</Text>
+        <Text style={tableStyles.cell}>{item.id}</Text>
         <Text style={tableStyles.cell}>{item.ejemplar.material.titulo}</Text>
         <Text style={tableStyles.cell}>{item.owner.email}</Text>
-        <Text style={tableStyles.cell}>{item.fecha_fin}</Text>
+        {item.estado === "Finalizado" ? (
+          <Text style={tableStyles.cell}>Finalizado</Text>
+        ) : (
+          <Text style={tableStyles.cell}>{moment(item.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}</Text>
+        )}
       </View>
     </TouchableOpacity>
   );

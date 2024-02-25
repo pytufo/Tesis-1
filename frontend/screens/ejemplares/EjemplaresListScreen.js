@@ -14,58 +14,59 @@ import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 
 import { tableStyles } from "../../constants/Colors";
 
+import { useUser } from "../../contexts/UserContext";
+import EjemplarServices from "../../services/EjemplarServices";
 
-import MaterialServices from "../../services/MaterialServices";
-
-const MaterialListScreen = () => {
-  const [material, setMaterial] = useState([]);
+const EjemplarListScreen = ({ navigation }) => {
+  const [ejemplar, setEjemplar] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const navigation = useNavigation();
+  const { userInfo } = useUser();
 
   useEffect(() => {
-    const fetchMaterial = async () => {
+    const fetchEjemplar = async () => {
       try {
-        const response = await MaterialServices.listarMateriales(searchQuery);
-        setMaterial(response);
+        const access_token = userInfo.access_token;
+        const response = await EjemplarServices.listarEjemplares(
+          access_token,
+          searchQuery
+        );
+        setEjemplar(response);
         console.log(response);
       } catch (error) {
-        console.error("Error al obtener material", error);
+        console.error("Error al obtener Ejemplar", error);
       }
     };
 
-    fetchMaterial();
-  }, [searchQuery]);
+    fetchEjemplar();
+  }, [userInfo.access_token, searchQuery]);
 
   const renderTableHeader = () => (
     <View style={tableStyles.tableHeader}>
-      <Text style={tableStyles.headerText}>Titulo</Text>
-      <Text style={tableStyles.headerText}>Autor</Text>
+      <Text style={tableStyles.headerText}>Id</Text>
+      <Text style={tableStyles.headerText}>Titulo</Text>      
       <Text style={tableStyles.headerText}>Estado</Text>
     </View>
   );
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleMaterialPress(item.id)}>
+    <TouchableOpacity onPress={() => handleEjemplarPress(item.id)}>
       <View style={tableStyles.tableRow}>
-        <Text style={tableStyles.cell}>{item.titulo}</Text>
-        <Text style={tableStyles.cell}>
-          {item.autor[0].nombre} {item.autor[0].apellido}
-        </Text>
+        <Text style={tableStyles.cell}>{item.id}</Text>
+        <Text style={tableStyles.cell}>{item.material.titulo}</Text>        
         <Text style={tableStyles.cell}>{item.estado}</Text>
       </View>
     </TouchableOpacity>
   );
 
-  const handleMaterialPress = (materialId) => {
-    navigation.navigate("DetalleMaterial", { materialId });
+  const handleEjemplarPress = (ejemplarId) => {
+    navigation.navigate("DetalleEjemplar", { ejemplarId });
   };
   return (
     <View style={styles.container}>
       <View style={{ padding: 10 }}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar material..."
+          placeholder="Buscar Ejemplar..."
           value={searchQuery}
           onChangeText={(text) => setSearchQuery(text)}
         />
@@ -73,7 +74,7 @@ const MaterialListScreen = () => {
       <ScrollView>
         {renderTableHeader()}
         <FlatList
-          data={material}
+          data={ejemplar}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
         />
@@ -98,4 +99,4 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
-export default MaterialListScreen;
+export default EjemplarListScreen;

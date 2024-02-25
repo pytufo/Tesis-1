@@ -1,7 +1,7 @@
 import { API_BASE_URL, API_ROUTES } from "../constants/API";
 
 const MovimientosServices = {
-  listarReservas: async (accessToken, materialId) => {
+  listarReservas: async (accessToken, searchQuery) => {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ROUTES.RESERVAS}`, {
         method: "GET",
@@ -10,9 +10,24 @@ const MovimientosServices = {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
+      if (!response.ok) {
+        throw new Error(
+          `Error al obtener las reservas: ${response.statusText}`
+        );
+      }
       const data = await response.json();
+
+      const buscarReserva = data.filter(
+        (reserva) =>
+          reserva.material &&
+          reserva.material.titulo
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+      );
+      console.log(buscarReserva);
       console.log(data);
-      return data;
+      return buscarReserva;
     } catch (error) {
       console.error("Error al obtener las reservas");
       throw error;
@@ -48,12 +63,12 @@ const MovimientosServices = {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
-          },          
+          },
         }
       );
       const data = await response.json();
       console.log(data);
-      return data;
+      return data, response;
     } catch (error) {
       console.error("Error al entregar el ejemplar de la reserva");
       throw error;

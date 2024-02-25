@@ -17,7 +17,7 @@ const UserProvider = ({ children }) => {
   };
   const clearUserInfo = async () => {
     try {
-      await AsyncStorage.removeItem("user_info");
+      await AsyncStorage.removeItem("user_info");      
       setUserInfo(null);
     } catch (error) {
       console.error("Error al limpiar la información del usuario:", error);
@@ -34,8 +34,7 @@ const UserProvider = ({ children }) => {
       } catch (error) {
         console.error("Error al cargar la información del usuario:", error);
       }
-    };
-
+    };    
     loadUserInfo();
   }, []);
 

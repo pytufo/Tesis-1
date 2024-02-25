@@ -4,14 +4,17 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { UserProvider } from "./contexts/UserContext";
+import { UserProvider, useUser } from "./contexts/UserContext";
 import { Provider as PaperProvider, DefaultTheme } from "react-native-paper";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthStackScreen from "./AuthStackScreen";
 import AppTabsScreen from "./AppTabsScreens";
+import HomeScreen from "./screens/HomeScreen";
+import Navbar from "./components/Navbar";
 
 const Stack = createStackNavigator();
+
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -25,6 +28,7 @@ const App = () => {
       }
     };
     checkAuthentication();
+    console.log(isLoggedIn);
   }, []);
 
   return (
@@ -36,7 +40,11 @@ const App = () => {
               <Stack.Screen
                 name="AppTabs"
                 children={(props) => (
-                  <AppTabsScreen {...props} setIsLoggedIn={setIsLoggedIn} />
+                  <AppTabsScreen
+                    {...props}
+                    isLoggedIn={isLoggedIn}
+                    setIsLoggedIn={setIsLoggedIn}
+                  />
                 )}
               />
             ) : (
@@ -46,7 +54,7 @@ const App = () => {
                   <AuthStackScreen
                     {...props}
                     setIsLoggedIn={setIsLoggedIn}
-                    setUserData={setUserData}
+                    isLoggedIn={isLoggedIn}
                   />
                 )}
               />

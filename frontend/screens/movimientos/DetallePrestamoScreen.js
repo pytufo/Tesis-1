@@ -7,6 +7,7 @@ import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 import { Button } from "react-native";
 import MovimientosServices from "../../services/MovimientosServices";
 import { toast } from "react-toastify";
+import moment from "moment";
 const DetallePrestamoScreen = () => {
   const route = useRoute();
   const [detallePrestamo, setDetallePrestamo] = useState(null);
@@ -43,13 +44,14 @@ const DetallePrestamoScreen = () => {
         prestamoId
       );
       console.log(response);
-      if (response && response.message) {
-        toast.success(response.message);
+
+      if (response.ok) {
+        toast.info("Devolucion exitosa");
       } else {
-        toast.error(response.message);
+        toast.error("Error al realizar la devolucion");
       }
     } catch (error) {
-      console.error("Error al finalizar el prestamo");
+      toast.error("Error al finalizar el prestamo");
     }
   };
   return (
@@ -62,8 +64,12 @@ const DetallePrestamoScreen = () => {
 
           <Text> Material: </Text>
           <Text> {detallePrestamo.ejemplar?.material.titulo} </Text>
-          <Text> Finalizacion: {detallePrestamo.fecha_fin}</Text>
-          <Button title="Finalizar" onPress={handleFinalizarPrestamo} />
+          <Text> Finalizacion: {moment(detallePrestamo.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}</Text>
+          {detallePrestamo.estado === "Finalizado" ? (
+            <Text>Prestamo Finalizado</Text>
+          ) : (
+            <Button title="Finalizar" onPress={handleFinalizarPrestamo} />
+          )}
         </View>
       ) : (
         <Text>Cargando prestamo...</Text>

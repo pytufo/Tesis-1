@@ -1,13 +1,34 @@
 import { API_BASE_URL, API_ROUTES } from "../constants/API";
 
 const MaterialServices = {
-  listarMateriales: async (accessToken, searchQuery) => {
+  listarMateriales: async ( searchQuery) => {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ROUTES.MATERIALES}`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",          
+        },
+      });
+      const data = await response.json();
+
+      const buscarMaterial = data.filter((material) =>
+        material.titulo.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      return buscarMaterial;
+
+      /* console.log(data);
+      return data; */
+    } catch (error) {
+      console.error("Error al obtener los materiales");
+      throw error;
+    }
+  },
+  DetaleMateriales: async (searchQuery) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",          
         },
       });
       const data = await response.json();

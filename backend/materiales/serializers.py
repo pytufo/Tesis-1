@@ -52,9 +52,6 @@ class TipoMaterialSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
-
-
 class EjemplarMaterialSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
 
@@ -103,6 +100,7 @@ class MaterialSerializer(serializers.ModelSerializer):
             "estado",
             "ejemplares_disponibles",
         ]
+        
 
     def get_cantidad_existente(self, obj):
         return get_cantidad_existente(obj)

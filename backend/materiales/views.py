@@ -76,7 +76,7 @@ def generar_datos_aleatorios(request):
     for _ in range(20):
         material = Material.objects.order_by("?")[:1].first()
         Ejemplar.objects.create(
-            material=material,            
+            material=material,
         )
     return JsonResponse({"message": "Datos aleatorios generados exitosamente"})
 
@@ -112,10 +112,9 @@ class AutorViewSet(viewsets.ModelViewSet):
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
-    # permission_classes = (AllowAny, IsSuperUserOrReadOnly)
+    permission_classes = (AllowAny,)
     serializer_class = MaterialSerializer
     queryset = Material.objects.all()
-    
 
 
 """     def retrieve_material(self, request, material_pk=None):
