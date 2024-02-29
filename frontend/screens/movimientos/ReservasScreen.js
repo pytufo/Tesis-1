@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   Text,
   View,
@@ -21,22 +22,39 @@ const ReservasScreen = ({ navigation }) => {
   const [reserva, setReserva] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { userInfo } = useUser();
-  useEffect(() => {
-    const fetchReserva = async () => {
-      try {
-        const access_token = userInfo.access_token;
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchReserva = async () => {
+    try {
+      const access_token = userInfo.access_token;
+      if (userInfo && userInfo.user.role === 1) {
         const response = await MovimientosServices.listarReservas(
           access_token,
           searchQuery
         );
         setReserva(response);
         console.log(response);
-      } catch (error) {
-        console.log("Error al obtener las reservas:", error);
+      } else {
+        const response = await MovimientosServices.reservasUsuario(
+          access_token,
+          searchQuery
+        );
+        setReserva(response);
+        console.log(response);
       }
-    };
-    fetchReserva();
-  }, [userInfo.access_token]);
+    } catch (error) {
+      console.log("Error al obtener las reservas:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchReserva();
+    }, [userInfo, searchQuery])
+  );
+
   const handleReservaPress = (reservaId) => {
     navigation.navigate("DetalleReserva", { reservaId });
   };
@@ -56,6 +74,8 @@ const ReservasScreen = ({ navigation }) => {
         <Text style={tableStyles.cell}>{item.owner.email}</Text>
         {item.estado === "Finalizada" ? (
           <Text style={tableStyles.cell}> Finalizada </Text>
+        ) : item.fecha_fin === null ? (
+          <Text style={tableStyles.cell}>Pendiente: {item.estado}</Text>
         ) : (
           <Text style={tableStyles.cell}>
             Pendiente: {moment(item.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}

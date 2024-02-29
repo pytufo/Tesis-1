@@ -31,7 +31,6 @@ class Reserva(models.Model):
         ordering = ["-fecha_fin"]
 
 
-
 class Prestamo(models.Model):
     fecha_inicio = models.DateTimeField(auto_now_add=True)
     fecha_fin = models.DateTimeField(auto_now_add=False, blank=True, null=True)
@@ -49,14 +48,4 @@ class Prestamo(models.Model):
 
     class Meta:
         ordering = ["-fecha_fin"]
-
-
-class ListaEspera(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    material = models.ForeignKey(Material, on_delete=models.CASCADE)
-    fecha_inicio = models.DateTimeField(auto_now_add=True)
-    fecha_fin = models.DateTimeField()
-
-    def __str__(self):
-        return f"Lista de espera para {self.material} - {self.usuario}"
 

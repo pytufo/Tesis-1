@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
   Text,
-  View,
-  Button,
-  TextInput,
+  View,  
   FlatList,
   TouchableOpacity,
   Keyboard,
   StyleSheet,
 } from "react-native";
+import {
+  Button,
+  Dialog,
+  PaperProvider,
+  Paragraph,
+  Portal,
+  TextInput,
+} from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
@@ -28,6 +34,7 @@ const DetalleEjemplarScreen = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
 
+  const [dialogVisible, setDialogVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
 
@@ -67,7 +74,13 @@ const DetalleEjemplarScreen = () => {
     fetchUsers();
     fetchDetalleEjemplar();
   }, [ejemplarId, accessToken]);
-
+  const handleConfirmar = async () => {
+    setDialogVisible(true);
+  };
+  const handleCancel = () => {
+    // Cerrar el diálogo de confirmación
+    setDialogVisible(false);
+  };
   const handlePrestarEjemplar = async () => {
     try {
       const access_token = userInfo.access_token;
@@ -87,10 +100,8 @@ const DetalleEjemplarScreen = () => {
         ejemplarId,
         prestamoData
       );
-      console.log(response);
-      console.log(prestamoData);
-      console.log(selectedUser);
       if (response) {
+        setDialogVisible(false);
         toast.info(response.message);
       } else {
         toast.error(response.message);
@@ -136,7 +147,7 @@ const DetalleEjemplarScreen = () => {
       {detalleEjemplar ? (
         <View>
           <Text>Id: {detalleEjemplar.id} </Text>
-          <Text>Titulo: {detalleEjemplar.titulo} </Text>
+          <Text>Titulo: {detalleEjemplar.material?.titulo} </Text>
           <Text>
             Editorial:
             {detalleEjemplar.material?.editorial?.map((editorial) => (
@@ -189,7 +200,27 @@ const DetalleEjemplarScreen = () => {
                   </TouchableOpacity>
                 )}
               />
-              <Button title="Prestar" onPress={handlePrestarEjemplar} />
+              <Button onPress={handleConfirmar}>
+                <Text>Entregar ejemplar</Text>
+              </Button>
+              <Portal>
+                      <Dialog
+                        visible={dialogVisible}
+                        onDismiss={handleConfirmar}
+                      >
+                        <Dialog.Content>
+                          <Paragraph>
+                            ¿Estas seguro realizar el prestamo?
+                          </Paragraph>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                          <Button onPress={handleCancel}>Cancelar</Button>
+                          <Button onPress={handlePrestarEjemplar}>
+                            Aceptar
+                          </Button>
+                        </Dialog.Actions>
+                      </Dialog>
+                    </Portal>
             </View>
           ) : (
             <Text>El material no se encuentra disponible...</Text>

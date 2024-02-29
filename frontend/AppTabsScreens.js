@@ -27,7 +27,11 @@ const EjemplaresStack = createStackNavigator();
 
 const UsuariosStackNavigator = () => (
   <UsuariosStack.Navigator>
-    <UsuariosStack.Screen name="Usuarios" options={{ headerShown: false }} component={UsersListScreen} />
+    <UsuariosStack.Screen
+      name="Usuarios"
+      options={{ headerShown: false }}
+      component={UsersListScreen}
+    />
     <UsuariosStack.Screen
       name="DetalleUsuario"
       component={DetalleUsuarioScreen}
@@ -37,10 +41,13 @@ const UsuariosStackNavigator = () => (
 
 const PrestamosStackNavigator = () => (
   <PrestamosStack.Navigator>
-    <PrestamosStack.Screen name="Prestamos" options={{ headerShown: false }} component={PrestamosScreen} />
+    <PrestamosStack.Screen
+      name="Prestamos"
+      options={{ headerShown: false }}
+      component={PrestamosScreen}
+    />
     <PrestamosStack.Screen
       name="DetallePrestamo"
-      
       component={DetallePrestamoScreen}
     />
   </PrestamosStack.Navigator>
@@ -48,7 +55,11 @@ const PrestamosStackNavigator = () => (
 
 const ReservasStackNavigator = () => (
   <ReservasStack.Navigator>
-    <ReservasStack.Screen name="Reservas" options={{ headerShown: false }} component={ReservasScreen} />
+    <ReservasStack.Screen
+      name="Reservas"
+      options={{ headerShown: false }}
+      component={ReservasScreen}
+    />
     <ReservasStack.Screen
       name="DetalleReserva"
       component={DetalleReservaScreen}
@@ -58,7 +69,11 @@ const ReservasStackNavigator = () => (
 
 const MaterialesStackNavigator = () => (
   <MaterialesStack.Navigator>
-    <MaterialesStack.Screen name="Materiales" options={{ headerShown: false }} component={MaterialListScreen} />
+    <MaterialesStack.Screen
+      name="Materiales"
+      options={{ headerShown: false }}
+      component={MaterialListScreen}
+    />
     <MaterialesStack.Screen
       name="DetalleMaterial"
       component={DetalleMaterialScreen}
@@ -68,7 +83,11 @@ const MaterialesStackNavigator = () => (
 
 const EjemplaresStackNavigator = () => (
   <EjemplaresStack.Navigator>
-    <EjemplaresStack.Screen name="Ejemplares" options={{ headerShown: false }} component={EjemplarListScreen} />
+    <EjemplaresStack.Screen
+      name="Ejemplares"
+      options={{ headerShown: false }}
+      component={EjemplarListScreen}
+    />
     <EjemplaresStack.Screen
       name="DetalleEjemplar"
       component={DetalleEjemplarScreen}
@@ -91,27 +110,23 @@ const AppTabsScreen = ({ setIsLoggedIn, setUserData, navigation }) => {
               name="Ejemplares"
               component={EjemplaresStackNavigator}
             />
-            <AppTabs.Screen
-              name="Prestamos"
-              component={PrestamosStackNavigator}
-            />
-            <AppTabs.Screen
-              name="Reservas"
-              component={ReservasStackNavigator}
-            />
           </>
         ) : (
           <>
             <AppTabs.Screen name="Perfil" component={ProfileScreen} />
-            <AppTabs.Screen
-              name="Materiales"
-              component={MaterialesStackNavigator}
-              initialParams={{ setIsLoggedIn }}
-            />
-
           </>
         )}
 
+        <AppTabs.Screen
+          name="Reservas"
+          component={ReservasStackNavigator}
+        />
+        <AppTabs.Screen name="Prestamos" component={PrestamosStackNavigator} />
+        <AppTabs.Screen
+          name="Materiales"
+          component={MaterialesStackNavigator}
+          initialParams={{ setIsLoggedIn }}
+        />
         <AppTabs.Screen
           name="Logout"
           children={(props) => (

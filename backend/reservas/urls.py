@@ -28,10 +28,28 @@ urlpatterns = [
         name="entrega_reserva",
     ),
     path(
+        "reservas/usr/",
+        ReservaViewSet.as_view(
+            {
+                "get": "listar_reservas_usuario",
+            }
+        ),
+        name="entrega_reserva",
+    ),
+    path(
         "prestamo/<int:pk>/devolucion/",
         PrestamoViewSet.as_view(
             {
                 "put": "devolucion",
+            }
+        ),
+        name="prestamo-devolucion",
+    ),
+    path(
+        "reservas/<int:pk>/cancelar/",
+        ReservaViewSet.as_view(
+            {
+                "put": "cancelar_reserva",
             }
         ),
         name="prestamo-devolucion",

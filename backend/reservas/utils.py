@@ -1,8 +1,9 @@
 from django.utils import timezone
 from datetime import datetime
+from datetime import timedelta
 
 
-from materiales.utils import get_cantidad_en_espera, get_cantidad_disponible
+from materiales.utils import get_cantidad_disponible
 from .models import Reserva, Prestamo
 
 # Segun el resultado del seguimiento en "Materiales", establecemos un limite de reservas y prestamos para los usuarios.
@@ -21,21 +22,35 @@ def get_reservas_prestamos_usuario(obj):
     cantidad_reservas = reservas_usuario.count()
     cantidad_prestamos = prestamos_usuario.count()
 
-    reservas_list = [{'id': reserva.id, 'fecha_inicio': reserva.fecha_inicio, 'fecha_fin': reserva.fecha_fin} for reserva in reservas_usuario]
-    prestamos_list = [{'id': prestamo.id, 'fecha_inicio': prestamo.fecha_inicio, 'fecha_fin': prestamo.fecha_fin} for prestamo in prestamos_usuario]
+    reservas_list = [
+        {
+            "id": reserva.id,
+            "fecha_inicio": reserva.fecha_inicio,
+            "fecha_fin": reserva.fecha_fin,
+        }
+        for reserva in reservas_usuario
+    ]
+    prestamos_list = [
+        {
+            "id": prestamo.id,
+            "fecha_inicio": prestamo.fecha_inicio,
+            "fecha_fin": prestamo.fecha_fin,
+        }
+        for prestamo in prestamos_usuario
+    ]
 
     return {
-        'cantidad_reservas': cantidad_reservas,
-        'cantidad_prestamos': cantidad_prestamos,
-        'reservas_usuario': reservas_list,
-        'prestamos_usuario': prestamos_list,
+        "cantidad_reservas": cantidad_reservas,
+        "cantidad_prestamos": cantidad_prestamos,
+        "reservas_usuario": reservas_list,
+        "prestamos_usuario": prestamos_list,
     }
 
 
 def get_limite_reservas_prestamo(obj):
     limite = 4
-    cantidad_reservas = get_reservas_prestamos_usuario(obj)['cantidad_reservas']
-    cantidad_prestamos = get_reservas_prestamos_usuario(obj)['cantidad_prestamos']
+    cantidad_reservas = get_reservas_prestamos_usuario(obj)["cantidad_reservas"]
+    cantidad_prestamos = get_reservas_prestamos_usuario(obj)["cantidad_prestamos"]
 
     if (cantidad_reservas + cantidad_prestamos) >= limite:
         return "Excede"
@@ -45,8 +60,7 @@ def get_limite_reservas_prestamo(obj):
 
 def get_limite_epera(obj):
     limite = get_cantidad_disponible(obj)
-    cantidad_espera = get_cantidad_en_espera(obj)
-    cantidad_disponible = limite - cantidad_espera
+    cantidad_disponible = limite
     return cantidad_disponible
 
 
@@ -79,8 +93,8 @@ def get_estado_reserva(reserva):
     fecha_actual = timezone.now()
     if reserva.fecha_fin is not None and reserva.fecha_fin <= fecha_actual:
         return "Finalizada"
-    elif reserva.fecha_fin is not None and reserva.fecha_fin > fecha_actual:
-        return "En espera"
+    elif reserva.fecha_fin is None:
+        return "En lista de espera"
     else:
         return "Estado no definido"
 
@@ -93,3 +107,24 @@ def get_estado_prestamo(prestamo):
         return "En prestamo"
     else:
         return "Estado no definido"
+
+
+def get_reserva_lista_espera(material):
+    try:
+        reserva_lista_espera = (
+            Reserva.objects.filter(material=material, fecha_fin__isnull=True)
+            .order_by("fecha_inicio")
+            .first()
+        )
+        return reserva_lista_espera
+    except Reserva.DoesNotExist:
+        return None
+
+
+def habilitar_reserva_lista_espera(material, fecha_fin_anterior):
+    reserva_lista_espera = get_reserva_lista_espera(material)
+
+    if reserva_lista_espera:
+        reserva_lista_espera.fecha_inicio = fecha_fin_anterior
+        reserva_lista_espera.fecha_fin = timezone.now() + timedelta(days=1)
+        reserva_lista_espera.save()

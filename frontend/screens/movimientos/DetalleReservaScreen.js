@@ -1,13 +1,20 @@
 import {
   View,
   Text,
-  TextInput,
-  Button,
   FlatList,
   StyleSheet,
   TouchableOpacity,
   Keyboard,
 } from "react-native";
+import {
+  Button,
+  Dialog,
+  PaperProvider,
+  Paragraph,
+  Portal,
+  TextInput,
+} from "react-native-paper";
+
 import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { useUser } from "../../contexts/UserContext";
@@ -21,16 +28,18 @@ const DetalleReservaScreen = () => {
   const route = useRoute();
   const [detalleReserva, setDetalleReserva] = useState({});
   const [ejemplaresDisponibles, setEjemplaresDisponibles] = useState([]);
+
+  const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedEjemplar, setSelectedEjemplar] = useState();
   const { reservaId } = route.params;
   const [searchText, setSearchText] = useState("");
   const [filteredEjemplares, setFilteredEjemplares] = useState([]);
 
   const { userInfo } = useUser();
-  const accessToken = userInfo.access_token;
   useEffect(() => {
     const fetchDetalleReserva = async () => {
       try {
+        const accessToken = userInfo.access_token;
         const response = await axios.get(
           `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/`,
           {
@@ -49,22 +58,49 @@ const DetalleReservaScreen = () => {
     const fetchEjemplaresDisponibles = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
+          `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`
         );
-        setEjemplaresDisponibles(response.data.ejemplares_disponibles);
+        setEjemplaresDisponibles(response.data.ejemplares_disponibles || []);
         console.log(response.data);
+        console.log(ejemplaresDisponibles);
       } catch (error) {
         console.error("Error al obtener los ejemplares disponibles");
       }
     };
     fetchEjemplaresDisponibles();
     fetchDetalleReserva();
-  }, [reservaId, accessToken]);
+  }, [reservaId, userInfo]);
+
+  const handleConfirmar = async () => {
+    setDialogVisible(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    try {
+      const access_token = userInfo.access_token;
+
+      const response = await MovimientosServices.cancelarReserva(
+        access_token,
+        reservaId
+      );
+      console.log(response);
+
+      if (response.ok) {
+        setDialogVisible(false);
+        toast.info("Reserva cancelada");
+      } else {
+        setDialogVisible(false);
+        toast.error("Error al realizar la cancelacion");
+      }
+    } catch (error) {
+      toast.error("Error al cancelar la reserva");
+    }
+  };
+
+  const handleCancel = () => {
+    // Cerrar el diálogo de confirmación
+    setDialogVisible(false);
+  };
 
   const handleEntregarEjemplar = async () => {
     try {
@@ -96,6 +132,7 @@ const DetalleReservaScreen = () => {
       );
       console.log(response);
 
+      setDialogVisible(false);
       toast.info(response.message);
     } catch (error) {
       console.error("Error al entregar el ejemplar");
@@ -138,60 +175,111 @@ const DetalleReservaScreen = () => {
   };
 
   return (
-    <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
-      {detalleReserva ? (
-        <View style={styles.reservaContainer}>
-          <Text>Detalles de la reserva</Text>
-          <Text>Solicitante:{detalleReserva.owner?.email}</Text>
-          <Text>Material: {detalleReserva.material?.titulo}</Text>
-          <Text>
-            Finalizacion:{" "}
-            {moment(detalleReserva.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}
-          </Text>
-          {detalleReserva.estado === "Finalizada" ? (
-            <Text style={styles.finalizadaText}> Finalizada</Text>
-          ) : (
-            <View style={styles.entregarContainer}>
-              <Text style={styles.label}>Buscar ejemplar por ID: </Text>
-              <TextInput
-                style={styles.input}
-                value={searchText}
-                onChangeText={handleSearchChange}
-                placeholder="Ingresa el ID del ejemplar"
-                defaultValue={selectedEjemplar?.toString()}
-                onKeyPress={handleKeyPress}
-              />
-              <FlatList
-                style={styles.flatList}
-                data={filteredEjemplares}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => handleEjemplarSelect(item.id)}
-                    style={[
-                      styles.ejemplarItem,
-                      item.id === selectedEjemplar && styles.selectedItem,
-                    ]}
-                  >
-                    <Text
-                      style={styles.ejemplarText}
-                    >{`ID: ${item.id}, Estado: ${item.estado}`}</Text>
-                  </TouchableOpacity>
+    <PaperProvider>
+      <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
+        {detalleReserva ? (
+          <View style={styles.reservaContainer}>
+            <Text>Detalles de la reserva</Text>
+            <Text>Solicitante:{detalleReserva.owner?.email}</Text>
+            <Text>Material: {detalleReserva.material?.titulo}</Text>
+            {detalleReserva.fecha_fin === null ? (
+              <Text>Finalizacion: {detalleReserva.estado}</Text>
+            ) : (
+              <Text>
+                Finalizacion:{" "}
+                {moment(detalleReserva.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}
+              </Text>
+            )}
+            {detalleReserva.estado === "Finalizada" ? (
+              <Text style={styles.finalizadaText}> Finalizada</Text>
+            ) : (
+              <View style={styles.entregarContainer}>
+                {userInfo && userInfo.user.role === 1 ? (
+                  <View>
+                    <Text style={styles.label}>Buscar ejemplar por ID: </Text>
+                    <TextInput
+                      style={styles.input}
+                      value={searchText}
+                      onChangeText={handleSearchChange}
+                      placeholder="Ingresa el ID del ejemplar"
+                      defaultValue={selectedEjemplar?.toString()}
+                      onKeyPress={handleKeyPress}
+                    />
+                    <FlatList
+                      style={styles.flatList}
+                      data={filteredEjemplares}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => handleEjemplarSelect(item.id)}
+                          style={[
+                            styles.ejemplarItem,
+                            item.id === selectedEjemplar && styles.selectedItem,
+                          ]}
+                        >
+                          <Text
+                            style={styles.ejemplarText}
+                          >{`ID: ${item.id}, Estado: ${item.estado}`}</Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                    <Button style={styles.button} onPress={handleConfirmar}>
+                      <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                        Entregar ejemplar
+                      </Text>
+                    </Button>
+                    <Portal>
+                      <Dialog
+                        visible={dialogVisible}
+                        onDismiss={handleConfirmar}
+                      >
+                        <Dialog.Content>
+                          <Paragraph>
+                            ¿Estas seguro realizar el prestamo?
+                          </Paragraph>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                          <Button onPress={handleCancel}>Cancelar</Button>
+                          <Button onPress={handleEntregarEjemplar}>
+                            Aceptar
+                          </Button>
+                        </Dialog.Actions>
+                      </Dialog>
+                    </Portal>
+                  </View>
+                ) : (
+                  <View>
+                    <Button style={styles.button} onPress={handleConfirmar}>
+                      <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                        Cancelar reserva
+                      </Text>
+                    </Button>
+                    <Portal>
+                      <Dialog
+                        visible={dialogVisible}
+                        onDismiss={handleConfirmar}
+                      >
+                        <Dialog.Content>
+                          <Paragraph>
+                            ¿Estas seguro de cancelar la reserva?
+                          </Paragraph>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                          <Button onPress={handleCancel}>Cancelar</Button>
+                          <Button onPress={handleConfirmCancel}>Aceptar</Button>
+                        </Dialog.Actions>
+                      </Dialog>
+                    </Portal>
+                  </View>
                 )}
-              />
-
-              <Button
-                style={styles.button}
-                title="Entregar ejemplar"
-                onPress={handleEntregarEjemplar}
-              />
-            </View>
-          )}
-        </View>
-      ) : (
-        <Text>Cargando reserva...</Text>
-      )}
-    </View>
+              </View>
+            )}
+          </View>
+        ) : (
+          <Text>Cargando reserva...</Text>
+        )}
+      </View>
+    </PaperProvider>
   );
 };
 
@@ -231,7 +319,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
+    backgroundColor: "#2471A3",
     marginTop: 10,
+  },
+  buttonText: {
+    color: "#FFFFFF",
   },
   loadingText: {
     fontSize: 18,

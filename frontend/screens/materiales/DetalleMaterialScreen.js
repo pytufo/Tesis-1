@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, Button, StyleSheet } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
+import {
+  Button,
+  Dialog,
+  PaperProvider,
+  Paragraph,
+  Portal,
+  TextInput,
+} from "react-native-paper";
+
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
@@ -17,9 +26,10 @@ const DetalleMaterialScreen = (props) => {
   const [detalleMaterial, setDetalleMaterial] = useState(null);
   const navigation = useNavigation();
 
+  const [dialogVisible, setDialogVisible] = useState(false);
+
   const { userInfo } = useUser();
 
-  console.log(route.parms);
   useEffect(() => {
     const fetchDetalleMaterial = async () => {
       try {
@@ -52,59 +62,109 @@ const DetalleMaterialScreen = (props) => {
         materialId,
         { id: owner_id }
       );
-
+      setDialogVisible(false);
       toast.info(response.message);
     } catch (error) {
       console.error("Error al realizar la reserva del material", error);
     }
   };
+
+  const handleConfirmar = async () => {
+    setDialogVisible(true);
+  };
+
+  const handleCancel = () => {
+    // Cerrar el diálogo de confirmación
+    setDialogVisible(false);
+  };
   return (
-    <View style={styles.container}>
-      {detalleMaterial ? (
-        <View style={styles.reservaContainer}>
-          <Text>Titulo: {detalleMaterial.titulo} </Text>
-          <Text>
-            Editorial:
-            {detalleMaterial.editorial.map((editorial) => (
-              <Text key={editorial.id}>{editorial.nombre}</Text>
-            ))}
-          </Text>
-          <Text>
-            Autor:
-            {detalleMaterial.autor.map((autor) => (
-              <Text key={autor.id}>
-                {autor.nombre}, {autor.apellido}.
-              </Text>
-            ))}
-          </Text>
-          <Text>
-            carrera:
-            {detalleMaterial.carrera.map((carrera) => (
-              <Text key={carrera.id}>{carrera.nombre}</Text>
-            ))}
-          </Text>
-          <Text>
-            genero:
-            {detalleMaterial.genero.map((genero) => (
-              <Text key={genero.id}>{genero.nombre}</Text>
-            ))}
-          </Text>
-          {detalleMaterial.estado === "Disponible" ? (
-            <View style={styles.entregarContainer}>
-              <Button
-                style={styles.button}
-                title="Reservar"
-                onPress={handleReservarMaterial}
-              />
-            </View>
-          ) : (
-            <Text>El material no se encuentra disponible...</Text>
-          )}
-        </View>
-      ) : (
-        <Text> Cargando detalles...</Text>
-      )}
-    </View>
+    <PaperProvider>
+      <View style={styles.container}>
+        {detalleMaterial ? (
+          <View style={styles.reservaContainer}>
+            <Text>Titulo: {detalleMaterial.titulo} </Text>
+            <Text>
+              Editorial:
+              {detalleMaterial.editorial.map((editorial) => (
+                <Text key={editorial.id}>{editorial.nombre}</Text>
+              ))}
+            </Text>
+            <Text>
+              Autor:
+              {detalleMaterial.autor.map((autor) => (
+                <Text key={autor.id}>
+                  {autor.nombre}, {autor.apellido}.
+                </Text>
+              ))}
+            </Text>
+            <Text>
+              carrera:
+              {detalleMaterial.carrera.map((carrera) => (
+                <Text key={carrera.id}>{carrera.nombre}</Text>
+              ))}
+            </Text>
+            <Text>
+              genero:
+              {detalleMaterial.genero.map((genero) => (
+                <Text key={genero.id}>{genero.nombre}</Text>
+              ))}
+            </Text>
+            {userInfo && userInfo.user.role === 1 ? (
+              <></>
+            ) : detalleMaterial.estado === "Disponible" ? (
+              <View style={styles.entregarContainer}>
+                <Button style={styles.button} onPress={handleConfirmar}>
+                  <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                    Reservar
+                  </Text>
+                </Button>
+                <Portal>
+                  <Dialog visible={dialogVisible} onDismiss={handleConfirmar}>
+                    <Dialog.Content>
+                      <Paragraph>
+                        ¿Estas seguro de realizar la reserva?. Recuerda que la
+                        reserva tiene un lapso de tiempo de 24hs a partir de
+                        este momento para retirar el ejemplar, finalizado el
+                        tiempo la reserva ya no será valida
+                      </Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                      <Button onPress={handleCancel}>Cancelar</Button>
+                      <Button onPress={handleReservarMaterial}>Aceptar</Button>
+                    </Dialog.Actions>
+                  </Dialog>
+                </Portal>
+              </View>
+            ) : (
+              <View style={styles.entregarContainer}>
+                <Button style={styles.button} onPress={handleConfirmar}>
+                  <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                    Apuntarse a la lista de espera
+                  </Text>
+                </Button>
+                <Portal>
+                  <Dialog visible={dialogVisible} onDismiss={handleConfirmar}>
+                    <Dialog.Content>
+                      <Paragraph>
+                        ¿Estas seguro de añadirte a la "Lista de espera"?. Se te
+                        notificará cuando el material esté disponible y se
+                        creará la reserva.
+                      </Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                      <Button onPress={handleCancel}>Cancelar</Button>
+                      <Button onPress={handleReservarMaterial}>Aceptar</Button>
+                    </Dialog.Actions>
+                  </Dialog>
+                </Portal>
+              </View>
+            )}
+          </View>
+        ) : (
+          <Text> Cargando detalles...</Text>
+        )}
+      </View>
+    </PaperProvider>
   );
 };
 
@@ -145,6 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
+    backgroundColor: "#2471A3",
     marginTop: 10,
   },
   loadingText: {

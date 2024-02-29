@@ -1,10 +1,29 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import React,{useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "../../contexts/UserContext";
+import MovimientosServices from "../../services/MovimientosServices";
 
 const ProfileScreen = () => {
+  const [userReservas, setUserReserva] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { userInfo } = useUser();
   console.log(userInfo);
+  useEffect(() => {
+    const fetchReservaUsuario = async () => {
+      try {
+        const access_token = userInfo.access_token;
+        const response = await MovimientosServices.reservasUsuario(
+          access_token,
+          searchQuery
+        );
+        setUserReserva(response);
+        console.log(response);
+      } catch (error) {
+        console.log("Error al obtener las reservas del usuario: ", error);
+      }
+    };
+    fetchReservaUsuario();
+  }, [userInfo]);
 
   return (
     <View style={styles.container}>
@@ -13,7 +32,7 @@ const ProfileScreen = () => {
           <Text>Email: {userInfo.user.email}</Text>
           <Text>Rol: {userInfo.user.role}</Text>
           <View style={styles.buttonContainer}>
-          <TouchableOpacity
+            <TouchableOpacity
               style={styles.button}
               onPress={() => {
                 // Manejar la acción del botón "Mis prestamos"
@@ -23,7 +42,8 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => { console.log(userInfo)
+              onPress={() => {
+                console.log(userReservas.reserva);
                 // Manejar la acción del botón "Mis reservas"
               }}
             >

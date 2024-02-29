@@ -11,8 +11,7 @@ from materiales.serializers import MaterialSerializer
 from .utils import (
     get_limite_reservas_prestamo,
     usuario_tiene_reserva_pendiente,
-    get_reserva_proxima_a_espirar,
-    get_limite_epera,
+    habilitar_reserva_lista_espera,
     get_estado_prestamo,
     get_estado_reserva,
 )
@@ -35,7 +34,7 @@ from rest_framework.permissions import IsAuthenticated
 
 # from rest_framework.filters import SearchFilter
 
-from .models import Reserva, Prestamo, ListaEspera
+from .models import Reserva, Prestamo
 from accounts.models import User
 from materiales.models import Material, Ejemplar
 
@@ -52,7 +51,6 @@ from .serializers import (
     EntregaEjemplarReserva,
     PrestamoCreateSerializer,
     ReservaCreateSerializer,
-    ListaDeEsperaSerializer,
     EjemplarSerializer,
 )
 
@@ -63,20 +61,59 @@ class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()
 
     def list(self, request, *args, **kwargs):
-        reservas = Reserva.objects.all()
+        reservas = Reserva.objects.filter(fecha_fin__isnull=False)
         serializer = ReservasSerializer(
             reservas, context={"request": request}, many=True
         )
         return Response(serializer.data)
 
+    @action(detail=False, methods=["GET"])
     def listar_reservas_usuario(self, request, *args, **kwargs):
-        # Filtrar las reservas del usuario actual
-        reservas = Reserva.objects.filter(owner=request.user)
+        usuario = request.user
 
-        serializer = ReservasSerializer(
-            reservas, context={"request": request}, many=True
-        )
-        return Response(serializer.data)
+        try:
+            reservas_usuario = Reserva.objects.filter(owner=usuario)
+            serializer = ReservasSerializer(
+                reservas_usuario, context={"request": request}, many=True
+            )
+            return Response(serializer.data)
+
+        except Exception as e:
+            return Response(
+                {"message": f"Error al obtener las reservas del usuario: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(detail=True, methods=["put"])
+    def cancelar_reserva(self, request, pk=None):
+        try:
+            reserva = self.get_object()
+
+            estado = get_estado_reserva(reserva)
+            if estado == "Finalizada":
+                return Response(
+                    {"message": "La reserva ya ha expirado"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            fecha_fin_anterior = reserva.fecha_fin
+            reserva.fecha_fin = timezone.now()
+            reserva.save()
+
+            habilitar_reserva_lista_espera(reserva.material, fecha_fin_anterior)
+            return Response(
+                {"message": "Reserva cancelada. "}, status=status.HTTP_200_OK
+            )
+
+        except Reserva.DoesNotExist:
+            return Response(
+                {"message": "la reserva no existe"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Exception as e:
+            return Response(
+                {"message": f"Error al realizar la cancelación: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def retrieve(self, request, pk=None):
         reserva = Reserva.objects.get(pk=pk)
@@ -139,20 +176,13 @@ class ReservaViewSet(viewsets.ModelViewSet):
             ### Obtenemos el estado del material dando opcion para una "lista de espera" obteniendo el material proximo a liberarse.
             ### solicitando una confirmacion para crearla
 
-            if estado == "Disponible (Lista de espera)" or estado == "Solo Lectura":
-                reserva_proxima = get_reserva_proxima_a_espirar(material)
-                if reserva_proxima:
-                    serializer = ReservasSerializer(reserva_proxima)
-                    return Response(
-                        {
-                            "message": "No hay ejemplares disponibles para la reserva. Reserva próxima a expirar:",
-                            "reserva_proxima": serializer.data,
-                        }
-                    )
-                else:
-                    return Response(
-                        {"message": "No hay ejemplares disponibles para la reserva. "}
-                    )
+            if (
+                estado == "Disponible (Lista de espera)"
+                or estado == "Solo Lectura (Lista de espera)"
+            ):
+                fecha_fin_default = None
+            else:
+                fecha_fin_default = timezone.now() + timedelta(days=1)
 
             if limite_reservas_prestamo == "Excede":
                 return Response(
@@ -161,9 +191,6 @@ class ReservaViewSet(viewsets.ModelViewSet):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            ### Establecemos un limite para la "fecha_fin" por defecto de 1 dia.
-            fecha_fin_default = timezone.now() + timedelta(days=1)
 
             data = {
                 "owner": usuario.id,
@@ -196,47 +223,6 @@ class ReservaViewSet(viewsets.ModelViewSet):
             )
 
 
-class ListaDeEsperaviewset(viewsets.ModelViewSet):
-    serializer_class = ListaDeEsperaSerializer
-    queryset = ListaEspera.objects.all()
-
-    #
-    def retrieve(self, request, material_pk=None):
-        material = Material.objects.get(pk=material_pk)
-        serializer = MaterialSerializer(material)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["post"])
-    def create(self, request, material_pk=None):
-        usuario_id = request.user
-        material = Material.objects.get(pk=material_pk)
-        usuario = User.objects.get(pk=usuario_id)
-
-        ### Establecemos un limite para la "fecha_fin" por defecto de 1 dia.
-        fecha_fin_default = timezone.now() + timedelta(days=1)
-        limite_espera = get_limite_epera(material)
-
-        if limite_espera == 0:
-            return Response(
-                {
-                    "message": "La cola de espera se encuetra llena, por favor intente denuevo más tarde."
-                }
-            )
-        data = {
-            "owner": usuario.id,
-            "material": material.id,
-            "fecha_fin": fecha_fin_default,
-        }
-
-        serializer = ListaDeEsperaSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-
-        serializer.validated_data["fecha_fin"] = fecha_fin_default
-        serializer.save(material=material)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 class PrestamoViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = PrestamoCreateSerializer
@@ -251,6 +237,23 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             prestamos, context={"request": request}, many=True
         )
         return Response(serializer.data)
+
+    @action(detail=False, methods=["GET"])
+    def listar_prestamos_usuario(self, request, *args, **kwargs):
+        usuario = request.user
+
+        try:
+            reservas_usuario = Prestamo.objects.filter(owner=usuario)
+            serializer = PrestamosSerializer(
+                reservas_usuario, context={"request": request}, many=True
+            )
+            return Response(serializer.data)
+
+        except Exception as e:
+            return Response(
+                {"message": f"Error al obtener los prestamos del usuario: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def retrieve(self, request, pk=None):
         prestamo = Prestamo.objects.get(pk=pk)
@@ -274,10 +277,12 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                     {"message": "El prestamo ya ha expirado"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
+            fecha_fin_anterior = prestamo.fecha_fin
             prestamo.fecha_fin = timezone.now()
             prestamo.save()
-
+            habilitar_reserva_lista_espera(
+                prestamo.ejemplar.material, fecha_fin_anterior
+            )
             return Response(
                 {"message": "Devolución exitosa"}, status=status.HTTP_200_OK
             )

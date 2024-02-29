@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Reserva, Prestamo, ListaEspera
+from .models import Reserva, Prestamo
 
 from materiales.utils import get_ejemplares_de_material
 from .utils import get_estado_prestamo, get_estado_reserva
@@ -17,11 +17,12 @@ from accounts.serializers import UserProfileSerializer
 class ReservaCreateSerializer(serializers.ModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     material = serializers.PrimaryKeyRelatedField(queryset=Material.objects.all())
-    fecha_fin = serializers.DateTimeField()
+    fecha_fin = serializers.DateTimeField(required=False, allow_null=True)
+
     class Meta:
         model = Reserva
         fields = ["id", "fecha_fin", "owner", "material"]
-        read_only_fields = ["material", "fecha_fin"]
+        read_only_fields = ["material"]
 
     def __init__(self, *args, **kwargs):
         material_pk = kwargs.pop("material_pk", None)
@@ -36,21 +37,14 @@ class ReservasSerializer(serializers.ModelSerializer):
     owner = UserProfileSerializer()
     estado = serializers.SerializerMethodField()
     fecha_fin = serializers.DateTimeField()
+
     class Meta:
         model = Reserva
         fields = ["id", "fecha_fin", "owner", "material", "estado"]
         ordering = ["-fecha_fin"]
 
-
     def get_estado(self, obj):
         return get_estado_reserva(obj)
-
-
-class ListaDeEsperaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ListaEspera
-        fields = ["fecha_fin", "owner", "material"]
-        read_only_fields = ["material", "fecha_fin"]
 
 
 class PrestamosSerializer(serializers.ModelSerializer):
@@ -63,7 +57,6 @@ class PrestamosSerializer(serializers.ModelSerializer):
         model = Prestamo
         fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar", "estado"]
         ordering = ["-fecha_fin"]
-
 
     def get_estado(self, obj):
         return get_estado_prestamo(obj)
@@ -85,7 +78,6 @@ class PrestamoCreateSerializer(serializers.ModelSerializer):
         model = Prestamo
         fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar"]
         ordering = ["-fecha_fin"]
-
 
     def __init__(self, *args, **kwargs):
         ejemplar_pk = kwargs.pop("ejemplar_pk", None)

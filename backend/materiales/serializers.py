@@ -10,7 +10,7 @@ from materiales.models import (
 )
 
 
-from reservas.utils import get_cantidad_en_espera, get_limite_epera
+from reservas.utils import get_limite_epera
 from .utils import (
     get_cantidad_disponible,
     get_cantidad_en_reserva,
@@ -67,9 +67,7 @@ class MaterialSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
     cantidad_en_reserva = serializers.SerializerMethodField()
     cantidad_en_prestamo = serializers.SerializerMethodField()
-    cantidad_en_espera = serializers.SerializerMethodField()
     cantidad_disponible = serializers.SerializerMethodField()
-    limite_espera = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
     ejemplares_disponibles = serializers.SerializerMethodField()
 
@@ -94,13 +92,10 @@ class MaterialSerializer(serializers.ModelSerializer):
             "cantidad_existente",
             "cantidad_en_reserva",
             "cantidad_en_prestamo",
-            "cantidad_en_espera",
             "cantidad_disponible",
-            "limite_espera",
             "estado",
             "ejemplares_disponibles",
         ]
-        
 
     def get_cantidad_existente(self, obj):
         return get_cantidad_existente(obj)
@@ -110,9 +105,6 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     def get_cantidad_en_prestamo(self, obj):
         return get_cantidad_en_prestamo(obj)
-
-    def get_cantidad_en_espera(self, obj):
-        return get_cantidad_en_espera(obj)
 
     def get_cantidad_disponible(self, obj):
         return get_cantidad_disponible(obj)

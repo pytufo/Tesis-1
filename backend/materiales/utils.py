@@ -1,6 +1,6 @@
 from django.utils import timezone
 from materiales.models import Ejemplar
-from reservas.models import Reserva, Prestamo, ListaEspera
+from reservas.models import Reserva, Prestamo
 
 # Definimos consultas para el seguimiento de los ejemplares (cantidades de prestamos, reservas, etc) y asignamos un estado segun el criterio del seguimiento. y tambien establecemos parametros de vencimiento en los prestamos.
 
@@ -59,9 +59,6 @@ def get_cantidad_en_prestamo(obj, vencidas=True):
     return prestamos.count()
 
 
-def get_cantidad_en_espera(obj):
-    return ListaEspera.objects.filter(material=obj.id).count()
-
 
 def get_cantidad_disponible(obj):
     cantidad_existente = get_cantidad_existente(obj)
@@ -75,9 +72,9 @@ def get_cantidad_disponible(obj):
 
 def get_estado(obj):
     cantidad_disponible = get_cantidad_disponible(obj)
-    if cantidad_disponible >= 2:
+    if cantidad_disponible > 1:
         return "Disponible"
     elif cantidad_disponible <= 1:
-        return "Solo Lectura"
+        return "Solo Lectura (Lista de espera)"
     elif cantidad_disponible == 1:
         return "Disponible (Lista de espera)"

@@ -1,0 +1,8 @@
+######## La lista de espera:
+
+· Se asigna cuando un usuario quiere realizar una reserva a un material que en ese momento no se encuentra
+disponible.
+
+· Entonces se debera checkear el 'estado_material' en la lista de espera cada vez que se crea o devuelve un prestamo/reserva.
+De ser una devolucion se finalizara la lista de espera, y se creara la reserva correspondiente al material y usuario de la misma.
+

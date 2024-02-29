@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Button,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -63,6 +64,7 @@ const EjemplarListScreen = ({ navigation }) => {
   };
   return (
     <View style={styles.container}>
+      <Button>asfd</Button>
       <View style={{ padding: 10 }}>
         <TextInput
           style={styles.searchInput}
