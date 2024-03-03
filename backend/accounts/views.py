@@ -104,6 +104,12 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
 
+    @action(detail=True, methods=["get"])
+    def no_admin(self, request, pk=None):
+        users = User.objects.exclude(role=User.ADMIN)
+        serializer = self.get_serializer(users, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=["put"])
     def activar(self, request, pk=None):
         user = self.get_object()

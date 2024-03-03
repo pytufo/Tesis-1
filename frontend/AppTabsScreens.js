@@ -96,7 +96,7 @@ const EjemplaresStackNavigator = () => (
 );
 const AppTabsScreen = ({ setIsLoggedIn, setUserData, navigation }) => {
   const { userInfo } = useUser();
-
+  const isAdmin = userInfo && userInfo.user.role === 1;
   return (
     <>
       <AppTabs.Navigator>
@@ -120,6 +120,7 @@ const AppTabsScreen = ({ setIsLoggedIn, setUserData, navigation }) => {
         <AppTabs.Screen
           name="Reservas"
           component={ReservasStackNavigator}
+          options={{ tabBarVisibilityAnimationConfig: isAdmin }}
         />
         <AppTabs.Screen name="Prestamos" component={PrestamosStackNavigator} />
         <AppTabs.Screen

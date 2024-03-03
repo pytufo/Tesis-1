@@ -13,6 +13,15 @@ router = DefaultRouter()
 router.register(r"users", UserViewSet, basename="users")
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "no_admin/",
+        UserViewSet.as_view(
+            {
+                "get": "no_admin",
+            }
+        ),
+        name="users-no-admin",
+    ),
     path("login/", UserLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("register/", RegisterView.as_view(), name="sign_up"),

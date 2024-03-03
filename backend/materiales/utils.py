@@ -52,12 +52,11 @@ def get_cantidad_en_reserva(obj, vencidas=True):
 
 
 def get_cantidad_en_prestamo(obj, vencidas=True):
-    prestamos = Prestamo.objects.filter(ejemplar=obj.id)
+    prestamos = Prestamo.objects.filter(ejemplar__material=obj.id)
     if vencidas:
         prestamos = prestamos.filter(fecha_fin__gte=timezone.now())
 
     return prestamos.count()
-
 
 
 def get_cantidad_disponible(obj):
@@ -72,9 +71,11 @@ def get_cantidad_disponible(obj):
 
 def get_estado(obj):
     cantidad_disponible = get_cantidad_disponible(obj)
+    cantidad_existente = get_cantidad_existente(obj)
     if cantidad_disponible > 1:
         return "Disponible"
-    elif cantidad_disponible <= 1:
-        return "Solo Lectura (Lista de espera)"
-    elif cantidad_disponible == 1:
+    elif cantidad_disponible <= 1 and cantidad_existente > 1:
+        # Verificar tambien la cantidad existente > 1
         return "Disponible (Lista de espera)"
+    elif cantidad_disponible <= 1:
+        return "No disponible (Solo lectura)"

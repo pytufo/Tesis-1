@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from materiales.serializers import MaterialSerializer
 from .utils import (
     get_limite_reservas_prestamo,
-    usuario_tiene_reserva_pendiente,
+    usuario_tiene_reserva_prestamo_pendiente,
     habilitar_reserva_lista_espera,
     get_estado_prestamo,
     get_estado_reserva,
@@ -24,7 +24,6 @@ from materiales.utils import (
 
 
 from rest_framework import viewsets, filters, generics, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import PrestamoFilter
@@ -167,7 +166,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             ### El usuario no podrá resepetir una reserva.
 
-            if usuario_tiene_reserva_pendiente(usuario, material):
+            if usuario_tiene_reserva_prestamo_pendiente(usuario, material):
                 return Response(
                     {"message": "Ya tienes una reserva para este material..."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -272,6 +271,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             prestamo = self.get_object()
 
             estado = get_estado_prestamo(prestamo)
+
             if estado == "Finalizado":
                 return Response(
                     {"message": "El prestamo ya ha expirado"},
@@ -306,11 +306,37 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             usuario_id = request.data.get("owner")
             usuario = User.objects.get(pk=usuario_id)
             ejemplar = Ejemplar.objects.get(pk=ejemplar_pk)
+            
+            if get_estado(ejemplar.material) != "Disponible":
+                return Response(
+                    {"message": "El material no está disponible para préstamo"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             # definimos variables de estados y aplicamos sus validaciones
             estado = get_estado_ejemplar(ejemplar)
             limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
 
+            # Verificar si el usuario tiene una reserva o prestamo pendiente par el mismo material
+            pendiente = usuario_tiene_reserva_prestamo_pendiente(
+                usuario, ejemplar.material
+            )
+            if pendiente:
+                tipo = pendiente["tipo"]
+                if tipo == "Reserva":
+                    return Response(
+                        {
+                            "message": "El usuario ya tiene una reserva vigente para este material"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                elif tipo == "Prestamo":
+                    return Response(
+                        {
+                            "message": "El usuario ya tiene préstamo vigente para este material"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             if estado == "En prestamo":
                 return Response({"message": "El ejemplar ya se encuentra prestado"})
             if limite_reservas_prestamo == "Excede":

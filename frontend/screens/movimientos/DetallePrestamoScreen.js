@@ -88,12 +88,10 @@ const DetallePrestamoScreen = () => {
       <View style={styles.container}>
         {detallePrestamo ? (
           <View style={styles.reservaContainer}>
-            <Text> Entregado por: {detallePrestamo.created_by}</Text>
+            <Text> Entregado por: {detallePrestamo.created_by?.email}</Text>
             <Text> Usuario: {detallePrestamo.owner?.email}</Text>
             <Text> Ejemplar: {detallePrestamo.ejemplar?.id} </Text>
-
-            <Text> Material: </Text>
-            <Text> {detallePrestamo.ejemplar?.material[0]?.titulo} </Text>
+            <Text> Material: {detallePrestamo.ejemplar?.material?.titulo}</Text>            
             <Text>
               {" "}
               Finalizacion:{" "}

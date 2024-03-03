@@ -49,6 +49,7 @@ class ReservasSerializer(serializers.ModelSerializer):
 
 class PrestamosSerializer(serializers.ModelSerializer):
     owner = UserProfileSerializer()
+    created_by = UserProfileSerializer()
     ejemplar = EjemplarSerializer()
     estado = serializers.SerializerMethodField()
     fecha_fin = serializers.DateTimeField()

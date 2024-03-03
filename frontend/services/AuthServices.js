@@ -60,7 +60,33 @@ const AuthServices = {
         },
       });
 
-      
+      const data = await response.json();
+
+      const buscarUsuario = data.filter((user) =>
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      return buscarUsuario;
+
+      /* console.log(data);
+      return data; */
+    } catch (error) {
+      console.error("Error al obtener los usuarios");
+      throw error;
+    }
+  },
+  listarUsuariosNoAdmin: async (accessToken, searchQuery) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}${AUTH_ROUTES.USUARIOS_NOADMIN}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
       const data = await response.json();
 
       const buscarUsuario = data.filter((user) =>

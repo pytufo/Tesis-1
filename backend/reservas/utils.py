@@ -64,13 +64,20 @@ def get_limite_epera(obj):
     return cantidad_disponible
 
 
-def usuario_tiene_reserva_pendiente(usuario, material):
+def usuario_tiene_reserva_prestamo_pendiente(usuario, material):
     reservas_usuario = Reserva.objects.filter(owner=usuario, material=material)
+    prestamos_usuario = Prestamo.objects.filter(
+        owner=usuario, ejemplar__material=material
+    )
 
     for reserva in reservas_usuario:
         estado_reserva = get_estado_reserva(reserva)
         if estado_reserva != "Finalizada":
-            return True
+            return {"tipo": "Reserva", "id": reserva.id}
+    for prestamo in prestamos_usuario:
+        estado_prestamo = get_estado_prestamo(prestamo)
+        if estado_prestamo != "Finalizado":
+            return {"tipo": "Prestamo", "id": prestamo.id}
     return False
 
 

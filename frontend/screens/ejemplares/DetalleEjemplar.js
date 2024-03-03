@@ -61,7 +61,7 @@ const DetalleEjemplarScreen = () => {
 
     const fetchUsers = async () => {
       try {
-        const usersResponse = await AuthServices.listarUsuarios(
+        const usersResponse = await AuthServices.listarUsuariosNoAdmin(
           accessToken,
           ""
         );

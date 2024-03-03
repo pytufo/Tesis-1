@@ -47,13 +47,6 @@ const DetalleMaterialScreen = (props) => {
 
   const handleReservarMaterial = async () => {
     try {
-      console.log(userInfo);
-      if (!userInfo) {
-        // Mostrar un mensaje y redireccionar al login
-        toast.warning("Debes iniciar sesión para realizar una reserva.");
-        navigation.navigate("Login"); // Asegúrate de que el nombre de la pantalla sea correcto
-        return;
-      }
       const access_token = userInfo.access_token;
       const owner_id = userInfo.id;
 
@@ -70,6 +63,12 @@ const DetalleMaterialScreen = (props) => {
   };
 
   const handleConfirmar = async () => {
+    if (!userInfo) {
+      // Mostrar un mensaje y redireccionar al login
+      toast.warning("Debes iniciar sesión para realizar una reserva.");
+      navigation.navigate("Login"); // Asegúrate de que el nombre de la pantalla sea correcto
+      return;
+    }
     setDialogVisible(true);
   };
 

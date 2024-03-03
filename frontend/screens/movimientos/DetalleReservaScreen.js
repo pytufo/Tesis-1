@@ -178,8 +178,7 @@ const DetalleReservaScreen = () => {
     <PaperProvider>
       <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
         {detalleReserva ? (
-          <View style={styles.reservaContainer}>
-            <Text>Detalles de la reserva</Text>
+          <View style={styles.reservaContainer}>            
             <Text>Solicitante:{detalleReserva.owner?.email}</Text>
             <Text>Material: {detalleReserva.material?.titulo}</Text>
             {detalleReserva.fecha_fin === null ? (
