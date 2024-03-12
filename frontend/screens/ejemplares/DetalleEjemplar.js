@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Text,
-  View,  
+  View,
   FlatList,
   TouchableOpacity,
   Keyboard,
@@ -14,6 +14,7 @@ import {
   Paragraph,
   Portal,
   TextInput,
+  Snackbar,
 } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -35,6 +36,9 @@ const DetalleEjemplarScreen = () => {
   const [users, setUsers] = useState([]);
 
   const [dialogVisible, setDialogVisible] = useState(false);
+
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
 
@@ -87,7 +91,8 @@ const DetalleEjemplarScreen = () => {
       const owner_id = selectedUser;
 
       if (!selectedUser) {
-        toast.error("Selecciona un usuario para el prestamo");
+        setSnackbarMessage("Selecciona un usuario para el prestamo");
+        setSnackbarVisible(true);
         return;
       }
       const prestamoData = {
@@ -101,10 +106,11 @@ const DetalleEjemplarScreen = () => {
         prestamoData
       );
       if (response) {
-        setDialogVisible(false);
-        toast.info(response.message);
+        setSnackbarMessage(response.message);
+        setSnackbarVisible(true);
+        
       } else {
-        toast.error(response.message);
+        setSnackbarMessage(response.message);
       }
     } catch (error) {
       console.error("Error al realizar el prestamo del ejemplar", error);
@@ -143,93 +149,94 @@ const DetalleEjemplarScreen = () => {
   };
 
   return (
-    <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
-      {detalleEjemplar ? (
-        <View>
-          <Text>Id: {detalleEjemplar.id} </Text>
-          <Text>Titulo: {detalleEjemplar.material?.titulo} </Text>
-          <Text>
-            Editorial:
-            {detalleEjemplar.material?.editorial?.map((editorial) => (
-              <Text key={editorial.id}>{editorial.nombre}</Text>
-            ))}
-          </Text>
-          <Text>
-            Autor:
-            {detalleEjemplar.material?.autor?.map((autor) => (
-              <Text key={autor.id}>
-                {autor.nombre}, {autor.apellido}.
-              </Text>
-            ))}
-          </Text>
-          <Text>
-            carrera:
-            {detalleEjemplar.material?.carrera?.map((carrera) => (
-              <Text key={carrera.id}>{carrera.nombre}</Text>
-            ))}
-          </Text>
-          <Text>
-            genero:
-            {detalleEjemplar.material?.genero?.map((genero) => (
-              <Text key={genero.id}>{genero.nombre}</Text>
-            ))}
-          </Text>
-          {detalleEjemplar.estado === "Disponible" ? (
-            <View style={styles.entregarContainer}>
-              <Text style={styles.label}>Buscar usuario: </Text>
-              <TextInput
-                style={styles.input}
-                value={searchText}
-                onChangeText={handleSearchChange}
-                placeholder="Ingresa el correo del usuario"
-                onKeyPress={handleKeyPress}
-              />
-              <FlatList
-                style={styles.flatList}
-                data={filteredUsers}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => handleUserSelect(item.id)}
-                    style={[
-                      styles.ejemplarItem,
-                      item.id === selectedUser?.id && styles.selectedItem,
-                    ]}
-                  >
-                    <Text style={styles.ejemplarText}>{item.email}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-              <Button onPress={handleConfirmar}>
-                <Text>Entregar ejemplar</Text>
-              </Button>
-              <Portal>
-                      <Dialog
-                        visible={dialogVisible}
-                        onDismiss={handleConfirmar}
-                      >
-                        <Dialog.Content>
-                          <Paragraph>
-                            ¿Estas seguro realizar el prestamo?
-                          </Paragraph>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                          <Button onPress={handleCancel}>Cancelar</Button>
-                          <Button onPress={handlePrestarEjemplar}>
-                            Aceptar
-                          </Button>
-                        </Dialog.Actions>
-                      </Dialog>
-                    </Portal>
-            </View>
-          ) : (
-            <Text>El material no se encuentra disponible...</Text>
-          )}
-        </View>
-      ) : (
-        <Text> Cargando detalles...</Text>
-      )}
-    </View>
+    <Portal.Host>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+      >
+        {snackbarMessage}
+      </Snackbar>
+      <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
+        {detalleEjemplar ? (
+          <View>
+            <Text>Id: {detalleEjemplar.id} </Text>
+            <Text>Titulo: {detalleEjemplar.material?.titulo} </Text>
+            <Text>
+              Editorial:
+              {detalleEjemplar.material?.editorial?.map((editorial) => (
+                <Text key={editorial.id}>{editorial.nombre}</Text>
+              ))}
+            </Text>
+            <Text>
+              Autor:
+              {detalleEjemplar.material?.autor?.map((autor) => (
+                <Text key={autor.id}>
+                  {autor.nombre}, {autor.apellido}.
+                </Text>
+              ))}
+            </Text>
+            <Text>
+              carrera:
+              {detalleEjemplar.material?.carrera?.map((carrera) => (
+                <Text key={carrera.id}>{carrera.nombre}</Text>
+              ))}
+            </Text>
+            <Text>
+              genero:
+              {detalleEjemplar.material?.genero?.map((genero) => (
+                <Text key={genero.id}>{genero.nombre}</Text>
+              ))}
+            </Text>
+            {detalleEjemplar.estado === "Disponible" ? (
+              <View style={styles.entregarContainer}>
+                <Text style={styles.label}>Buscar usuario: </Text>
+                <TextInput
+                  style={styles.input}
+                  value={searchText}
+                  onChangeText={handleSearchChange}
+                  placeholder="Ingresa el correo del usuario"
+                  onKeyPress={handleKeyPress}
+                />
+                <FlatList
+                  style={styles.flatList}
+                  data={filteredUsers}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => handleUserSelect(item.id)}
+                      style={[
+                        styles.ejemplarItem,
+                        item.id === selectedUser?.id && styles.selectedItem,
+                      ]}
+                    >
+                      <Text style={styles.ejemplarText}>{item.email}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+                <Button onPress={handleConfirmar}>
+                  <Text>Entregar ejemplar</Text>
+                </Button>
+                <Portal>
+                  <Dialog visible={dialogVisible} onDismiss={handleConfirmar}>
+                    <Dialog.Content>
+                      <Paragraph>¿Estas seguro realizar el prestamo?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                      <Button onPress={handleCancel}>Cancelar</Button>
+                      <Button onPress={handlePrestarEjemplar}>Aceptar</Button>
+                    </Dialog.Actions>
+                  </Dialog>
+                </Portal>
+              </View>
+            ) : (
+              <Text>El material no se encuentra disponible...</Text>
+            )}
+          </View>
+        ) : (
+          <Text> Cargando detalles...</Text>
+        )}
+      </View>
+    </Portal.Host>
   );
 };
 

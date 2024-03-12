@@ -7,21 +7,33 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Modal,
 } from "react-native";
+
+import {
+  Button,
+  Dialog,
+  PaperProvider,
+  Paragraph,
+  Portal,
+} from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { MaterialesStackNavigator } from "../../AppTabsScreens";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 
 import { tableStyles } from "../../constants/Colors";
 
-
 import MaterialServices from "../../services/MaterialServices";
+import { useUser } from "../../contexts/UserContext";
 
 const MaterialListScreen = () => {
   const [material, setMaterial] = useState([]);
+  const [isMaterialModalVisible, setIsMaterialModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const navigation = useNavigation();
+  const { userInfo } = useUser();
 
   useEffect(() => {
     const fetchMaterial = async () => {
@@ -62,6 +74,26 @@ const MaterialListScreen = () => {
   };
   return (
     <View style={styles.container}>
+      {userInfo && userInfo.user.role === 1 && (
+        <View style={styles.buttonContainer}>
+          <Button
+            style={[styles.button, { marginRight: 10 }]}
+            onPress={() =>
+              navigation.navigate("NuevoMaterial", { isEditar: false })
+            }
+          >
+            <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+              Nuevo material
+            </Text>
+          </Button>
+          <Button style={styles.button}>
+            <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+              Nuevo ejemplar
+            </Text>
+          </Button>
+        </View>
+      )}
+
       <View style={{ padding: 10 }}>
         <TextInput
           style={styles.searchInput}
@@ -96,6 +128,16 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     borderWidth: 1,
     padding: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: "#2471A3",
+    marginTop: 10,
+    paddingHorizontal: 12,
+    borderRadius: 4,
   },
 });
 export default MaterialListScreen;

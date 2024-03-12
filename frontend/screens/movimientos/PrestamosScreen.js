@@ -4,14 +4,15 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  StyleSheet,  
 } from "react-native";
+import { Button, Portal } from "react-native-paper";
 import React, { useEffect, useState } from "react";
 import { tableStyles } from "../../constants/Colors";
 import { useFocusEffect } from "@react-navigation/native";
 
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
 import axios from "axios";
-
 import moment from "moment";
 import MovimientosServices from "../../services/MovimientosServices";
 import { useUser } from "../../contexts/UserContext";
@@ -21,6 +22,7 @@ const PrestamosScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { userInfo } = useUser();
   const [refreshing, setRefreshing] = useState(false);
+  
 
   const fetchPrestamo = async () => {
     try {
@@ -52,7 +54,6 @@ const PrestamosScreen = ({ navigation }) => {
       fetchPrestamo();
     }, [userInfo, searchQuery])
   );
-
   const handlePrestamoPress = (prestamoId) => {
     navigation.navigate("DetallePrestamo", { prestamoId });
   };
@@ -84,17 +85,48 @@ const PrestamosScreen = ({ navigation }) => {
   );
 
   return (
-    <ScrollView>
-      <View>
-        {renderTableHeader()}
-        <FlatList
-          data={prestamo}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
-        />
+    <Portal.Host>
+      <View style={styles.container}>
+        <ScrollView>
+          <View>
+            {renderTableHeader()}
+            <FlatList
+              data={prestamo}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+            />
+          </View>
+        </ScrollView>
       </View>
-    </ScrollView>
+    </Portal.Host>
   );
 };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  searchBar: {
+    padding: 10,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  searchInput: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    padding: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: "#2471A3",
+    marginTop: 10,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+  },
+});
 
 export default PrestamosScreen;

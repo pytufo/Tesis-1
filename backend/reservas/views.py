@@ -60,7 +60,8 @@ class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()
 
     def list(self, request, *args, **kwargs):
-        reservas = Reserva.objects.filter(fecha_fin__isnull=False)
+        reservas = Reserva.objects.all()
+        # reservas = Reserva.objects.filter(fecha_fin__isnull=False)
         serializer = ReservasSerializer(
             reservas, context={"request": request}, many=True
         )
@@ -207,7 +208,8 @@ class ReservaViewSet(viewsets.ModelViewSet):
             serializer.save(material=material)
 
             return Response(
-                {"message": "Reserva creada con exito"}, status=status.HTTP_201_CREATED
+                {"message": "Reserva creada con exito", "id": serializer.data["id"]},
+                status=status.HTTP_201_CREATED,
             )
         except Material.DoesNotExist:
             return Response(
@@ -300,13 +302,14 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
     # Un prestamo puede ser de dos maneras: Presencial-inmediata o Entrega de reserva
     # @action(detail=False, methods=["post"])
-    def create(self, request, ejemplar_pk=None):
+    def create(self, request):
         try:
             # definimos los campos de "prestamo"
             usuario_id = request.data.get("owner")
             usuario = User.objects.get(pk=usuario_id)
-            ejemplar = Ejemplar.objects.get(pk=ejemplar_pk)
-            
+            ejemplar_id = request.data.get("ejemplar")
+            ejemplar = Ejemplar.objects.get(pk=ejemplar_id)
+
             if get_estado(ejemplar.material) != "Disponible":
                 return Response(
                     {"message": "El material no está disponible para préstamo"},

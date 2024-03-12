@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  TouchableWithoutFeedback,
+} from "react-native";
 import {
   Button,
   Dialog,
@@ -7,8 +14,11 @@ import {
   Paragraph,
   Portal,
   TextInput,
+  Menu,
+  IconButton,
 } from "react-native-paper";
 
+import { tableStyles } from "../../constants/Colors";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
@@ -24,9 +34,19 @@ const DetalleMaterialScreen = (props) => {
   const { materialId } = route.params;
   const { isLoggedIn } = props.isLoggedIn || false;
   const [detalleMaterial, setDetalleMaterial] = useState(null);
+  const [ejemplares, setEjemplares] = useState([]);
+
+  const [showEjemplaresList, setShowEjemplareslist] = useState(false);
   const navigation = useNavigation();
 
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const openMenu = () => {
+    setMenuVisible(true);
+  };
+  const closeMenu = () => {
+    setMenuVisible(false);
+  };
 
   const { userInfo } = useUser();
 
@@ -34,9 +54,11 @@ const DetalleMaterialScreen = (props) => {
     const fetchDetalleMaterial = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}/`
+          `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}/ejemplares/`
         );
-        setDetalleMaterial(response.data);
+        setDetalleMaterial(response.data.material);
+        setEjemplares(response.data.ejemplares);
+
         console.log(response);
       } catch (error) {
         console.error("Error al obtener detales del material", error);
@@ -55,13 +77,28 @@ const DetalleMaterialScreen = (props) => {
         materialId,
         { id: owner_id }
       );
+      console.log(response);
       setDialogVisible(false);
       toast.info(response.message);
     } catch (error) {
       console.error("Error al realizar la reserva del material", error);
     }
   };
+  const renderTableHeader = () => (
+    <View style={tableStyles.tableHeader}>
+      <Text style={tableStyles.headerText}>Id</Text>
 
+      <Text style={tableStyles.headerText}>Estado</Text>
+    </View>
+  );
+
+  const renderItem = ({ item }) => (
+    <View style={tableStyles.tableRow}>
+      <Text style={tableStyles.cell}>{item.id}</Text>
+
+      <Text style={tableStyles.cell}>{item.estado}</Text>
+    </View>
+  );
   const handleConfirmar = async () => {
     if (!userInfo) {
       // Mostrar un mensaje y redireccionar al login
@@ -69,6 +106,12 @@ const DetalleMaterialScreen = (props) => {
       navigation.navigate("Login"); // Asegúrate de que el nombre de la pantalla sea correcto
       return;
     }
+    if (userInfo.user.role === 1) {
+      setShowEjemplareslist(true);
+    } else {
+      setDialogVisible(true);
+    }
+
     setDialogVisible(true);
   };
 
@@ -76,12 +119,48 @@ const DetalleMaterialScreen = (props) => {
     // Cerrar el diálogo de confirmación
     setDialogVisible(false);
   };
+
+  // Creamos el menu de navegacion para las Acciones del material
+
+  const handlePrestarMaterial = () => {
+    navigation.navigate("PrestarMaterial", {
+      detalleMaterial: detalleMaterial,
+      ejemplares: ejemplares,
+    });
+    closeMenu();
+  };
+
+  const handleEditarMaterial = () => {
+    navigation.navigate("NuevoMaterial", {
+      detalleMaterial: detalleMaterial,
+      isEditar: true,
+    });
+    closeMenu();
+  };
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: detalleMaterial ? detalleMaterial.titulo : "Cargando detalles...",
+      headerRight: () => (
+        <View style={{ marginRight: 10 }}>
+          <Menu
+            visible={menuVisible}
+            onDismiss={closeMenu}
+            anchor={<IconButton icon="dots-vertical" onPress={openMenu} />}
+          >
+            <Menu.Item onPress={handlePrestarMaterial} title="Prestar material" />
+            <Menu.Item onPress={handleEditarMaterial} title="Editar material" />
+          </Menu>
+        </View>
+      ),
+    });
+  }, [navigation, menuVisible, detalleMaterial, userInfo]);
+
   return (
     <PaperProvider>
       <View style={styles.container}>
         {detalleMaterial ? (
           <View style={styles.reservaContainer}>
-            <Text>Titulo: {detalleMaterial.titulo} </Text>
             <Text>
               Editorial:
               {detalleMaterial.editorial.map((editorial) => (
@@ -108,13 +187,22 @@ const DetalleMaterialScreen = (props) => {
                 <Text key={genero.id}>{genero.nombre}</Text>
               ))}
             </Text>
-            {userInfo && userInfo.user.role === 1 ? (
-              <></>
-            ) : detalleMaterial.estado === "Disponible" ? (
+            {showEjemplaresList && userInfo && userInfo.user.role === 1 ? (
+              <ScrollView>
+                {renderTableHeader()}
+                <FlatList
+                  data={ejemplares}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={renderItem}
+                />
+              </ScrollView>
+            ) : userInfo &&
+              userInfo.user.role != 1 &&
+              detalleMaterial.estado === "Disponible" ? (
               <View style={styles.entregarContainer}>
                 <Button style={styles.button} onPress={handleConfirmar}>
                   <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
-                    Reservar
+                    <Text>Reservar</Text>
                   </Text>
                 </Button>
                 <Portal>
@@ -135,28 +223,32 @@ const DetalleMaterialScreen = (props) => {
                 </Portal>
               </View>
             ) : (
-              <View style={styles.entregarContainer}>
-                <Button style={styles.button} onPress={handleConfirmar}>
-                  <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
-                    Apuntarse a la lista de espera
-                  </Text>
-                </Button>
-                <Portal>
-                  <Dialog visible={dialogVisible} onDismiss={handleConfirmar}>
-                    <Dialog.Content>
-                      <Paragraph>
-                        ¿Estas seguro de añadirte a la "Lista de espera"?. Se te
-                        notificará cuando el material esté disponible y se
-                        creará la reserva.
-                      </Paragraph>
-                    </Dialog.Content>
-                    <Dialog.Actions>
-                      <Button onPress={handleCancel}>Cancelar</Button>
-                      <Button onPress={handleReservarMaterial}>Aceptar</Button>
-                    </Dialog.Actions>
-                  </Dialog>
-                </Portal>
-              </View>
+              detalleMaterial.estado === "Disponible (Lista de espera)" && (
+                <View style={styles.entregarContainer}>
+                  <Button style={styles.button} onPress={handleConfirmar}>
+                    <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                      Apuntarse a la lista de espera
+                    </Text>
+                  </Button>
+                  <Portal>
+                    <Dialog visible={dialogVisible} onDismiss={handleConfirmar}>
+                      <Dialog.Content>
+                        <Paragraph>
+                          ¿Estas seguro de añadirte a la "Lista de espera"?. Se
+                          te notificará cuando el material esté disponible y se
+                          creará la reserva.
+                        </Paragraph>
+                      </Dialog.Content>
+                      <Dialog.Actions>
+                        <Button onPress={handleCancel}>Cancelar</Button>
+                        <Button onPress={handleReservarMaterial}>
+                          Aceptar
+                        </Button>
+                      </Dialog.Actions>
+                    </Dialog>
+                  </Portal>
+                </View>
+              )
             )}
           </View>
         ) : (
@@ -171,7 +263,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     /* justifyContent: "center", */
-    alignItems: "center",
     paddingHorizontal: 16,
   },
   reservaContainer: {
@@ -210,6 +301,9 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 18,
     fontStyle: "italic",
+  },
+  menuContainer: {
+    right: 16,
   },
 });
 export default DetalleMaterialScreen;

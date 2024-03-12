@@ -1,5 +1,14 @@
-import { Text, Button, TextInput, View } from "react-native";
 import React, { useState, useEffect } from "react";
+
+import { Text, View, StyleSheet } from "react-native";
+import {
+  TextInput,
+  Button,
+  Snackbar,
+  HelperText,
+  List,
+} from "react-native-paper";
+
 import AuthServices from "../../services/AuthServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../../contexts/UserContext";
@@ -40,10 +49,28 @@ const LoginScreen = ({ setIsLoggedIn, navigation }) => {
         secureTextEntry={true}
         onChangeText={setPassword}
       />
-      <Button title="Login" onPress={handleLogin} />
+      <View style={styles.buttonContainer}>
+        <Button style={styles.button} onPress={handleLogin}>
+          <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>Login</Text>
+        </Button>
+      </View>
       <Text onPress={navigateToSignup}>¿No tienes cuenta? Regístrate aquí</Text>
     </View>
   );
 };
-
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: "#2471A3",
+    marginTop: 10,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+  },
+});
 export default LoginScreen;

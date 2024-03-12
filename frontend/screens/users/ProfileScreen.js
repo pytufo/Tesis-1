@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useUser } from "../../contexts/UserContext";
 import MovimientosServices from "../../services/MovimientosServices";
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const [userReservas, setUserReserva] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { userInfo } = useUser();
@@ -35,7 +35,7 @@ const ProfileScreen = () => {
             <TouchableOpacity
               style={styles.button}
               onPress={() => {
-                // Manejar la acción del botón "Mis prestamos"
+                navigation;
               }}
             >
               <Text style={styles.buttonText}>Notificaciones (0)</Text>
@@ -43,7 +43,7 @@ const ProfileScreen = () => {
             <TouchableOpacity
               style={styles.button}
               onPress={() => {
-                console.log(userReservas.reserva);
+                navigation.navigate("Reservas");
                 // Manejar la acción del botón "Mis reservas"
               }}
             >
@@ -53,6 +53,7 @@ const ProfileScreen = () => {
             <TouchableOpacity
               style={styles.button}
               onPress={() => {
+                navigation.navigate("Prestamos");
                 // Manejar la acción del botón "Mis prestamos"
               }}
             >

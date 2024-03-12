@@ -16,7 +16,7 @@ import {
 } from "react-native-paper";
 
 import React, { useEffect, useState } from "react";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useUser } from "../../contexts/UserContext";
 import MovimientosServices from "../../services/MovimientosServices";
 import { API_BASE_URL, API_ROUTES } from "../../constants/API";
@@ -34,7 +34,7 @@ const DetalleReservaScreen = () => {
   const { reservaId } = route.params;
   const [searchText, setSearchText] = useState("");
   const [filteredEjemplares, setFilteredEjemplares] = useState([]);
-
+  const navigation = useNavigation();
   const { userInfo } = useUser();
   useEffect(() => {
     const fetchDetalleReserva = async () => {
@@ -57,9 +57,15 @@ const DetalleReservaScreen = () => {
 
     const fetchEjemplaresDisponibles = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`
-        );
+        let url;
+        if (userInfo && userInfo.user.role === 1) {
+          url = `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/entregar_ejemplar/`;
+        } else {
+          url = `${API_BASE_URL}${API_ROUTES.RESERVAS}${reservaId}/`;
+        }
+
+        const response = await axios.get(url);
+
         setEjemplaresDisponibles(response.data.ejemplares_disponibles || []);
         console.log(response.data);
         console.log(ejemplaresDisponibles);
@@ -88,6 +94,7 @@ const DetalleReservaScreen = () => {
       if (response.ok) {
         setDialogVisible(false);
         toast.info("Reserva cancelada");
+        navigation.navigate("Reservas");
       } else {
         setDialogVisible(false);
         toast.error("Error al realizar la cancelacion");
@@ -175,26 +182,24 @@ const DetalleReservaScreen = () => {
   };
 
   return (
-    <PaperProvider>
-      <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
+    <View style={styles.container} onTouchStart={handleKeyboardDismiss}>
+      <PaperProvider>
         {detalleReserva ? (
-          <View style={styles.reservaContainer}>            
+          <View style={styles.reservaContainer}>
             <Text>Solicitante:{detalleReserva.owner?.email}</Text>
             <Text>Material: {detalleReserva.material?.titulo}</Text>
-            {detalleReserva.fecha_fin === null ? (
-              <Text>Finalizacion: {detalleReserva.estado}</Text>
-            ) : (
-              <Text>
-                Finalizacion:{" "}
-                {moment(detalleReserva.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}
+            {detalleReserva.fecha_fin === null ||
+            detalleReserva.estado === "Finalizada" ||
+            detalleReserva.estado === "En lista de espera" ? (
+              <Text style={styles.finalizadaText}>
+                Finalizacion: {detalleReserva.estado}
               </Text>
-            )}
-            {detalleReserva.estado === "Finalizada" ? (
-              <Text style={styles.finalizadaText}> Finalizada</Text>
             ) : (
-              <View style={styles.entregarContainer}>
+              <View>
+                <Text>Finalizacion: </Text>
+                {moment(detalleReserva.fecha_fin).format("YYYY-MM-DD HH:mm:ss")}
                 {userInfo && userInfo.user.role === 1 ? (
-                  <View>
+                  <View style={styles.entregarContainer}>
                     <Text style={styles.label}>Buscar ejemplar por ID: </Text>
                     <TextInput
                       style={styles.input}
@@ -277,8 +282,8 @@ const DetalleReservaScreen = () => {
         ) : (
           <Text>Cargando reserva...</Text>
         )}
-      </View>
-    </PaperProvider>
+      </PaperProvider>
+    </View>
   );
 };
 

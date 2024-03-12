@@ -17,6 +17,8 @@ import DetalleUsuarioScreen from "./screens/users/DetalleUsuarioScreen";
 import DetalleReservaScreen from "./screens/movimientos/DetalleReservaScreen";
 import DetallePrestamoScreen from "./screens/movimientos/DetallePrestamoScreen";
 import HomeScreen from "./screens/HomeScreen";
+import PrestarMaterialScreen from "./screens/materiales/Actions/PrestarMaterialScreen";
+import NuevoMaterialScreen from "./screens/materiales/Actions/NuevoMaterialScreen";
 
 const AppTabs = createBottomTabNavigator();
 const UsuariosStack = createStackNavigator();
@@ -67,7 +69,7 @@ const ReservasStackNavigator = () => (
   </ReservasStack.Navigator>
 );
 
-const MaterialesStackNavigator = () => (
+export const MaterialesStackNavigator = () => (
   <MaterialesStack.Navigator>
     <MaterialesStack.Screen
       name="Materiales"
@@ -78,10 +80,18 @@ const MaterialesStackNavigator = () => (
       name="DetalleMaterial"
       component={DetalleMaterialScreen}
     />
+    <MaterialesStack.Screen
+      name="PrestarMaterial"
+      component={PrestarMaterialScreen}
+    />
+    <MaterialesStack.Screen
+      name="NuevoMaterial"
+      component={NuevoMaterialScreen}
+    />
   </MaterialesStack.Navigator>
 );
 
-const EjemplaresStackNavigator = () => (
+export const EjemplaresStackNavigator = () => (
   <EjemplaresStack.Navigator>
     <EjemplaresStack.Screen
       name="Ejemplares"
@@ -106,10 +116,10 @@ const AppTabsScreen = ({ setIsLoggedIn, setUserData, navigation }) => {
               name="Usuarios"
               component={UsuariosStackNavigator}
             />
-            <AppTabs.Screen
+            {/* <AppTabs.Screen
               name="Ejemplares"
               component={EjemplaresStackNavigator}
-            />
+            /> */}
           </>
         ) : (
           <>

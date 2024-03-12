@@ -1,4 +1,5 @@
 import { API_BASE_URL, API_ROUTES } from "../constants/API";
+import { useUser } from "../contexts/UserContext";
 
 const MaterialServices = {
   listarMateriales: async (searchQuery) => {
@@ -42,17 +43,21 @@ const MaterialServices = {
       throw error;
     }
   },
-  DetaleMateriales: async (searchQuery) => {
+  DetalleMateriales: async (searchQuery) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const { userInfo } = useUser();
+      let url;
+      if (userInfo.role === 1) {
+        url = `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}/ejemplares/`;
+      } else {
+        url = `${API_BASE_URL}${API_ROUTES.MATERIALES}${materialId}`;
+      }
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await response.json();
 
       const buscarMaterial = data.filter((material) =>
@@ -88,6 +93,7 @@ const MaterialServices = {
       console.log(data);
       return data;
     } catch (error) {
+      ya;
       console.error("Error al reservar el material:", error);
       throw error;
     }
@@ -96,17 +102,14 @@ const MaterialServices = {
   // Listar los campos del material (genero, autor, etc....)
   listarTipoMaterial: async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}tipo/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}tipo/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await response.json();
-      
+
       return data;
     } catch (error) {
       console.error("Error al obtener los materiales");
@@ -115,17 +118,14 @@ const MaterialServices = {
   },
   listarEditoriales: async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}editorial/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}editorial/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await response.json();
-      
+
       return data;
     } catch (error) {
       console.error("Error al obtener los materiales");
@@ -134,17 +134,14 @@ const MaterialServices = {
   },
   listarAutores: async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}autor/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}autor/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await response.json();
-      
+
       return data;
     } catch (error) {
       console.error("Error al obtener los materiales");
@@ -153,42 +150,36 @@ const MaterialServices = {
   },
   listarCarreras: async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}carrera/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}carrera/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await response.json();
-      
-      return data;
-    } catch (error) {
-      console.error("Error al obtener los materiales");
-      throw error;
-    }
-  },listarGeneros: async () => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}genero/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = await response.json();
-      
+
       return data;
     } catch (error) {
       console.error("Error al obtener los materiales");
       throw error;
     }
   },
-  
+  listarGeneros: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}genero/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.error("Error al obtener los materiales");
+      throw error;
+    }
+  },
 };
 
 export default MaterialServices;

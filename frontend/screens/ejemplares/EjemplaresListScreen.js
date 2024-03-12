@@ -63,8 +63,7 @@ const EjemplarListScreen = ({ navigation }) => {
     navigation.navigate("DetalleEjemplar", { ejemplarId });
   };
   return (
-    <View style={styles.container}>
-      <Button>asfd</Button>
+    <View style={styles.container}>      
       <View style={{ padding: 10 }}>
         <TextInput
           style={styles.searchInput}

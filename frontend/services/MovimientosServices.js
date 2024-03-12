@@ -88,6 +88,24 @@ const MovimientosServices = {
       throw error;
     }
   },
+  crearPrestamo: async (accessToken, prestamoData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ROUTES.PRESTAMOS}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(prestamoData),
+      });
+      const data = await response.json();
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.error("Error al entregar el ejemplar de la reserva");
+      throw error;
+    }
+  },
   entregarEjemplarReserva: async (accessToken, reservaId, prestamoData) => {
     try {
       const response = await fetch(

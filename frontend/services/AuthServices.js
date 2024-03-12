@@ -77,7 +77,7 @@ const AuthServices = {
   listarUsuariosNoAdmin: async (accessToken, searchQuery) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}${AUTH_ROUTES.USUARIOS_NOADMIN}`,
+        `${API_BASE_URL}${AUTH_ROUTES.USUARIOS_NOADMIN}?search=${searchQuery}`,
         {
           method: "GET",
           headers: {

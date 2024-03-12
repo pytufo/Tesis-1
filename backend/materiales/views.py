@@ -116,17 +116,17 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     queryset = Material.objects.all()
 
-
-"""     def retrieve_material(self, request, material_pk=None):
+    def retrieve_material(self, request, material_pk=None):
         material = Material.objects.get(pk=material_pk)
         serializer = MaterialSerializer(material)
 
-        # ejemplares = get_ejemplares_de_material(material)
-        # ejemplares_serializer = EjemplarMaterialSerializer(ejemplares, many=True)
+        ejemplares = get_ejemplares_de_material(material)
+        ejemplares_serializer = EjemplarMaterialSerializer(ejemplares, many=True)
         response_data = {
             "material": serializer.data,
+            "ejemplares": ejemplares_serializer.data,
         }
-        return Response(response_data) """
+        return Response(response_data)
 
 
 class EjemplarViewSet(viewsets.ModelViewSet):
