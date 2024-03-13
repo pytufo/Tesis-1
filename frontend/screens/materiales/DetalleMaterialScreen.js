@@ -15,6 +15,7 @@ import {
   Portal,
   TextInput,
   Menu,
+  Divider,
   IconButton,
 } from "react-native-paper";
 
@@ -40,14 +41,7 @@ const DetalleMaterialScreen = (props) => {
   const navigation = useNavigation();
 
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [menuVisible, setMenuVisible] = useState(false);
-  const openMenu = () => {
-    setMenuVisible(true);
-  };
-  const closeMenu = () => {
-    setMenuVisible(false);
-  };
-
+  const [menuVisible, setMenuVisible] = React.useState(null);
   const { userInfo } = useUser();
 
   useEffect(() => {
@@ -127,7 +121,6 @@ const DetalleMaterialScreen = (props) => {
       detalleMaterial: detalleMaterial,
       ejemplares: ejemplares,
     });
-    closeMenu();
   };
 
   const handleEditarMaterial = () => {
@@ -135,29 +128,36 @@ const DetalleMaterialScreen = (props) => {
       detalleMaterial: detalleMaterial,
       isEditar: true,
     });
-    closeMenu();
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     navigation.setOptions({
       title: detalleMaterial ? detalleMaterial.titulo : "Cargando detalles...",
-      headerRight: () => (
-        <View style={{ marginRight: 10 }}>
-          <Menu
-            visible={menuVisible}
-            onDismiss={closeMenu}
-            anchor={<IconButton icon="dots-vertical" onPress={openMenu} />}
-          >
-            <Menu.Item onPress={handlePrestarMaterial} title="Prestar material" />
-            <Menu.Item onPress={handleEditarMaterial} title="Editar material" />
-          </Menu>
-        </View>
-      ),
     });
   }, [navigation, menuVisible, detalleMaterial, userInfo]);
 
   return (
     <PaperProvider>
+      {userInfo && userInfo.user.role === 1 && (
+        <View
+          style={{
+            flexDirection: "row",
+          }}
+        >
+          <Button
+            style={[styles.button, { marginRight: 10 }]}
+            onPress={handlePrestarMaterial}
+          >
+            <Text style={{ color: "#FFFFFF" }}>Prestar material</Text>
+          </Button>
+          <Button
+            style={[styles.button, { marginRight: 10 }]}
+            onPress={handleEditarMaterial}
+          >
+            <Text style={{ color: "#FFFFFF" }}>Editar material</Text>
+          </Button>
+        </View>
+      )}
       <View style={styles.container}>
         {detalleMaterial ? (
           <View style={styles.reservaContainer}>
@@ -223,7 +223,9 @@ const DetalleMaterialScreen = (props) => {
                 </Portal>
               </View>
             ) : (
-              detalleMaterial.estado === "Disponible (Lista de espera)" && (
+              detalleMaterial.estado === "Disponible (Lista de espera)" &&
+              userInfo &&
+              userInfo.user.role != 1 && (
                 <View style={styles.entregarContainer}>
                   <Button style={styles.button} onPress={handleConfirmar}>
                     <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
@@ -240,9 +242,9 @@ const DetalleMaterialScreen = (props) => {
                         </Paragraph>
                       </Dialog.Content>
                       <Dialog.Actions>
-                        <Button onPress={handleCancel}>Cancelar</Button>
+                        <Button onPress={handleCancel}>Volver</Button>
                         <Button onPress={handleReservarMaterial}>
-                          Aceptar
+                          Confirmar
                         </Button>
                       </Dialog.Actions>
                     </Dialog>
@@ -263,6 +265,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     /* justifyContent: "center", */
+    paddingTop: 20,
     paddingHorizontal: 16,
   },
   reservaContainer: {
@@ -295,8 +298,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
+    color: "#FFFFFF",
     backgroundColor: "#2471A3",
     marginTop: 10,
+    paddingHorizontal: 12,
+    borderRadius: 4,
   },
   loadingText: {
     fontSize: 18,

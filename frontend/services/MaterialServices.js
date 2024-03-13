@@ -12,8 +12,12 @@ const MaterialServices = {
       });
       const data = await response.json();
 
-      const buscarMaterial = data.filter((material) =>
-        material.titulo.toLowerCase().includes(searchQuery.toLowerCase())
+      const buscarMaterial = data.filter(
+        (material) =>
+          material.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          material.autor[0].nombre
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
       );
       return buscarMaterial;
 

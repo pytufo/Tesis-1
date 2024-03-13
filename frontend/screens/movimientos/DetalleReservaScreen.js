@@ -93,7 +93,7 @@ const DetalleReservaScreen = () => {
 
       if (response.ok) {
         setDialogVisible(false);
-        toast.info("Reserva cancelada");
+        toast.success("Reserva cancelada");
         navigation.navigate("Reservas");
       } else {
         setDialogVisible(false);
@@ -192,7 +192,7 @@ const DetalleReservaScreen = () => {
             detalleReserva.estado === "Finalizada" ||
             detalleReserva.estado === "En lista de espera" ? (
               <Text style={styles.finalizadaText}>
-                Finalizacion: {detalleReserva.estado}
+                {detalleReserva.estado}
               </Text>
             ) : (
               <View>
@@ -290,8 +290,8 @@ const DetalleReservaScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    /* justifyContent: "center", */
+    paddingTop: 20,
     paddingHorizontal: 16,
   },
   reservaContainer: {

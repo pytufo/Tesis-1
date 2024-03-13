@@ -1,6 +1,14 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import React, { useState, useEffect } from "react";
-import { TextInput, List, Button, Snackbar } from "react-native-paper";
+import {
+  TextInput,
+  List,
+  Button,
+  Dialog,
+  Paragraph,
+  Portal,
+} from "react-native-paper";
+import { toast } from "react-toastify";
 import axios from "axios";
 import MaterialServices from "../../../services/MaterialServices";
 import MovimientosServices from "../../../services/MovimientosServices";
@@ -12,6 +20,8 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
   const { userInfo } = useUser();
   const accessToken = userInfo ? userInfo.access_token : null;
 
+  const [dialogVisible, setDialogVisible] = useState(false);
+
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchUserText, setSearchUserText] = useState("");
 
@@ -19,12 +29,6 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedEjemplar, setSelectedEjemplar] = useState("");
-
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-
-  console.log(detalleMaterial);
-  console.log(ejemplares);
 
   useEffect(() => {
     navigation.setOptions(
@@ -39,7 +43,6 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
           accessToken,
           ""
         );
-        console.log(usersResponse);
         setUsers(usersResponse);
       } catch (error) {
         console.error("Error al obtener la lista de usuarios", error);
@@ -53,13 +56,13 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
     try {
       console.log(selectedUser);
       if (!selectedUser) {
-        setSnackbarMessage("Selecciona un usuario para el prestamo");
-        setSnackbarVisible(true);
+        toast.error("Selecciona un usuario para el prestamo");
+
         return;
       }
       if (!selectedEjemplar) {
-        setSnackbarMessage("El ejemplar seleccionado no existe");
-        setSnackbarVisible(true);
+        toast.error("El ejemplar seleccionado no existe");
+
         return;
       }
       const prestamoData = {
@@ -71,13 +74,12 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
         accessToken,
         prestamoData
       );
-      if (response) {
-        console.log(selectedEjemplar, selectedUser);
-        setSnackbarMessage(response.message);
-        setSnackbarVisible(true);
+      if (response.ok) {
+        toast.success(response.message);
       } else {
-        setSnackbarMessage(response.message);
+        toast.info(response.message);
       }
+      setDialogVisible(false);
     } catch (error) {
       console.error("Error al realizar el prestamo del ejemplar", error);
     }
@@ -118,14 +120,16 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
     const filtered = filterItems(text, ejemplares);
     setFilteredEjemplares(filtered);
   };
+
+  const handleConfirmar = async () => {
+    setDialogVisible(true);
+  };
+  const handleCancel = () => {
+    // Cerrar el diálogo de confirmación
+    setDialogVisible(false);
+  };
   return (
     <ScrollView>
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-      >
-        {snackbarMessage}
-      </Snackbar>
       <TextInput
         label="Ingrese el Id del ejemplar a prestar"
         value={selectedEjemplar}
@@ -133,6 +137,7 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
           setSelectedEjemplar(text);
           filterEjemplares(text);
         }}
+        
       />
       <List.Section>
         {filteredEjemplares.map((item) => (
@@ -161,21 +166,27 @@ const PrestarMaterialScreen = ({ route, navigation }) => {
         ))}
       </List.Section>
       <View style={styles.buttonContainer}>
-        <Button style={styles.button} onPress={handleEntregarMaterial}>
-          Entregar Material
+        <Button style={styles.button} onPress={handleConfirmar}>
+          <Text style={{ color: "#FFFFFF" }}>Entregar Material</Text>
         </Button>
+        <Portal>
+          <Dialog visible={dialogVisible} onDismiss={handleConfirmar}>
+            <Dialog.Content>
+              <Paragraph>¿Estas seguro realizar el prestamo?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={handleCancel}>Cancelar</Button>
+              <Button onPress={handleEntregarMaterial}>Aceptar</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
+  container: { flex: 1 },
   button: {
     backgroundColor: "#2471A3",
     marginTop: 10,

@@ -4,7 +4,8 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  StyleSheet,  
+  StyleSheet,
+  TextInput,
 } from "react-native";
 import { Button, Portal } from "react-native-paper";
 import React, { useEffect, useState } from "react";
@@ -22,7 +23,6 @@ const PrestamosScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { userInfo } = useUser();
   const [refreshing, setRefreshing] = useState(false);
-  
 
   const fetchPrestamo = async () => {
     try {
@@ -86,6 +86,14 @@ const PrestamosScreen = ({ navigation }) => {
 
   return (
     <Portal.Host>
+      <View style={{ padding: 10 }}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar..."
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
+      </View>
       <View style={styles.container}>
         <ScrollView>
           <View>

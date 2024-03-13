@@ -17,13 +17,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
     usuario_prestamos = serializers.SerializerMethodField()
     cantidad_prestamos = serializers.SerializerMethodField()
     limite = serializers.SerializerMethodField()
-    role = serializers.CharField(source='get_role_display', read_only=True)
+    role = serializers.CharField(source="get_role_display", read_only=True)
 
     class Meta:
         model = User
         fields = [
             "id",
             "username",
+            "first_name",
+            "last_name",
             "email",
             "cantidad_reservas",
             "usuario_reservas",
@@ -123,7 +125,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("email", "password")
+        fields = ("email", "password", "first_name", "last_name")
 
     def create(self, validated_data):
         user = User.objects.create(email=validated_data["email"])

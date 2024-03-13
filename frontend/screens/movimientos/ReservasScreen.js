@@ -90,7 +90,7 @@ const ReservasScreen = ({ navigation }) => {
       <View style={{ padding: 10 }}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar material..."
+          placeholder="Buscar..."
           value={searchQuery}
           onChangeText={(text) => setSearchQuery(text)}
         />

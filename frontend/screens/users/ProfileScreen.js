@@ -30,16 +30,10 @@ const ProfileScreen = ({ navigation }) => {
       {userInfo && (
         <>
           <Text>Email: {userInfo.user.email}</Text>
+          <Text>Nombre: {userInfo.user.first_name}</Text>
+          <Text>Apelido: {userInfo.user.last_name}</Text>
           <Text>Rol: {userInfo.user.role}</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                navigation;
-              }}
-            >
-              <Text style={styles.buttonText}>Notificaciones (0)</Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
               onPress={() => {
@@ -69,14 +63,16 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    /* justifyContent: "center", */
+    paddingTop: 20,
+    paddingHorizontal: 16,
   },
   buttonContainer: {
     flexDirection: "column",
     marginTop: 10,
   },
   button: {
-    backgroundColor: "#3498db", // Puedes ajustar el color de fondo según tu diseño
+    backgroundColor: "#2471A3", // Puedes ajustar el color de fondo según tu diseño
     padding: 15,
     marginBottom: 10,
     borderRadius: 5,

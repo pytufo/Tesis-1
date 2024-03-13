@@ -118,23 +118,3 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
-
-"""     def retrieve(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        data = []
-        for user in queryset:
-            cantidad_reservas, cantidad_prestamos = get_reservas_prestamos_usuario(user)
-
-            # Agrega la información al objeto user
-            user_data = {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "cantidad_reservas": cantidad_reservas,
-                "cantidad_prestamos": cantidad_prestamos,
-            }
-
-            data.append(user_data)
-
-        return Response(data) """

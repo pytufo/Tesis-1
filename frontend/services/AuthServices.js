@@ -17,14 +17,14 @@ const AuthServices = {
       throw error;
     }
   },
-  signup: async (email, password) => {
+  signup: async (email, password, first_name, last_name) => {
     try {
       const response = await fetch(`${API_BASE_URL}auth/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, first_name, last_name }),
       });
       const data = await response.json();
       return data;

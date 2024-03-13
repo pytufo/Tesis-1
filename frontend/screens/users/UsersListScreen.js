@@ -17,7 +17,7 @@ import AuthServices from "../../services/AuthServices";
 const UsersListScreen = ({ navigation }) => {
   const [user, setUser] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const { userInfo } = useUser();  
+  const { userInfo } = useUser();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -28,7 +28,7 @@ const UsersListScreen = ({ navigation }) => {
           searchQuery
         );
         setUser(response);
-        console.log(response)
+        console.log(response);
       } catch (error) {
         console.log("Error al obtener los usuarios", error);
       }
@@ -39,7 +39,7 @@ const UsersListScreen = ({ navigation }) => {
   const renderTableHeader = () => (
     <View style={tableStyles.tableHeader}>
       <Text style={tableStyles.headerText}>Usuario</Text>
-      <Text style={tableStyles.headerText}>Estado de la cuenta</Text>
+      <Text style={tableStyles.headerText}>Estado de la cuenta</Text>      
     </View>
   );
 
@@ -49,7 +49,7 @@ const UsersListScreen = ({ navigation }) => {
         <Text style={tableStyles.cell}>{item.email}</Text>
         <Text style={tableStyles.cell}>
           {item.is_active ? (
-            <Text> Cuenta activada</Text>
+            <Text> Limite: {item.limite}</Text>
           ) : (
             <Text> Cuenta pendiente de activacion por el administrador</Text>
           )}

@@ -20,10 +20,14 @@ const MovimientosServices = {
 
       const buscarReserva = data.filter(
         (reserva) =>
-          reserva.material &&
-          reserva.material.titulo
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
+          (reserva.material &&
+            reserva.material.titulo
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (reserva.owner &&
+            reserva.owner.email
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()))
       );
       console.log(buscarReserva);
       console.log(data);
@@ -146,14 +150,17 @@ const MovimientosServices = {
 
       const buscarPrestamo = data.filter(
         (prestamo) =>
-          prestamo.material &&
-          prestamo.material.titulo
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
+          (prestamo.material &&
+            prestamo.material.titulo
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (prestamo.owner &&
+            prestamo.owner.email
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()))
       );
       console.log(buscarPrestamo);
-      console.log(data);
-      return data;
+      return buscarPrestamo;
     } catch (error) {
       console.error("Error al obtener las reservas");
       throw error;
