@@ -1,0 +1,53 @@
+{% extends 'navbar.html' %}
+
+{% block title %} Detalles del Material {% endblock %}
+
+{% block content %}
+<br />
+<div class="d-flex justify-content-between mb-3">
+  <a onclick="window.location='{% url 'listar_materiales' %}';" class="btn btn-primary">Volver a la lista</a>
+  {% if user.role == 1%}
+  <div>
+    <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#materialModal"
+      onclick="editModal('{{ material.id }}')">Editar</a>
+    <a href="#" class="btn btn-secondary">Ejemplares del material</a>
+    <a href="{% url 'generar_pdf_material' material.id %}" target="_blank" class="btn btn-secondary">Imprimir material</a>
+  </div>
+  {%endif%}
+</div>
+<div class="container text-center">
+  <br />
+  <h2>{{ material.id }}</h2>
+  <h2>{{ material.titulo }}</h2>
+  <p><strong>Autor:</strong>
+    {% for autor in material.autor %}
+    {{ autor.nombre }} {{ autor.apellido }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  <p><strong>Tipo:</strong>
+    {% for tipo in material.tipo %}
+    {{ tipo.nombre }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  <p><strong>Genero:</strong>
+    {% for genero in material.genero %}
+    {{ genero.nombre }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  <p><strong>Editorial:</strong>
+    {% for editorial in material.editorial %}
+    {{ editorial.nombre }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>  
+  <p><strong>Carrera:</strong>
+    {% for carrera in material.carrera %}
+    {{ carrera.nombre }} {% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  <p><strong>Descripción:</strong> {{ material.descripcion }}</p>
+  <p><strong>Estado:</strong> {{ material.estado }}</p>
+
+</div>
+
+{% include 'materiales/_nuevo_material_modal.html' %}
+{% endblock %}

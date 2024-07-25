@@ -1,0 +1,7 @@
+{% extends 'navbar.html'%}
+{% block title %} Error {% endblock%}
+{% block content%}
+<h5>Oops! Página no encontrada</h5>
+<p>Disculpa, pero la página que estas buscando no existe</p>
+<a href="{% url 'materiales' %}" class="btn btn-primary">Volver al inicio</a>
+{% endblock %}

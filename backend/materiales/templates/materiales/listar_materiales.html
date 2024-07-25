@@ -1,0 +1,188 @@
+{% extends 'navbar.html' %}
+{% block title %} Lista de Materiales{% endblock %}
+{% block content %}
+{% if message %}
+<div class="alert alert-success" role="alert">{{ message }}</div>
+<script>
+  setTimeout(function () {
+    document.querySelector('.alert-success').style.display = 'none';
+  }, 3000)
+</script>
+{% endif %}
+<div class="container-fluid">
+  <p>
+  </p>
+  <br />
+  <div class="row">
+    <div class="col-12">
+      <form method="get" action="{% url 'listar_materiales' %}">
+        <div class="input-group mb-3">
+          <input type="text" name="query" class="form-control" placeholder="Buscar material..." value="{{ query }}" />
+          <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+  {% if user.role == 1%}
+  <div class="row">
+    <div class="col">
+    </div>
+    <div class="col">
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+        aria-expanded="false">Nuevo
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal">Nuevo Material</a>
+        </li>
+        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#ejemplarModal">Nuevo Ejemplar</a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+  {% endif%}
+  <div class="row">
+    <div class="col">
+      {% if materials %}
+      <table class="table table-sm table-hover table-secondary table-bordered">
+        <thead class="table-secondary text-center">
+          <th scope="col">Titulo</th>
+          <th scope="col">Autor</th>
+          <th scope="col">Descripcion</th>
+          {% if user.role == 1 %}
+          <th scope="col">Estado</th>
+          {%endif%}
+          <th scope="col">Accion</th>
+        </thead>
+        <!-- Tabla de materiales -->
+        <tbody class="table-group-divider bg-dark-subtle">
+          {% for material in materials %}
+          <tr>
+            <td>{{ material.titulo }}</td>
+            <td>
+              <p>
+                {% for autor in material.autor %}
+                {{ autor.nombre }} {{autor.apellido }}.
+                {% endfor %}
+              </p>
+            </td>
+            <td>{{ material.descripcion }}</td>
+            {%if user.role == 1%}
+            <td>
+              {{ material.estado }}
+
+            </td>
+            {% endif%}
+            <td class="text-center">
+              {% if user.role != 1 %}
+              <!-- Acciones para usuario -->
+              <div class="btn-group">
+                <button class="btn btn-secondary" type="button" href="'#'">
+                  {% if material.estado == "Disponible (Lista de espera)" %}
+                  Añadirse a lista de espera
+                  {% elif material.estado == "Disponible" %}
+
+                  Reservar
+                </button>
+                {% else %}
+                <button class="btn btn-secondary" type="button" href="{% url 'material' material.id%}">
+                  No disponible
+                </button>
+                {% endif %}
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                  <span class="visually-hidden">Toggle Dropdown</span>
+                  <ul class="dropdown-menu ">
+                    <li onclick="window.location='{% url 'material' material.id %}';"><a
+                        href="{% url 'material' material.id %}" class="dropdown-item">Informacion del
+                        material</a></li>
+                    <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                  </ul>
+              </div>
+              {% else %}
+              <!-- Acciones para admin  -->
+              <div class="btn-group">
+                <button class="btn btn-secondary" type="button">
+                  Accion
+                </button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                  <span class="visually-hidden">Toggle Dropdown</span>
+                  <ul class="dropdown-menu ">
+                    <li><a class="dropdown-item" href="#">Crear prestamo</a></li>
+                    <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                    <li onclick="window.location='{% url 'material' material.id %}';"><a
+                        class="dropdown-item">Informacion del
+                        material</a></li>
+                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
+                        onclick="editModal('{{ material.id }}')">Editar
+                        material</a></li>
+                    <li onclick="window.location='{% url 'ejemplares_de_material' material.id %}';"><a
+                        class="dropdown-item" href="{% url 'ejemplares_de_material' material.id%}">Ejemplares del
+                        material: ({{material.cantidad_existente}}) </a></li>
+                  </ul>
+              </div>
+
+              {% endif %}
+
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="alert alert-danger" role="alert">No se encontraron coincidencias</div>
+      {% endif %}
+
+
+      <!-- Navegacion entre paginas -->
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link"
+              href="?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}"
+              aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+          <li class="page-item active">
+            <a class="page-link" href="#">{{ num }}</a>
+          </li>
+          {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %} <li class="page-item">
+            <a class="page-link" href="?{% if query %}query={{ query }}&{% endif %}page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                href="?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.next_page_number }}"
+                aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+            {% endif %}
+        </ul>
+      </nav>
+      <br />
+
+    </div>
+  </div>
+
+</div>
+<!-- Modal para nuevo material -->
+{% include 'materiales/_nuevo_material_modal.html' %}
+{% include 'ejemplares/_ejemplar_nuevo_editar.html' %}
+{% endblock %}

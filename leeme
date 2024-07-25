@@ -1,0 +1,23 @@
+- Compilar la imagen:
+    $ docker-compose up -d --build
+
+- Dar de alta la imagel docker:
+    $ docker-compose up -d
+
+- (si da error por no encontrar la bd):
+    en directorio raiz ejecutar:
+    source .env/bin/activate 
+    docker-compose exec django python manage.py makemigrations
+    docker-compose exec django python manage.py migrate
+    (por ultimo desactivar el entorno virtual con: 
+        $ deactivate
+    )
+
+- iniciar sesion en postgres:
+    $ docker-compose up -d --build django db
+
+    $ docker-compose exec db psql --username=postgres --db=postgres
+
+· GENERAR MATERIALES
+curl -X POST http://localhost:8000/api/generar/
+curl -X POST http://localhost:8000/auth/generar/

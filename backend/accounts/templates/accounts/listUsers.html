@@ -1,0 +1,150 @@
+{% extends 'navbar.html' %}
+{% block title %} Lista de Usuarios {% endblock %}
+
+{% block content %}
+
+<!-- Barra de busqueda -->
+<br />
+<div class="col-12">
+  <form method="get" action="{% url 'listar_usuarios' %}">
+    <div class="input-group mb-3">
+      <input type="text" name="query" class="form-control" placeholder="Buscar usuario..." value="{{query}}">
+      <button class="btn btn-outline-secondary" type="submit">
+        Buscar
+      </button>
+
+    </div>
+  </form>
+</div>
+<!-- Tabla de usuarios -->
+
+{% if usuarios %}
+<div class="row">
+  <div class="col">
+    <!-- Titulos de la tabla -->
+    <table class="table table-hover table-secondary table-bordered">
+      <thead class="table-secondary table-hover">
+        <th scope="col">Id</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">E-mail</th>
+        <th scope="col">Dispone para reservar </th>
+        <th scope="col col-hover"><a
+            href="?query={{ query }}&ordering={% if ordering == 'is_active' %}-is_active{% else %}is_active{% endif %}"
+            class="link-offset link-underline link-underline-opacity-0">Activo</a></th>
+
+        <th scope="col">Accion</th>
+      </thead>
+      <tbody class="table-group-divider bg-dark-subtle">
+        {% for user in usuarios %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.last_name }}, {{ user.first_name }}</td>
+          <td>{{ user.email }}</td>
+          {% if user.limite == "Excede" %}
+          <td class="table-danger">{{ user.limite }}</td>
+          {% else %}
+          <td>{{ user.limite }}</td>
+          {% endif %}
+          {% if user.is_active %}
+          <td class="table-success">Activo</td>
+          {% else %}
+          <td class="table-danger">Desactivado</td>
+          {% endif %}
+          <td class="text-center">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" , data-bs-toggle="dropdown"
+                aria-expanded="false">Accion</button>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'detalle_usuario' user.id%}" class="dropdown-item">Informacion del usuario</a>
+                </li>
+                {% if not user.email == "admin@mail.com" %}
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                {% if not user.is_active %}
+                <li><a href="#" class="dropdown-item bg bg-success" data-bs-toggle="modal" data-bs-target="#Modal"
+                    data-user-id="{{ user.id }}">Activar usuario</a></li>
+                {% else %}
+                <li><a href="#" class="dropdown-item bg bg-danger" data-bs-toggle="modal" data-bs-target="#Modal"
+                    data-user-id="{{ user.id }}">Desactivar usuario</a></li>
+                {% endif %}
+                {% endif %}
+                <li><a href="#" class="dropdown-item">Reservas del usuario</a></li>
+                <li><a href="#" class="dropdown-item">Prestamos</a></li>
+              </ul>
+
+            </div>
+          </td>
+
+        </tr>
+        {% endfor%}
+
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+<div class="pagination">
+  <span class="step-links">
+    {% if page_obj.has_previous %}
+    <a href="?query={{ query }}&page=1">inicio</a>
+    <a href="?query={{ query }}&page={{ page_obj.previous_page_number }}">anterior</a>
+    {% endif %}
+
+    <span class="current">
+      Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+    </span>
+
+    {% if page_obj.has_next %}
+    <a href="?query={{ query }}&page={{ page_obj.next_page_number }}">siguiente ></a>
+    <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}">ultima >></a>
+    {% endif %}
+  </span>
+</div>
+<br />
+{% else %}
+<div class="alert alert-danger" role="alert">No se encontraron coincidencias</div>
+{% endif %}
+
+<!-- Modal activar usuario-->
+<div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="ModalLabel">Activar usuario {{ user_id}} </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text center">
+        ¿Seguro que desea activar el usuario?
+      </div>
+      <div class="modal-footer">
+        <form method="post" action="{% url 'activar'%}">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" id="activate-user" value="">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Activar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('Modal');
+    modal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var userId = button.getAttribute('data-user-id');
+      var input = modal.querySelector('#activate-user');
+      input.value = userId;
+    });
+  });
+</script>
+{% endblock %}

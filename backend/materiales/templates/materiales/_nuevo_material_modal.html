@@ -1,0 +1,228 @@
+<div class="container" id="NuevoModificar">
+  <!-- Modal para nuevo material -->
+  <div class="modal fade" id="materialModal" tabindex="-1" aria-labelledby="materialModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="materialModalLabel">Nuevo Material</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="nuevoMaterialForm" method="post" action="{% url 'crear_material' %}">
+            {% csrf_token %}
+            <input type="hidden" id="materialId" name="id">
+            <div class="input-group mb-3 ">
+              <span class="input-group-text" class="form-label">Título: </span>
+              <input type="text" class="form-control border border-secondary-subtle" id="titulo" name="titulo" required>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text" class="form-label">Tipo: </span>
+              <input class="form-control border border-secondary-subtle" list="datalistTipoOptions" id="tipoDataList"
+                name="tipo" placeholder="Cree o seleccione un Tipo..." required>
+              <datalist id="datalistTipoOptions">
+                {% for tipo in tipos %}
+                <option>{{ tipo.nombre }}</option>
+                {% endfor %}
+              </datalist>
+            </div>
+            <div class="input-group mb-3 ">
+              <span class="input-group-text" class="form-label">Editorial: </span>
+              <input class="form-control border border-secondary-subtle" list="datalistEditorialOptions"
+                id="EditorialDataList" name="editorial" placeholder="Cree o seleccione una Editorial...">
+              <datalist id="datalistEditorialOptions">
+                {% for editorial in editoriales %}
+                <option>{{ editorial.nombre }}</option>
+                {% endfor %}
+              </datalist>
+            </div>
+            <div class="mb-3">
+              <div id="autores-container">
+                <div class="input-group mb-3" id="autores-container-2">
+                  <span class="input-group-text" class="form-label">Autor: </span>
+                  <input class="form-control border border-secondary-subtle autor-input" list="datalistAutorOptions"
+                    id="autorDataList" name="autores" placeholder="Cree o seleccione un Autor...">
+                  <datalist id="datalistAutorOptions">
+                    {% for autor in autores %}
+                    <option>{{ autor.nombre }} {{ autor.apellido }}</option>
+                    {% endfor %}
+                  </datalist>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="addAuthorField()">Añadir otro autor</button>
+
+              </div>
+            </div>
+            <div class="input-group mb-3 ">
+              <span class="input-group-text" class="form-label">Carrera: </span>
+              <input class="form-control border border-secondary-subtle bordered" list="datalistCarreraOptions"
+                id="carreraDataList" name="carrera" placeholder="Cree o seleccione una carrera...">
+              <datalist id="datalistCarreraOptions">
+                {% for carrera in carreras %}
+                <option>{{ carrera.nombre }}</option>
+                {% endfor %}
+              </datalist>
+            </div>
+            <div class="input-group mb-3 ">
+              <span class="input-group-text" class="form-label">Género: </span>
+              <input class="form-control border border-secondary-subtle" list="datalistGeneroOptions"
+                id="generoDataList" name="genero" placeholder="Cree o seleccione un Género...">
+              <datalist id="datalistGeneroOptions">
+                {% for genero in generos %}
+                <option>{{ genero.nombre }}</option>
+                {% endfor %}
+              </datalist>
+            </div>
+            <div class="input-group mb-3 ">
+              <span class="input-group-text" class="form-label">Descripción</span>
+              <textarea class="form-control border border-secondary-subtle" id="descripcion" name="descripcion" rows="3"
+                required></textarea>
+            </div>
+            <div class="alert alert-success" id="success-message" style="display: none;"></div>
+            <div class="alert alert-danger" id="error-message" style="display: none;"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-primary" onclick="submitForm()">Guardar</button>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  let originalForm = null;
+  let confirmAlert = false;
+  document.addEventListener('DOMContentLoaded', () => {
+    originalForm = document.getElementById('nuevoMaterialForm').cloneNode(true)
+  })
+
+  function addAuthorField(autor = '') {
+    const container = document.getElementById('autores-container');
+    const inputGroup = document.createElement('div');
+    inputGroup.className = 'input-group mb-3';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'autores';
+    input.className = 'form-control border border-secondary-subtle mb-3';
+    input.placeholder = 'Cree o seleccione un Autor...';
+    input.value = autor;
+
+    const datalist = document.getElementById('datalistAutorOptions').cloneNode(true);
+    const id = 'datalistAutorOptions-' + new Date().getTime();
+    datalist.id = id;
+    input.setAttribute('list', id);
+
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'input-group-append';
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'btn btn-danger';
+    removeButton.textContent = 'Eliminar';
+    removeButton.onclick = () => {
+      inputGroup.remove();
+    };
+
+    buttonGroup.appendChild(removeButton);
+    inputGroup.appendChild(input);
+    inputGroup.appendChild(buttonGroup);
+    container.appendChild(inputGroup);
+    container.appendChild(datalist);
+  }
+
+  function clearMensajes() {
+    const error_mensajes = document.getElementById('error-message');
+    while (error_mensajes.firstChild && error_mensajes.children.length >= 1) {
+      error_mensajes.removeChild(error_mensajes.lastChild);
+    };
+    const success_mensajes = document.getElementById('success-message');
+    while (success_mensajes.firstChild && success_mensajes.children.length >= 1) {
+      success_mensajes.removeChild(success_mensajes.lastChild);
+    };
+  }
+
+
+  function editModal(materialId) {
+    fetch(`/material/${materialId}/detail`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        document.getElementById('nuevoMaterialForm').action = `/material/${materialId}/editar_material`;
+        document.getElementById('materialModalLabel').textContent = 'Editar Material Id: ' + materialId;
+        document.getElementById('titulo').value = data.titulo;
+        document.getElementById('descripcion').value = data.descripcion;
+        document.getElementById('tipoDataList').value = data.tipo[0].nombre;
+        document.getElementById('EditorialDataList').value = data.editorial[0].nombre;
+        data.autor.forEach(autor => {
+          addAuthorField(autor.nombre + ' ' + autor.apellido);
+        });
+
+        document.getElementById('carreraDataList').value = data.carrera[0].nombre;
+        document.getElementById('generoDataList').value = data.genero[0].nombre;
+      });
+  }
+
+  function submitForm() {
+
+    const form = document.getElementById('nuevoMaterialForm');
+    if(!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    if(!confirmAlert){
+      document.getElementById('error-message').textContent = 'Presione nuevamente "Guardar" para confirmar';
+      document.getElementById('error-message').style.display = 'block';
+      confirmAlert = true;
+      return;
+    }
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => { throw new Error(text) });
+        }
+        console.log(response)
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          console.log(data.success);
+          console.log(data.message);
+          clearMensajes();
+          document.getElementById('success-message').textContent = data.message;
+          document.getElementById('success-message').style.display = 'block';
+        } else {
+          console.log(data);
+          clearMensajes();
+          document.getElementById('error-message').textContent = data.message;
+          document.getElementById('error-message').style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  }
+
+  
+
+  function clearForm() {
+    const container = document.getElementById('materialModal').querySelector('.modal-body');
+    container.innerHTML = '';
+    container.appendChild(originalForm.cloneNode(true));
+  }
+
+  document.getElementById('materialModal').addEventListener('hidden.bs.modal', clearForm);
+
+</script>
