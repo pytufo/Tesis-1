@@ -120,12 +120,16 @@ class MaterialSerializer(serializers.ModelSerializer):
 
 
 class EjemplarSerializer(serializers.ModelSerializer):
-    # estado = serializers.SerializerMethodField()
+    estado = serializers.SerializerMethodField()
     material = MaterialSerializer(read_only=True)
 
     class Meta:
         model = Ejemplar
-        fields = "__all__"
+        fields = [
+            "id",
+            "estado",
+            "material",
+        ]
 
     def get_estado(self, obj):
         return get_estado_ejemplar(obj)

@@ -24,7 +24,7 @@
     </div>
 
   </div>
-  {% if user.role == 1%}
+  {% if user.role == 1 or user.role == 2 %}
   <div class="row">
     <div class="col">
     </div>
@@ -78,21 +78,17 @@
             </td>
             {% endif%}
             <td class="text-center">
-              {% if user.role != 1 %}
               <!-- Acciones para usuario -->
               <div class="btn-group">
-                <button class="btn btn-secondary" type="button" href="'#'">
+                <button class="btn btn-secondary" type="button">
                   {% if material.estado == "Disponible (Lista de espera)" %}
                   Añadirse a lista de espera
                   {% elif material.estado == "Disponible" %}
-
                   Reservar
+                  {% else %}
+                  Sólo lectura
+                  {% endif %}
                 </button>
-                {% else %}
-                <button class="btn btn-secondary" type="button" href="{% url 'material' material.id%}">
-                  No disponible
-                </button>
-                {% endif %}
                 <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
                   <span class="visually-hidden">Toggle Dropdown</span>
@@ -100,38 +96,20 @@
                     <li onclick="window.location='{% url 'material' material.id %}';"><a
                         href="{% url 'material' material.id %}" class="dropdown-item">Informacion del
                         material</a></li>
+                    {% if user.role == 1 or user.role == 2%}
                     <li>
                       <hr class="dropdown-divider">
                     </li>
-                  </ul>
-              </div>
-              {% else %}
-              <!-- Acciones para admin  -->
-              <div class="btn-group">
-                <button class="btn btn-secondary" type="button">
-                  Accion
-                </button>
-                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                  <span class="visually-hidden">Toggle Dropdown</span>
-                  <ul class="dropdown-menu ">
                     <li><a class="dropdown-item" href="#">Crear prestamo</a></li>
-                    <li>
-                      <hr class="dropdown-divider">
-                    </li>
-                    <li onclick="window.location='{% url 'material' material.id %}';"><a
-                        class="dropdown-item">Informacion del
-                        material</a></li>
                     <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
                         onclick="editModal('{{ material.id }}')">Editar
                         material</a></li>
                     <li onclick="window.location='{% url 'ejemplares_de_material' material.id %}';"><a
                         class="dropdown-item" href="{% url 'ejemplares_de_material' material.id%}">Ejemplares del
                         material: ({{material.cantidad_existente}}) </a></li>
+                    {%endif%}
                   </ul>
               </div>
-
-              {% endif %}
 
             </td>
           </tr>

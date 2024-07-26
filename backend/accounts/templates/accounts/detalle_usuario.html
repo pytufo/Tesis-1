@@ -40,7 +40,7 @@
         
         <div class="container text-center">
             <a href="{% url 'listar_usuarios' %}" class="btn btn-primary text-center">Volver a la lista</a>
-            {% if usuario.role == "Administrador" %}
+            {% if user.role == 1 %}
             <button type="button" class="btn btn-secondary" href="#" data-bs-toggle="modal" data-bs-target="#Modal" data-user-id="{{ user.id }}">Editar </button>        
             {% endif %}
             

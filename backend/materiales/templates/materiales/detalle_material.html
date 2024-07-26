@@ -11,13 +11,25 @@
     <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#materialModal"
       onclick="editModal('{{ material.id }}')">Editar</a>
     <a href="#" class="btn btn-secondary">Ejemplares del material</a>
-    <a href="{% url 'generar_pdf_material' material.id %}" target="_blank" class="btn btn-secondary">Imprimir material</a>
+    <a href="{% url 'generar_pdf_material' material.id %}" target="_blank" class="btn btn-secondary">Imprimir
+      material</a>
+  </div>
+  {%else%}
+  <div>
+    {%if material.estado == "Disponible"%}
+    <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#materialModal"
+      onclick="editModal('{{ material.id }}')">Reservar</a>
+    {%elif material.estado == "No disponible (lista de espera)" %}
+    <a href="#" class="btn btn-secondary">Añadirse a la lista de espera</a>
+    {%endif%}
   </div>
   {%endif%}
 </div>
 <div class="container text-center">
   <br />
+  {% if user.role == 1 %}
   <h2>{{ material.id }}</h2>
+  {%endif%}
   <h2>{{ material.titulo }}</h2>
   <p><strong>Autor:</strong>
     {% for autor in material.autor %}
@@ -38,7 +50,7 @@
     {% for editorial in material.editorial %}
     {{ editorial.nombre }}{% if not forloop.last %}, {% endif %}
     {% endfor %}
-  </p>  
+  </p>
   <p><strong>Carrera:</strong>
     {% for carrera in material.carrera %}
     {{ carrera.nombre }} {% if not forloop.last %}, {% endif %}

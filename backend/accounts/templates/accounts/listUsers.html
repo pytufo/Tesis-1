@@ -28,10 +28,11 @@
         <th scope="col">Nombre</th>
         <th scope="col">E-mail</th>
         <th scope="col">Dispone para reservar </th>
-        <th scope="col col-hover"><a
-            href="?query={{ query }}&ordering={% if ordering == 'is_active' %}-is_active{% else %}is_active{% endif %}"
-            class="link-offset link-underline link-underline-opacity-0">Activo</a></th>
-
+        <th scope="col">Rol</th>
+        <th scope="col col-hover">
+          <a href="?query={{ query }}&ordering={% if ordering == 'is_active' %}-is_active{% else %}is_active{% endif %}"
+            class="link-offset link-underline link-underline-opacity-0">Activo</a>
+        </th>
         <th scope="col">Accion</th>
       </thead>
       <tbody class="table-group-divider bg-dark-subtle">
@@ -45,6 +46,7 @@
           {% else %}
           <td>{{ user.limite }}</td>
           {% endif %}
+          <td class="table-success">{{ user.role }}</td>
           {% if user.is_active %}
           <td class="table-success">Activo</td>
           {% else %}
@@ -63,10 +65,12 @@
                 </li>
                 {% if not user.is_active %}
                 <li><a href="#" class="dropdown-item bg bg-success" data-bs-toggle="modal" data-bs-target="#Modal"
-                    data-user-id="{{ user.id }}">Activar usuario</a></li>
+                    data-user-email="{{ user.email }}" data-user-id="{{ user.id }}"
+                    data-user-active="{{ user.is_active }}">Activar usuario</a></li>
                 {% else %}
                 <li><a href="#" class="dropdown-item bg bg-danger" data-bs-toggle="modal" data-bs-target="#Modal"
-                    data-user-id="{{ user.id }}">Desactivar usuario</a></li>
+                    data-user-email="{{ user.email }}" data-user-id="{{ user.id }}"
+                    data-user-active="{{ user.is_active }}">Desactivar usuario</a></li>
                 {% endif %}
                 {% endif %}
                 <li><a href="#" class="dropdown-item">Reservas del usuario</a></li>
@@ -112,18 +116,18 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="ModalLabel">Activar usuario {{ user_id}} </h1>
+        <h1 class="modal-title fs-5" id="ModalLabel"> <!-- Id y E-mail del usuario --> </h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body text center">
-        ¿Seguro que desea activar el usuario?
+        <!-- El contenido del mensaje se actualiza dinamicamente -->
       </div>
       <div class="modal-footer">
         <form method="post" action="{% url 'activar'%}">
           {% csrf_token %}
           <input type="hidden" name="user_id" id="activate-user" value="">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Activar</button>
+          <button type="submit" class="btn btn-primary">Confirmar</button>
         </form>
       </div>
     </div>
@@ -142,8 +146,20 @@
     modal.addEventListener('show.bs.modal', function (event) {
       var button = event.relatedTarget;
       var userId = button.getAttribute('data-user-id');
+      var estadoUser = button.getAttribute('data-user-active');
+      var emailUser = button.getAttribute('data-user-email');
+      console.log(estadoUser)
+      console.log(emailUser)
       var input = modal.querySelector('#activate-user');
       input.value = userId;
+      document.getElementById('ModalLabel').textContent = 'Usuario ID: ' + userId + ' - ' + emailUser
+      var modalBody = modal.querySelector('.modal-body');
+      if (estadoUser) {
+        modalBody.textContent = '¿Seguro que desea desactivar el usuario?'
+
+      } else {
+        modalBody.textContent = '¿Seguro que desea activar el usuario?'
+      }
     });
   });
 </script>

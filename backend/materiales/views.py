@@ -520,7 +520,7 @@ class EjemplarViewSet(viewsets.ModelViewSet):
                         {
                             "status": 404,
                             "success": False,
-                            "message": "El material ingresado no existe. \n¿Desea crearlo?",
+                            "message": "El material ingresado no existe.",
                         }
                     )
             error_messages = [

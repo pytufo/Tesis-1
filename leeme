@@ -9,7 +9,7 @@
     source .env/bin/activate 
     docker-compose exec django python manage.py makemigrations
     docker-compose exec django python manage.py migrate
-    (por ultimo desactivar el entorno virtual con: 
+    (por ultimo desactivar el entorno virtual con:  
         $ deactivate
     )
 

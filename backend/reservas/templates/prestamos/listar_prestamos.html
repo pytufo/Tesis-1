@@ -1,26 +1,25 @@
-{% extends 'navbar.html' %} 
+{% extends 'navbar.html' %}
 {% block title %} Lista de Prestamos{% endblock %}
 {% block content %}
 <div class="container-fluid">
   <br />
   <div class="row">
-    <div class="col-12"> 
+    <div class="col-12">
       <form method="get" action="{% url 'listar_prestamos' %}">
-      <div class="input-group mb-3">
-          <input
-            type="text"
-            name="query"
-            class="form-control"
-            placeholder="Buscar material..."
-            value="{{ query }}"
-          />
+        <div class="input-group mb-3">
+          <input type="text" name="query" class="form-control" placeholder="Buscar material..." value="{{ query }}" />
           <button class="btn btn-outline-secondary" type="submit">Buscar</button>
         </div>
       </form>
     </div>
   </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-primary" data-bs-toggle="dropdown" aria-expanded="false">Nuevo
+      Prestamo
+    </button>
+  </div>
   <div class="row">
-    <div class="col"> 
+    <div class="col">
       {% if prestamos %}
       <table class="table table-sm table-hover table-secondary table-bordered">
         <thead class="table-secondary text-center">
@@ -33,64 +32,70 @@
         </thead>
         <!-- Tabla de materiales -->
         <tbody class="table-group-divider bg-dark-subtle">
-          {% for prestamo in prestamos %}                    
-            <tr >              
-              <td  >{{ prestamo.material.titulo }}</td>      
-              <td>
-                <p>
-                  {% for autor in prestamo.material.autor %} 
-                      {{ autor.nombre }} {{autor.apellido }}.
-                  {% endfor %}
-                </p>
-              </td>
-              <td >{{ material.descripcion }}</td>
-              <td class="text-center">   
-                {% if user.role != 1 %}
-                <!-- Acciones para usuario -->
-                  <div class="btn-group">
-                      {% if material.estado == "Disponible" %}  
-                      <button class="btn btn-secondary" type="button">
-                              Reservar
-                              {% elif material.estado == "Disponible (Lista de espera)" %}
-                              Añadirse a lista de espera
-                          {% else %}
-                              {{ material.estado }}
-                          {% endif%}
-                      </button>
-                      <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                      <ul class="dropdown-menu ">
-                        <li><a class="dropdown-item" href="#">Informacion del material</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                      </ul>
-                    </div>
-                    {% else %}
-                    <!-- Acciones para admin  -->
-                    <div class="btn-group">
-                      {% if material.estado == "Disponible" %}  
-                      <button class="btn btn-secondary" type="button">
-                              Accion
-                              {% elif material.estado == "Disponible (Lista de espera)" %}
-                              Añadirse a lista de espera
-                          {% else %}
-                              {{ material.estado }}
-                          {% endif%}
-                      </button>
-                      <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                      <ul class="dropdown-menu ">
-                        <li><a class="dropdown-item" href="#">Crear prestamo</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Informacion del  material</a></li>
-                        <li><a class="dropdown-item" href="#">Editar material</a></li>
-                      </ul>
-                    </div>
-                    {% endif %}          
+          {% for prestamo in prestamos %}
+          <tr>
+            <td>{{ prestamo.material.titulo }}</td>
+            <td>
+              <p>
+                {% for autor in prestamo.material.autor %}
+                {{ autor.nombre }} {{autor.apellido }}.
+                {% endfor %}
+              </p>
+            </td>
+            <td>{{ material.descripcion }}</td>
+            <td class="text-center">
+              {% if user.role != 1 %}
+              <!-- Acciones para usuario -->
+              <div class="btn-group">
+                {% if material.estado == "Disponible" %}
+                <button class="btn btn-secondary" type="button">
+                  Reservar
+                  {% elif material.estado == "Disponible (Lista de espera)" %}
+                  Añadirse a lista de espera
+                  {% else %}
+                  {{ material.estado }}
+                  {% endif%}
+                </button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                  <span class="visually-hidden">Toggle Dropdown</span>
+                  <ul class="dropdown-menu ">
+                    <li><a class="dropdown-item" href="#">Informacion del material</a></li>
+                    <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                  </ul>
+              </div>
+              {% else %}
+              <!-- Acciones para admin  -->
+              <div class="btn-group">
+                {% if material.estado == "Disponible" %}
+                <button class="btn btn-secondary" type="button">
+                  Accion
+                  {% elif material.estado == "Disponible (Lista de espera)" %}
+                  Añadirse a lista de espera
+                  {% else %}
+                  {{ material.estado }}
+                  {% endif%}
+                </button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                  <span class="visually-hidden">Toggle Dropdown</span>
+                  <ul class="dropdown-menu ">
+                    <li><a class="dropdown-item" href="#">Crear prestamo</a></li>
+                    <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#">Informacion del material</a></li>
+                    <li><a class="dropdown-item" href="#">Editar material</a></li>
+                  </ul>
+              </div>
+              {% endif %}
 
-              </td>            
-            </tr>          
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
@@ -101,22 +106,16 @@
         <span class="step-links">
           {% if page_obj.has_previous %}
           <a href="?query={{ query }}&page=1">inicio</a>
-          <a href="?query={{ query }}&page={{ page_obj.previous_page_number }}"
-            >anterior</a
-          >
+          <a href="?query={{ query }}&page={{ page_obj.previous_page_number }}">anterior</a>
           {% endif %}
-    
+
           <span class="current">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
           </span>
-    
+
           {% if page_obj.has_next %}
-          <a href="?query={{ query }}&page={{ page_obj.next_page_number }}"
-            >siguiente ></a
-          >
-          <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}"
-            >ultima >></a
-          >
+          <a href="?query={{ query }}&page={{ page_obj.next_page_number }}">siguiente ></a>
+          <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}">ultima >></a>
           {% endif %}
         </span>
       </div>

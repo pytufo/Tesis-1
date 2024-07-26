@@ -146,6 +146,12 @@
     };
   }
 
+  function clearForm() {
+    const container = document.getElementById('materialModal').querySelector('.modal-body');
+    container.innerHTML = '';
+    container.appendChild(originalForm.cloneNode(true));
+  }
+
 
   function editModal(materialId) {
     fetch(`/material/${materialId}/detail`)
@@ -203,6 +209,8 @@
           clearMensajes();
           document.getElementById('success-message').textContent = data.message;
           document.getElementById('success-message').style.display = 'block';
+          clearForm();
+
         } else {
           console.log(data);
           clearMensajes();
@@ -217,11 +225,7 @@
 
   
 
-  function clearForm() {
-    const container = document.getElementById('materialModal').querySelector('.modal-body');
-    container.innerHTML = '';
-    container.appendChild(originalForm.cloneNode(true));
-  }
+  
 
   document.getElementById('materialModal').addEventListener('hidden.bs.modal', clearForm);
 

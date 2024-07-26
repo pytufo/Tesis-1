@@ -166,9 +166,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def retrieve_user(self, request, *args, **kwargs):
         usuario = self.get_object()
-        if usuario.role == User.ADMIN:
+        if request.user.role == User.ADMIN:
             serializer = UserProfileSerializer(usuario)
-            roles = User._meta.get_field("role").choices
+            roles = [
+                role
+                for role in User._meta.get_field("role").choices
+                if role[0] != User.ADMIN
+            ]
             return render(
                 request,
                 "accounts/detalle_usuario.html",
@@ -187,7 +191,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     | Q(first_name__icontains=query)
                     | Q(last_name__icontains=query)
                 ).exclude(email="admin@mail.com")
-            else:                
+            else:
                 usuarios = User.objects.exclude(email="admin@mail.com")
 
             usuarios = usuarios.order_by(ordering)

@@ -102,10 +102,8 @@
                 } else if (data.status == 404) {
                     limpiarMensajes();
                     document.getElementById('message-error').textContent = data.message;
-                    document.getElementById('message-error').style.display = 'block';
+                    document.getElementById('message-error').style.display = 'block';                    
                     confirmAlert = false;
-                    btn_crear = document.getElementById('btnCrear')
-                    btn_crear.textContent = 'Crear Material'
 
                 } else {
                     console.log(data);
