@@ -162,7 +162,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 "ejemplares_disponibles": serializer_ejemplares.data,
             }
 
-            return Response(response_data)
+            return JsonResponse(response_data)
 
         except Reserva.DoesNotExist:
             return Response(
@@ -198,7 +198,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             if (
                 estado == "Disponible (Lista de espera)"
-                or estado == "Solo Lectura (Lista de espera)"
+                or estado == "No disponible (Solo lectura)"
             ):
                 fecha_fin_default = None
             else:

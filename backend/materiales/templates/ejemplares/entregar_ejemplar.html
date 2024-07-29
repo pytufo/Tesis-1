@@ -1,0 +1,22 @@
+<!-- Modal activar usuario-->
+<div class="modal fade" id="prestarEjemplarModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="ModalLabel"> Crear prestamo: <!-- Id y Titulo del ejemplar --> </h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text center">
+          <!-- El contenido del mensaje se actualiza dinamicamente -->
+        </div>
+        <div class="modal-footer">
+          <form method="post" action="{% url 'activar'%}">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" id="activate-user" value="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>

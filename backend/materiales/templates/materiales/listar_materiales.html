@@ -56,6 +56,7 @@
           {% if user.role == 1 %}
           <th scope="col">Estado</th>
           {%endif%}
+          <th scope="col">Tipo</th>
           <th scope="col">Accion</th>
         </thead>
         <!-- Tabla de materiales -->
@@ -77,10 +78,17 @@
 
             </td>
             {% endif%}
+            <td>
+              {% for tipo in material.tipo %}
+              {{ tipo.nombre }}
+              {% endfor %}
+
+            </td>
             <td class="text-center">
               <!-- Acciones para usuario -->
               <div class="btn-group">
-                <button class="btn btn-secondary" type="button">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="modal"
+                  data-bs-target="#materialReservaModal" onclick="reservarModal('{{material.id}}')">
                   {% if material.estado == "Disponible (Lista de espera)" %}
                   Añadirse a lista de espera
                   {% elif material.estado == "Disponible" %}
@@ -100,7 +108,8 @@
                     <li>
                       <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="#">Crear prestamo</a></li>
+                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#prestarEjemplarModal">Crear
+                        prestamo</a></li>
                     <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
                         onclick="editModal('{{ material.id }}')">Editar
                         material</a></li>
@@ -162,5 +171,7 @@
 </div>
 <!-- Modal para nuevo material -->
 {% include 'materiales/_nuevo_material_modal.html' %}
+{% include 'materiales/reservar_material.html' %}
 {% include 'ejemplares/_ejemplar_nuevo_editar.html' %}
+{% include 'ejemplares/entregar_ejemplar.html' %}
 {% endblock %}

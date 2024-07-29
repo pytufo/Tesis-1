@@ -105,7 +105,7 @@ class LogoutView(APIView):
             {"message": "Sesion cerrada exitosamente."}, status=status.HTTP_200_OK
         )
 
-    def post(self, request, *args, **kwargs):
+    """ def post(self, request, *args, **kwargs):
         try:
             access_token = request.data.get("access_token")
             token = RefreshToken(access_token)
@@ -118,7 +118,7 @@ class LogoutView(APIView):
             return Response(
                 {"error": f"Error al cerrar sesion: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            ) """
 
 
 class RegisterView(generics.CreateAPIView):
@@ -137,14 +137,18 @@ class RegisterView(generics.CreateAPIView):
             serializer.save()
             error_message = "Usuario registrado correctamente"
             return render(
-                request, "auth/register.html", {"error_message": error_message}
+                request,
+                "auth/register.html",
+                {"error_message": error_message, "status": 200},
             )
         else:
-            error_messages = [
+            error_message = [
                 f"{field}: {error[0]}" for field, error in serializer.errors.items()
             ]
             return render(
-                request, "auth/register.html", {"error_messages": error_messages}
+                request,
+                "auth/register.html",
+                {"error_message": error_message, "status": 400},
             )
 
 

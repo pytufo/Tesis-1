@@ -118,11 +118,11 @@
             });
     }
 
-    function clearForm() {
+    function limpiarForm() {
         let container = document.getElementById('ejemplarModal').querySelector('.modal-body');
         container.innerHTML = '';
         container.appendChild(defaultForm.cloneNode(true))
     }
 
-    document.getElementById('ejemplarModal').addEventListener('hidden.bs.modal', clearForm)
+    document.getElementById('ejemplarModal').addEventListener('hidden.bs.modal', limpiarForm)
 </script>

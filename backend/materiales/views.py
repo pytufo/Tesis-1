@@ -276,6 +276,17 @@ class MaterialViewSet(viewsets.ModelViewSet):
             data.pop("carrera", None)
             data.pop("genero", None)
 
+            # verificar que no exista el material
+            titulo = data.get("titulo", "").strip()
+            tipos = TipoMaterial.objects.filter(nombre__in=tipo_data.split(","))
+
+            if Material.objects.filter(titulo=titulo, tipo__in=tipos).exists():
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Ya existe un material con el mismo titulo y tipo.",
+                    }
+                )
             serializer = MaterialSerializer(data=data)
             if serializer.is_valid():
                 material = serializer.save()
@@ -283,19 +294,16 @@ class MaterialViewSet(viewsets.ModelViewSet):
                 for autor_name in autores_data:
                     nombre_apellido = autor_name.split()
                     if len(nombre_apellido) == 1:
-                        nombre = nombre_apellido
-                        autor, created = Autor.objects.get_or_create(
-                            nombre=nombre, apellido=""
-                        )
-                        material.autor.add(autor)
+                        nombre = nombre_apellido[0]
+                        apellido = ""
                     elif len(nombre_apellido) > 1:
                         nombre, apellido = nombre_apellido
-                        autor, created = Autor.objects.get_or_create(
-                            nombre=nombre, apellido=apellido
-                        )
-                        material.autor.add(autor)
                     else:
                         continue
+                    autor, created = Autor.objects.get_or_create(
+                        nombre=nombre, apellido=apellido
+                    )
+                    material.autor.add(autor)
 
                 if tipo_data:
                     tipo, created = TipoMaterial.objects.get_or_create(nombre=tipo_data)
@@ -370,19 +378,15 @@ class MaterialViewSet(viewsets.ModelViewSet):
                 nombre_apellido = autor_name.split()
 
                 if len(nombre_apellido) == 1:
-                    nombre = nombre_apellido
-                    autor, created = Autor.objects.get_or_create(
-                        nombre=nombre, apellido=""
-                    )
-                    material.autor.add(autor)
+                    nombre = nombre_apellido[0]
                 elif len(nombre_apellido) > 1:
                     nombre, apellido = nombre_apellido
-                    autor, created = Autor.objects.get_or_create(
-                        nombre=nombre, apellido=apellido
-                    )
-                    material.autor.add(autor)
                 else:
                     continue
+                autor, created = Autor.objects.get_or_create(
+                    nombre=nombre, apellido=apellido
+                )
+                material.autor.add(autor)
 
             if tipo_data:
                 tipo, created = TipoMaterial.objects.get_or_create(nombre=tipo_data)

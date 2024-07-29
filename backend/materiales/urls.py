@@ -91,9 +91,9 @@ urlpatterns = [
         PrestamoViewSet.as_view({"get": "retrieve_ejemplar", "post": "create"}),
     ),
     path(
-        "material/<int:material_pk>/reservar/",
+        "<int:material_pk>/reservar/",
         ReservaViewSet.as_view({"get": "retrieve_material", "post": "create"}),
-        name="reservar-material",
+        name="reservar_material",
     ),
     path("generar/", generar_datos_aleatorios, name="generar"),
     # path("movimientos/", include("reservas.urls")),
