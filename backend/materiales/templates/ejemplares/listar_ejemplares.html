@@ -51,8 +51,9 @@
                     Accion
                   </button>
                   <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal"
+                        onclick="prestarEjemplar('{{ejemplar.id}}')">Crear prestamo</a></li>
                     <li><a class="dropdown-item" href="#">Editar</a></li>
-                    <li class="dropdown-item"><a href="#">Eliminar</a></li>
                   </ul>
                 </div>
 
@@ -105,4 +106,5 @@
 
 {% include 'materiales/_nuevo_material_modal.html' %}
 {% include 'ejemplares/_ejemplar_nuevo_editar.html' %}
+{% include 'ejemplares/entregar_ejemplar.html' %}
 {% endblock%}

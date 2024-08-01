@@ -503,6 +503,11 @@ class EjemplarViewSet(viewsets.ModelViewSet):
             },
         )
 
+    def retrieve_ejemplar(self, request, ejemplar_pk=None):
+        ejemplar = Ejemplar.objects.get(pk=ejemplar_pk)
+        serializer = EjemplarSerializer(ejemplar)
+        return Response(serializer.data)
+
     def crear_ejemplar(self, request):
         if request.method == "POST":
             material_data = request.POST.get("material", "")

@@ -82,13 +82,18 @@ urlpatterns = [
         name="listar_ejemplares",
     ),
     path(
+        "ejemplar/<int:ejemplar_pk>/",
+        EjemplarViewSet.as_view({"get": "retrieve_ejemplar"}),
+        name="detalle_ejemplar",  
+    ),
+    path(
         "ejemplar/nuevo/",
         EjemplarViewSet.as_view({"post": "crear_ejemplar"}),
         name="crear_ejemplar",
     ),
     path(
         "ejemplar/<int:ejemplar_pk>/prestar/",
-        PrestamoViewSet.as_view({"get": "retrieve_ejemplar", "post": "create"}),
+        PrestamoViewSet.as_view({"post": "create"}),
         name="crear_prestamo",  
     ),
     path(

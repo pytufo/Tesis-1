@@ -57,12 +57,14 @@
               </div>
               {% else %}
               <!-- Acciones para admin  -->
+              {% if reserva.estado != "Finalizada" and reserva.fecha_fin %}
               <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                 data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
                 <span class="visually-hidden">Toggle Dropdown</span>
                 <ul class="dropdown-menu ">
                   <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal" onclick="reservaEntregarEjemplar('{{reserva.id}}')">Entregar ejemplar</a></li>
                 </ul>
+                {%endif%}
     </div>
     {% endif %}
 

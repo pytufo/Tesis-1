@@ -17,7 +17,7 @@
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">ID Ejemplar:</span>
-                <input type="text" class="form-control border border-secondary-subtle" id="ejemplar" name="ejemplar"
+                <input id="IdEjemplar" class="form-control border border-secondary-subtle" name="ejemplar"
                   placeholder="Ingreser o seleccione un Ejemplar..." list="datalistEjemplaresOptions" required>
                 <datalist id="datalistEjemplaresOptions">
                   <!-- Obtenemos los ejemplares del material dinamicamente -->
@@ -34,6 +34,9 @@
 
               </div>
             </div>
+            <p id="IdEjemplar">
+
+            </p>
             <div id="message-prestamo" style="display: none;"></div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="volver()">Cerrar</button>
@@ -49,11 +52,41 @@
 </div>
 
 <script>
+
+  function prestarEjemplar(ejemplarId) {
+    Limpiar();
+    fetch(`/material/ejemplar/${ejemplarId}/`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        console.log(data.material.id)
+        document.getElementById('crearPrestamoForm').action = `/movimientos/prestamos/nuevo/`
+        document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar'
+        let inputEjemplar = document.getElementById('IdEjemplar');
+        inputEjemplar.value = data.id;
+        let material = document.getElementById('material');
+        material.value = data.material.titulo;
+      });
+
+    fetch(`/accounts/users/`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+
+        let datalistUsers = document.getElementById('datalistUsersOptions');
+        datalistUsers.innerHTML = '';
+        data.forEach(user => {
+          let option = document.createElement('option');
+          option.value = user.email;
+          datalistUsers.appendChild(option);
+        });
+      })
+
+  }
   function reservaEntregarEjemplar(reserva) {
     fetch(`/movimientos/reservas/${reserva}/entregar_ejemplar/`)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
         document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar de reserva'
         document.getElementById('crearPrestamoForm').action = `/movimientos/reservas/${reserva}/entregar_ejemplar/`
         let material = document.getElementById('material');
@@ -72,7 +105,7 @@
       });
   }
 
-  function prestarEjemplar(material) {
+  function prestarMaterialEjemplar(material) {
     fetch(`/material/${material}/detail`)
       .then(response => response.json())
       .then(data => {

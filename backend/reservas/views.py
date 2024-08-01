@@ -369,7 +369,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             # definimos los campos de "prestamo"
             usuario_id = request.data.get("owner")
             usuario = User.objects.get(email=usuario_id)
-            ejemplar_id = request.data.get("ejemplar")
+            ejemplar_id = request.data.get("ejemplar") or request.data.get("IdEjemplar")
             ejemplar = Ejemplar.objects.get(pk=ejemplar_id)
 
             if get_estado(ejemplar.material) != "Disponible":
