@@ -294,24 +294,29 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["GET"])
     def listar_prestamos_usuario(self, request, *args, **kwargs):
         usuario = request.user
+        query = request.GET.get("query", "")
 
-        try:
-            prestamos_usuario = Prestamo.objects.filter(owner=usuario)
-            serializer = PrestamosSerializer(
-                prestamos_usuario, context={"request": request}, many=True
-            )
-            render(
-                request,
-                "prestamos/listar_prestamos.html",
-                {"usuario": usuario, "prestamos": prestamos_usuario},
-            )
-            return JsonResponse(serializer.data)
+        prestamos = Prestamo.objects.filter(owner=usuario.id)
 
-        except Exception as e:
-            return JsonResponse(
-                {"message": f"Error al obtener los prestamos del usuario: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        if query:
+            prestamos = prestamos.filter(
+                Q(material__titulo__icontains=query)
+                | Q(owner__email__icontains=query)
+                | Q(owner__first_name__icontains=query)
+                | Q(owner__last_name__icontains=query)
             )
+        # reservas = Reserva.objects.filter(fecha_fin__isnull=False)
+        paginator = Paginator(prestamos, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        prestamos_serializer = PrestamosSerializer(page_obj, many=True)
+        serializer_prestamos = prestamos_serializer.data
+
+        return render(
+            request,
+            "prestamos/listar_prestamos.html",
+            {"page_obj": page_obj, "prestamos": serializer_prestamos, "query": query},
+        )
 
     def retrieve(self, request, pk=None):
         prestamo = Prestamo.objects.get(pk=pk)
@@ -324,7 +329,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
         serializer = EjemplarSerializer(ejemplar)
         return JsonResponse(serializer.data)
 
-    @action(detail=True, methods=["put"])
+    # @action(detail=True, methods=["put"])
     def devolucion(self, request, pk=None):
         try:
             prestamo = self.get_object()

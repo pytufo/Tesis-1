@@ -1,0 +1,86 @@
+<div class="modal fade" id="finalizarPrestamoModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="ModalLabel"> Finalizar prestamo <!-- Id y Titulo del material --> </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text center">
+                <!-- El contenido del mensaje se actualiza dinamicamente -->
+            </div>
+            <div id="message-success" style="display: none;"></div>
+
+            <div class="modal-footer">
+                <form id="finalizarPrestamoForm" method="post">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        onclick="volver()">Volver</button>
+                    <button type="submit" class="btn btn-primary" id="btnCrearReserva">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function finalizarPrestamoModal(prestamo) {
+        fetch(`/movimientos/prestamo/${prestamo}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.ejemplar.material.titulo);
+                let modal = document.getElementById('finalizarPrestamoModal');
+                let modalBody = modal.querySelector('.modal-body');
+                modalBody.innerHTML = '¿Desea finalizar el prestamo de : "<b>"' + data.ejemplar.material.titulo + '"</b>del usuario <b>"' + data.owner.email + '</b>"?'
+                document.getElementById('finalizarPrestamoForm').action = `/movimientos/prestamo/${prestamo}/devolucion/`;
+            })
+    }
+
+    function Limpiar() {
+        let Messages = document.getElementById('message-success');
+        Messages.style.display = 'none';
+        Messages.textContent = '';
+
+    }
+    function volver() {
+        window.location.replace(window.location.href)
+    }
+
+    document.getElementById('finalizarPrestamoForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const form = event.target;
+        const formPrestamoFin = new FormData(form);
+        Limpiar();
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formPrestamoFin,
+            headers: {
+                'X-Requested-With': 'XMHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                let Message = document.getElementById('message-success')
+                if (data.success) {
+                    console.log(data);
+                    Message.className = 'alert alert-success';
+                    Message.textContent = data.message;
+                    Message.style.display = 'block';
+                } else {
+                    console.log(data)
+                    Message.className = 'alert alert-danger';
+                    Message.textContent = data.message;
+                    Message.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                let Message = document.getElementById('message-success');
+                Message.className = 'alert alert-success';
+                Message.textContent = 'Error: ' + error;
+                Message.style.display = 'block';
+            })
+    })
+
+    document.getElementById('finalizarPrestamoModal').addEventListener('hidden.bs.modal', Limpiar)
+
+</script>

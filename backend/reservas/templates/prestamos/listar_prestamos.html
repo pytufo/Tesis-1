@@ -20,7 +20,7 @@
   </div>
   <div class="row">
     <div class="col">
-      {% if prestamos %}     
+      {% if prestamos %}
       <table class="table table-sm table-hover table-secondary table-bordered">
         <thead class="table-secondary text-center">
           <th scope="col">Usuario</th>
@@ -40,60 +40,41 @@
             <td>
               <p>
                 {% for autor in prestamo.ejemplar.material.autor %}
-                {{ autor.nombre }} {{autor.apellido }}. 
+                {{ autor.nombre }} {{autor.apellido }}.
                 {% endfor %}
               </p>
             </td>
+
+            {% if prestamo.estado == 'Finalizado'%}
+            <td class="table-danger">{{prestamo.estado}}</td>
+
+            {%else %}
             <td>
+
               {{prestamo.fecha_fin}}
             </td>
+            {%endif%}
+
             <td class="text-center">
               {% if user.role != 1 %}
               <!-- Acciones para usuario -->
               <div class="btn-group">
-                {% if material.estado == "Disponible" %}
                 <button class="btn btn-secondary" type="button">
-                  Reservar
-                  {% elif material.estado == "Disponible (Lista de espera)" %}
-                  Añadirse a lista de espera
-                  {% else %}
-                  {{ material.estado }}
-                  {% endif%}
+                  Ver
                 </button>
-                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                  <span class="visually-hidden">Toggle Dropdown</span>
-                  <ul class="dropdown-menu ">
-                    <li><a class="dropdown-item" href="#">Informacion del material</a></li>
-                    <li>
-                      <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                  </ul>
               </div>
               {% else %}
               <!-- Acciones para admin  -->
               <div class="btn-group">
-                {% if material.estado == "Disponible" %}
-                <button class="btn btn-secondary" type="button">
-                  Accion
-                  {% elif material.estado == "Disponible (Lista de espera)" %}
-                  Añadirse a lista de espera
-                  {% else %}
-                  {{ material.estado }}
-                  {% endif%}
+                <button class="btn btn-secondary" type="button" href="#" data-bs-toggle="modal"
+                  data-bs-target="#finalizarPrestamoModal" onclick="finalizarPrestamoModal('{{prestamo.id}}')">
+                  Finalizar prestamo
                 </button>
                 <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
                   <span class="visually-hidden">Toggle Dropdown</span>
                   <ul class="dropdown-menu ">
-                    <li><a class="dropdown-item" href="#">Crear prestamo</a></li>
-                    <li>
-                      <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" href="#">Informacion del material</a></li>
-                    <li><a class="dropdown-item" href="#">Editar material</a></li>
+                    <li><a class="dropdown-item" href="#">Detalles del prestamo</a></li>
                   </ul>
               </div>
               {% endif %}
@@ -129,4 +110,6 @@
   </div>
 
 </div>
+
+{% include 'prestamos/finalizar_prestamo.html' %}
 {% endblock %}

@@ -61,7 +61,7 @@
                 data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
                 <span class="visually-hidden">Toggle Dropdown</span>
                 <ul class="dropdown-menu ">
-                  <li><a class="dropdown-item" href="#">Entregar ejemplar</a></li>
+                  <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal" onclick="reservaEntregarEjemplar('{{reserva.id}}')">Entregar ejemplar</a></li>
                 </ul>
     </div>
     {% endif %}
@@ -98,4 +98,5 @@
 
 </div>
 {% include 'reservas/cancelar_reserva.html' %}
+{% include 'ejemplares/entregar_ejemplar.html' %}
 {% endblock %}

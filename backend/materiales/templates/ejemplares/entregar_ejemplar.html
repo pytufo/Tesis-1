@@ -18,7 +18,7 @@
               <div class="input-group mb-3">
                 <span class="input-group-text">ID Ejemplar:</span>
                 <input type="text" class="form-control border border-secondary-subtle" id="ejemplar" name="ejemplar"
-                  placeholder="Ingreser o seleccione un Ejemplar..." list="datalistEjemplaresOptions">
+                  placeholder="Ingreser o seleccione un Ejemplar..." list="datalistEjemplaresOptions" required>
                 <datalist id="datalistEjemplaresOptions">
                   <!-- Obtenemos los ejemplares del material dinamicamente -->
                 </datalist>
@@ -27,18 +27,17 @@
               <div class="input-group mb-3">
                 <span class="input-group-text">Usuario E-mail:</span>
                 <input type="text" class="form-control border border-secondary-subtle" id="owner" name="owner"
-                  placeholder="Ingrese un e-mail..." list="datalistUsersOptions">
+                  placeholder="Ingrese un e-mail..." list="datalistUsersOptions" required>
                 <datalist id="datalistUsersOptions">
                   <!-- Obtenemos los ejemplares del material dinamicamente -->
                 </datalist>
 
               </div>
             </div>
-            <div class="alert alert-success" id="message-success" style="display: none;"></div>
-            <div class="alert alert-danger" id="message-error" style="display: none;"></div>
+            <div id="message-prestamo" style="display: none;"></div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-              <button type="button" class="btn btn-primary" onclick="crearPrestamo()">Crear
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="volver()">Cerrar</button>
+              <button type="submit" class="btn btn-primary">Crear
                 Prestamo</button>
             </div>
 
@@ -50,6 +49,29 @@
 </div>
 
 <script>
+  function reservaEntregarEjemplar(reserva) {
+    fetch(`/movimientos/reservas/${reserva}/entregar_ejemplar/`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar de reserva'
+        document.getElementById('crearPrestamoForm').action = `/movimientos/reservas/${reserva}/entregar_ejemplar/`
+        let material = document.getElementById('material');
+        material.value = data.reserva.material.titulo;
+
+        let usuario = document.getElementById('owner');
+        usuario.value = data.reserva.owner.email;
+
+        let datalist = document.getElementById('datalistEjemplaresOptions');
+        datalist.innerHTML = '';
+        data.reserva.material.ejemplares_disponibles.forEach(ejemplar => {
+          let option = document.createElement('option');
+          option.value = ejemplar;
+          datalist.appendChild(option);
+        });
+      });
+  }
+
   function prestarEjemplar(material) {
     fetch(`/material/${material}/detail`)
       .then(response => response.json())
@@ -82,9 +104,24 @@
       })
   }
 
-  function crearPrestamo() {
-    const form = document.getElementById('crearPrestamoForm')
-    const formData = new FormData(form)
+  function Limpiar() {
+    let messagesPrestamo = document.getElementById('message-prestamo');
+    messagesPrestamo.style.display = 'none';
+    messagesPrestamo.textContent = '';
+
+  }
+
+  function volver() {
+    window.location.replace(window.location.href)
+  }
+
+  document.getElementById('crearPrestamoForm').addEventListener('submit', function (event) {
+    event.preventDefault()
+
+    const form = event.target;
+    const formData = new FormData(form);
+    let messagesPrestamo = document.getElementById('message-prestamo');
+    Limpiar();
 
     fetch(form.action, {
       method: 'POST',
@@ -101,15 +138,27 @@
         return response.json();
       })
       .then(data => {
+
         if (data.success) {
           console.log(data);
+          messagesPrestamo.className = 'alert alert-success';
+          messagesPrestamo.textContent = data.message;
+          messagesPrestamo.style.display = 'block';
+
         } else {
           console.log(data);
+          messagesPrestamo.className = 'alert alert-danger';
+          messagesPrestamo.textContent = data.message;
+          messagesPrestamo.style.display = 'block';
         }
       })
       .catch(error => {
         console.error("Error: ", error)
+        messagesPrestamo.className = 'alert alert-danger';
+        messagesPrestamo.textContent = `${error.message}`;
+        messagesPrestamo.style.display = 'block';
       })
-  }
+
+  })
 
 </script>

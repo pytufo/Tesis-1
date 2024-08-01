@@ -66,6 +66,24 @@ urlpatterns = [
         name="listar_prestamos",
     ),
     path(
+        "prestamos/<int:prestamo_pk>",
+        PrestamoViewSet.as_view(
+            {
+                "get": "list",
+            }
+        ),
+        name="listar_prestamos",
+    ),
+    path(
+        "mis_prestamos/",
+        PrestamoViewSet.as_view(
+            {
+                "get": "listar_prestamos_usuario",
+            }
+        ),
+        name="prestamos_usuario",
+    ),
+    path(
         "prestamos/nuevo/",
         PrestamoViewSet.as_view(
             {
@@ -78,10 +96,10 @@ urlpatterns = [
         "prestamo/<int:pk>/devolucion/",
         PrestamoViewSet.as_view(
             {
-                "put": "devolucion",
+                "post": "devolucion",
             }
         ),
-        name="prestamo-devolucion",
+        name="prestamo_devolucion",
     ),
     path(
         "reservas/<int:pk>/cancelar/",
