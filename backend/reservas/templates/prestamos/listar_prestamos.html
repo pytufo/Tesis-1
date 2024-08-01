@@ -20,29 +20,33 @@
   </div>
   <div class="row">
     <div class="col">
-      {% if prestamos %}
+      {% if prestamos %}     
       <table class="table table-sm table-hover table-secondary table-bordered">
         <thead class="table-secondary text-center">
           <th scope="col">Usuario</th>
-
-          <th scope="col">Titulo</th>
+          <th scope="col">Material</th>
           <th scope="col">Autor</th>
           <th scope="col">Finalizacion</th>
           <th scope="col">Accion</th>
         </thead>
-        <!-- Tabla de materiales -->
+        <!-- Tabla de prestamos -->
         <tbody class="table-group-divider bg-dark-subtle">
           {% for prestamo in prestamos %}
           <tr>
-            <td>{{ prestamo.material.titulo }}</td>
+            <td>{{ prestamo.owner.email }}</td>
+            <td>{{ prestamo.ejemplar.material.titulo}}
+
+            </td>
             <td>
               <p>
-                {% for autor in prestamo.material.autor %}
-                {{ autor.nombre }} {{autor.apellido }}.
+                {% for autor in prestamo.ejemplar.material.autor %}
+                {{ autor.nombre }} {{autor.apellido }}. 
                 {% endfor %}
               </p>
             </td>
-            <td>{{ material.descripcion }}</td>
+            <td>
+              {{prestamo.fecha_fin}}
+            </td>
             <td class="text-center">
               {% if user.role != 1 %}
               <!-- Acciones para usuario -->

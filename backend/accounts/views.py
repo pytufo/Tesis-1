@@ -186,7 +186,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return redirect("/")
 
     def listar_usuarios(self, request, *args, **kwargs):
-        if request.user.role == 1:
+        if request.user.role == 1 or request.user.role == 2:
             query = request.GET.get("query", "")
             ordering = request.GET.get("ordering", "id")
             if query:

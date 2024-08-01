@@ -19,7 +19,15 @@ reserva_router.register(r"prestamo", PrestamoViewSet, basename="entregar-ejempla
 
 urlpatterns = [
     path(r"", include(router.urls)),
-    
+    path(
+        "reservas/<int:reserva_pk>",
+        ReservaViewSet.as_view(
+            {
+                "get": "retrieve",
+            }
+        ),
+        name="detalle_reserva",
+    ),
     path(
         "reservas/<int:reserva_pk>/entregar_ejemplar/",
         PrestamoViewSet.as_view(
@@ -40,7 +48,7 @@ urlpatterns = [
         name="listar_reservas",
     ),
     path(
-        "reservas/",
+        "mis_reservas/",
         ReservaViewSet.as_view(
             {
                 "get": "listar_reservas_usuario",
@@ -58,6 +66,15 @@ urlpatterns = [
         name="listar_prestamos",
     ),
     path(
+        "prestamos/nuevo/",
+        PrestamoViewSet.as_view(
+            {
+                "post": "create",
+            }
+        ),
+        name="nuevo_prestamo",
+    ),
+    path(
         "prestamo/<int:pk>/devolucion/",
         PrestamoViewSet.as_view(
             {
@@ -70,9 +87,9 @@ urlpatterns = [
         "reservas/<int:pk>/cancelar/",
         ReservaViewSet.as_view(
             {
-                "put": "cancelar_reserva",
+                "post": "cancelar_reserva",
             }
         ),
-        name="prestamo-devolucion",
+        name="cancelar_reserva",
     ),
 ]

@@ -48,23 +48,12 @@
               {% if user.role != 1 %}
               <!-- Acciones para usuario -->
               <div class="btn-group">
-                {% if material.estado == "Disponible" %}
-                <button class="btn btn-secondary" type="button">
-                  Reservar
-                  {% elif material.estado == "Disponible (Lista de espera)" %}
-                  Añadirse a lista de espera
-                  {% else %}
-                  {{ material.estado }}
-                  {% endif%}
+                {%if reserva.estado != "Finalizada" and reserva.owner.email == user.email %}
+                <button class="btn btn-secondary" type="button" href="#" data-bs-toggle="modal"
+                  data-bs-target="#cancelarReservaModal" onclick="cancelarReservarModal('{{reserva.id}}')">
+                  Cancelar reserva
                 </button>
-                {%if reserva.estado != "Finalizada" %}
-                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                  <span class="visually-hidden">Toggle Dropdown</span>
-                  <ul class="dropdown-menu ">
-                    <li><a class="dropdown-item" href="#">Cancelar reserva</a></li>
-                  </ul>
-                  {%endif%}
+                {%endif%}
               </div>
               {% else %}
               <!-- Acciones para admin  -->
@@ -108,4 +97,5 @@
 </div>
 
 </div>
+{% include 'reservas/cancelar_reserva.html' %}
 {% endblock %}

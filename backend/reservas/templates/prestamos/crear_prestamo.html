@@ -1,9 +1,9 @@
-<div class="container" id="NuevoModificar">
-    <div class="modal fade" id="ejemplarModal" tabindex="-1" aria-labelledby="ejemplarModalLabel" aria-hidden="true">
+<div class="container" id="crearPrestamo">
+    <div class="modal fade" id="crearPrestamoModal" tabindex="-1" aria-labelledby="prestamoModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ejemplarModalLabel">Nuevo Ejemplar</h5>
+                    <h5 class="modal-title" id="crearPrestamoModalLabel">Nuevo Ejemplar</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -12,12 +12,13 @@
                         <div class="input-group mb-3">
                             <span class="input-group-text">ID Ejemplar:</span>
                             <input type="text" class="form-control border border-secondary-subtle" id="ejemplar"
-                                name="ejemplar" disabled>
+                                name="ejemplar">
                         </div>
                         <div class="input-group mb-3 ">
                             <span class="input-group-text">Material: </span>
                             <input class="form-control border border-secondary-subtle" list="datalistMaterialOptions"
-                                id="MaterialDataList" name="material" placeholder="Ingrese o seleccione un Material...">
+                                id="MaterialDataList" name="material" placeholder="Ingrese o seleccione un Material..."
+                                required>
                             <datalist id="datalistMaterialOptions">
                                 {% if material %}
                                 {% for material in materiales %}
@@ -34,7 +35,7 @@
                         <div class="alert alert-danger" id="message-error" style="display: none;"></div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                            <button type="button" class="btn btn-primary" onclick="crearEjemplar()">Crear
+                            <button id="btnCrear" type="button" class="btn btn-primary" onclick="crearEjemplar()">Crear
                                 Ejemplar</button>
                         </div>
                     </form>
@@ -45,7 +46,11 @@
 </div>
 
 <script>
-    function clearMensajes() {
+    let defaultForm = null;
+    document.addEventListener('DOMContentLoaded', () => {
+        defaultForm = document.getElementById('nuevoEjemplarForm').cloneNode(true)
+    })
+    function limpiarMensajes() {
         const error_mensajes = document.getElementById('message-error');
         while (error_mensajes.firstChild && error_mensajes.children.length >= 1) {
             error_mensajes.removeChild(error_mensajes.lastChild);
@@ -89,14 +94,20 @@
                 if (data.success) {
                     console.log(data.success);
                     console.log(data.message);
-                    clearMensajes();
+                    limpiarMensajes();
                     document.getElementById('message-success').textContent = data.message;
                     document.getElementById('message-success').style.display = 'block';
                     document.getElementById('ejemplar').value = data.ejemplarID;
                     confirmAlert = false;
-                } else {                    
+                } else if (data.status == 404) {
+                    limpiarMensajes();
+                    document.getElementById('message-error').textContent = data.message;
+                    document.getElementById('message-error').style.display = 'block';                    
+                    confirmAlert = false;
+
+                } else {
                     console.log(data);
-                    clearMensajes();
+                    limpiarMensajes();
                     document.getElementById('message-error').textContent = data.message;
                     document.getElementById('message-error').style.display = 'block';
                     confirmAlert = false;
@@ -106,4 +117,12 @@
                 console.error('Error:', error);
             });
     }
+
+    function limpiarForm() {
+        let container = document.getElementById('ejemplarModal').querySelector('.modal-body');
+        container.innerHTML = '';
+        container.appendChild(defaultForm.cloneNode(true))
+    }
+
+    document.getElementById('ejemplarModal').addEventListener('hidden.bs.modal', limpiarForm)
 </script>

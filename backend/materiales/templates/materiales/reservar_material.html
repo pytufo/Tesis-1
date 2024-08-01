@@ -1,4 +1,3 @@
-<!-- Modal activar usuario-->
 <div class="modal fade" id="materialReservaModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -9,11 +8,13 @@
       <div class="modal-body text center">
         <!-- El contenido del mensaje se actualiza dinamicamente -->
       </div>
+      <div id="message-success" style="display: none;"></div>
+
       <div class="modal-footer">
-        <form method="post" id="reservarMaterialForm">
+        <form id="reservarMaterialForm" method="post">
           {% csrf_token %}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Confirmar</button>
+          <button type="submit" class="btn btn-primary" id="btnCrearReserva">Confirmar</button>
         </form>
       </div>
     </div>
@@ -31,7 +32,49 @@
         modalBody.innerHTML = '¿Desea reservar el material: "' + data.titulo + '" ? <br/>' + " Recuerde que al reservar un material este tiene una vigencia de 48hs a partir de este momento, en caso de no retirar el material en el tiempo estimado la reserva del mismo sera finalizada automaticamente."
         document.getElementById('reservarMaterialForm').action = `material/${material}/reservar/`;
       })
+  }
 
+  function Limpiar() {
+    let Messages = document.getElementById('message-success');
+    Messages.style.display = 'none';
+    Messages.textContent = '';
 
   }
+
+  document.getElementById('reservarMaterialForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const form = event.target;
+    const formReserva = new FormData(form);
+    Limpiar();
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formReserva,
+      headers: {
+        'X-Requested-With': 'XMHttpRequest'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        let Message = document.getElementById('message-success')
+        if (data.success) {
+          Message.className = 'alert alert-success';
+          Message.textContent = data.message;
+          Message.style.display = 'block';
+        } else {
+          Message.className = 'alert alert-danger';
+          Message.textContent = data.message;
+          Message.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        let Message = document.getElementById('message-success');
+        Message.className = 'alert alert-success';
+        Message.textContent = 'Error: ' + error;
+        Message.style.display = 'block';
+      })
+  })
+
+  document.getElementById('materialReservaModal').addEventListener('hidden.bs.modal', Limpiar)
+
 </script>

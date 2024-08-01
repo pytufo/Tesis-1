@@ -77,5 +77,5 @@ def get_estado(obj):
     elif cantidad_disponible <= 1 and cantidad_existente > 1:
         # Verificar tambien la cantidad existente > 1
         return "Disponible (Lista de espera)"
-    elif cantidad_disponible <= 1:
+    elif cantidad_disponible <= 1 and cantidad_existente <= 1:
         return "No disponible (Solo lectura)"

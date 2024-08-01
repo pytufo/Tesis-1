@@ -1,0 +1,86 @@
+<div class="modal fade" id="cancelarReservaModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="ModalLabel"> Cancelar reserva <!-- Id y Titulo del material --> </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text center">
+                <!-- El contenido del mensaje se actualiza dinamicamente -->
+            </div>
+            <div id="message-success" style="display: none;"></div>
+
+            <div class="modal-footer">
+                <form id="cancelarReservaForm" method="post">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        onclick="volver()">Volver</button>
+                    <button type="submit" class="btn btn-primary" id="btnCrearReserva">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cancelarReservarModal(reserva) {
+        fetch(`/movimientos/reservas/${reserva}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                var modal = document.getElementById('cancelarReservaModal');
+                var modalBody = modal.querySelector('.modal-body');
+                modalBody.innerHTML = '¿Desea cancelar la reserva de el material: "' + data.material.titulo + '" ? <br/>'
+                document.getElementById('cancelarReservaForm').action = `/movimientos/reservas/${reserva}/cancelar/`;
+            })
+    }
+
+    function Limpiar() {
+        let Messages = document.getElementById('message-success');
+        Messages.style.display = 'none';
+        Messages.textContent = '';
+
+    }
+    function volver() {
+        window.location.replace(window.location.href)
+    }
+
+    document.getElementById('cancelarReservaForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const form = event.target;
+        const formReserva = new FormData(form);
+        Limpiar();
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formReserva,
+            headers: {
+                'X-Requested-With': 'XMHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                let Message = document.getElementById('message-success')
+                if (data.success) {
+                    console.log(data);
+                    Message.className = 'alert alert-success';
+                    Message.textContent = data.message;
+                    Message.style.display = 'block';
+                } else {
+                    console.log(data)
+                    Message.className = 'alert alert-danger';
+                    Message.textContent = data.message;
+                    Message.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                let Message = document.getElementById('message-success');
+                Message.className = 'alert alert-success';
+                Message.textContent = 'Error: ' + error;
+                Message.style.display = 'block';
+            })
+    })
+
+    document.getElementById('cancelarReservaModal').addEventListener('hidden.bs.modal', Limpiar)
+
+</script>

@@ -25,7 +25,16 @@ urlpatterns = [
             }
         ),
         name="listar_usuarios",
-    ),       
+    ),
+    path(
+        "users/",
+        UserViewSet.as_view(
+            {
+                "get": "no_admin",
+            }
+        ),
+        name="listar_usuarios_no_admin",
+    ),
     path(
         "<int:pk>/",
         user_detail,

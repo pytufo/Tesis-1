@@ -4,10 +4,12 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
 
+
+from django.views.decorators.csrf import csrf_protect
 from datetime import timedelta, date, datetime
 from django.utils import timezone
 from rest_framework.decorators import action
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from materiales.serializers import MaterialSerializer
 from .utils import (
     get_limite_reservas_prestamo,
@@ -23,7 +25,8 @@ from materiales.utils import (
 )
 
 from rest_framework import viewsets, filters, generics, status
-from rest_framework.response import Response
+
+# from rest_framework.response import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import PrestamoFilter
 
@@ -56,7 +59,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
         usuario = request.user
         query = request.GET.get("query", "")
 
-        if usuario.role == 1:
+        if usuario.role == 1 or usuario.role == 2:
             reservas = Reserva.objects.all()
         else:
             reservas = Reserva.objects.filter(owner=usuario.id)
@@ -81,64 +84,75 @@ class ReservaViewSet(viewsets.ModelViewSet):
             {"page_obj": page_obj, "reservas": serializer_reservas, "query": query},
         )
 
-        return Response(serializer.data)
+        return JsonResponse(serializer.data)
 
-    """ @action(detail=False, methods=["GET"])
+    @action(detail=False, methods=["GET"])
     def listar_reservas_usuario(self, request, *args, **kwargs):
         usuario = request.user
+        query = request.GET.get("query", "")
 
-        try:
-            reservas_usuario = Reserva.objects.filter(owner=usuario)
+        reservas = Reserva.objects.filter(owner=usuario.id)
 
-            Paginator(reservas_usuario,10)
-            
-            reservas_serializer = ReservasSerializer(page_obj, many=true)
-            serializer = ReservasSerializer(
-                reservas_usuario, context={"request": request}, many=True
+        if query:
+            reservas = reservas.filter(
+                Q(material__titulo__icontains=query)
+                | Q(owner__email__icontains=query)
+                | Q(owner__first_name__icontains=query)
+                | Q(owner__last_name__icontains=query)
             )
-            return Response(serializer.data) 
+        # reservas = Reserva.objects.filter(fecha_fin__isnull=False)
+        paginator = Paginator(reservas, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        reservas_serializer = ReservasSerializer(page_obj, many=True)
+        serializer_reservas = reservas_serializer.data
 
-        except Exception as e:
-            return Response(
-                {"message": f"Error al obtener las reservas del usuario: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            ) """
+        return render(
+            request,
+            "reservas/listar_reservas.html",
+            {"page_obj": page_obj, "reservas": serializer_reservas, "query": query},
+        )
 
-    @action(detail=True, methods=["put"])
+    # @action(detail=True, methods=["put"])
+    # @csrf_protect
     def cancelar_reserva(self, request, pk=None):
-        try:
-            reserva = self.get_object()
+        if request.method == "POST":
+            try:
+                reserva = self.get_object()
 
-            estado = get_estado_reserva(reserva)
-            if estado == "Finalizada":
-                return Response(
-                    {"message": "La reserva ya ha expirado"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                estado = get_estado_reserva(reserva)
+                if estado == "Finalizada":
+                    return JsonResponse(
+                        {"message": "La reserva ya ha expirado"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                fecha_fin_anterior = reserva.fecha_fin
+                reserva.fecha_fin = timezone.now()
+                reserva.save()
+
+                habilitar_reserva_lista_espera(reserva.material, fecha_fin_anterior)
+                return JsonResponse(
+                    {"message": "Reserva cancelada. ", "status": 200, "success": True}
                 )
-            fecha_fin_anterior = reserva.fecha_fin
-            reserva.fecha_fin = timezone.now()
-            reserva.save()
 
-            habilitar_reserva_lista_espera(reserva.material, fecha_fin_anterior)
-            return Response(
-                {"message": "Reserva cancelada. "}, status=status.HTTP_200_OK
-            )
+            except Reserva.DoesNotExist:
+                return JsonResponse(
+                    {"message": "la reserva no existe", "success": False},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
-        except Reserva.DoesNotExist:
-            return Response(
-                {"message": "la reserva no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        except Exception as e:
-            return Response(
-                {"message": f"Error al realizar la cancelación: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            except Exception as e:
+                return JsonResponse(
+                    {"message": f"Error al realizar la cancelación: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        else:
+            return redirect("/")
 
     def retrieve(self, request, pk=None):
         reserva = Reserva.objects.get(pk=pk)
         serializer = ReservasSerializer(reserva)
-        return Response(serializer.data)
+        return JsonResponse(serializer.data)
 
     def retrieve_material(self, request, *args, **kwargs):
         try:
@@ -147,9 +161,6 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             ejemplares_disponibles = get_ejemplares_disponibles(material)
 
-            # Puedes adaptar la lógica según tus necesidades para obtener ejemplares disponibles
-
-            # Aquí devuelves la información sobre el material y ejemplares disponibles
             serializer_material = MaterialSerializer(
                 material, context={"request": request}
             )
@@ -165,13 +176,13 @@ class ReservaViewSet(viewsets.ModelViewSet):
             return JsonResponse(response_data)
 
         except Reserva.DoesNotExist:
-            return Response(
+            return JsonResponse(
                 {"message": "La reserva no existe"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         except Exception as e:
-            return Response(
+            return JsonResponse(
                 {"message": f"Error al obtener información de la reserva: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -188,7 +199,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
             ### El usuario no podrá resepetir una reserva.
 
             if usuario_tiene_reserva_prestamo_pendiente(usuario, material):
-                return Response(
+                return JsonResponse(
                     {"message": "Ya tienes una reserva para este material..."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -196,20 +207,23 @@ class ReservaViewSet(viewsets.ModelViewSet):
             ### Obtenemos el estado del material dando opcion para una "lista de espera" obteniendo el material proximo a liberarse.
             ### solicitando una confirmacion para crearla
 
-            if (
-                estado == "Disponible (Lista de espera)"
-                or estado == "No disponible (Solo lectura)"
-            ):
+            if estado == "Disponible (Lista de espera)":
                 fecha_fin_default = None
+            elif estado == "No disponible (Solo lectura)":
+                return JsonResponse(
+                    {
+                        "message": "El material no cuenta con ejemplares disponibles para la reserva."
+                    }
+                )
+
             else:
                 fecha_fin_default = timezone.now() + timedelta(days=1)
 
             if limite_reservas_prestamo == "Excede":
-                return Response(
+                return JsonResponse(
                     {
                         "message": "El usuario ha excedido el limite de reservas o prestamos"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                    }
                 )
 
             data = {
@@ -227,20 +241,19 @@ class ReservaViewSet(viewsets.ModelViewSet):
             serializer.validated_data["fecha_fin"] = fecha_fin_default
             serializer.save(material=material)
 
-            return Response(
-                {"message": "Reserva creada con exito", "id": serializer.data["id"]},
-                status=status.HTTP_201_CREATED,
+            return JsonResponse(
+                {
+                    "message": "Reserva creada con exito",
+                    "id": serializer.data["id"],
+                    "success": True,
+                },
             )
         except Material.DoesNotExist:
-            return Response(
-                {"message": "La reserva no existe"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return JsonResponse({"message": "El material no existe", "success": False})
 
         except Exception as e:
-            return Response(
-                {"message": f"Error al obtener información de la reserva: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            return JsonResponse(
+                {"message": f"Error al obtener información de la reserva: {str(e)}"}
             )
 
 
@@ -253,7 +266,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
         usuario = request.user
         query = request.GET.get("query", "")
 
-        if usuario.role == 1:
+        if usuario.role == 1 or usuario.role == 2:
             prestamos = Prestamo.objects.all()
         else:
             prestamos = Prestamo.objects.filter(owner=usuario.id)
@@ -275,7 +288,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
         return render(
             request,
             "prestamos/listar_prestamos.html",
-            {"page_obj": page_obj, "reservas": serializer_prestamos, "query": query},
+            {"page_obj": page_obj, "prestamos": serializer_prestamos, "query": query},
         )
 
     @action(detail=False, methods=["GET"])
@@ -292,10 +305,10 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 "prestamos/listar_prestamos.html",
                 {"usuario": usuario, "prestamos": prestamos_usuario},
             )
-            return Response(serializer.data)
+            return JsonResponse(serializer.data)
 
         except Exception as e:
-            return Response(
+            return JsonResponse(
                 {"message": f"Error al obtener los prestamos del usuario: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -303,13 +316,13 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         prestamo = Prestamo.objects.get(pk=pk)
         serializer = PrestamosSerializer(prestamo)
-        return Response(serializer.data)
+        return JsonResponse(serializer.data)
 
     @action(detail=True, methods=["get"])
     def retrieve_ejemplar(self, request, ejemplar_pk=None):
         ejemplar = Ejemplar.objects.get(pk=ejemplar_pk)
         serializer = EjemplarSerializer(ejemplar)
-        return Response(serializer.data)
+        return JsonResponse(serializer.data)
 
     @action(detail=True, methods=["put"])
     def devolucion(self, request, pk=None):
@@ -319,7 +332,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             estado = get_estado_prestamo(prestamo)
 
             if estado == "Finalizado":
-                return Response(
+                return JsonResponse(
                     {"message": "El prestamo ya ha expirado"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -329,17 +342,17 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             habilitar_reserva_lista_espera(
                 prestamo.ejemplar.material, fecha_fin_anterior
             )
-            return Response(
+            return JsonResponse(
                 {"message": "Devolución exitosa"}, status=status.HTTP_200_OK
             )
 
         except Prestamo.DoesNotExist:
-            return Response(
+            return JsonResponse(
                 {"message": "El préstamo no existe"}, status=status.HTTP_404_NOT_FOUND
             )
 
         except Exception as e:
-            return Response(
+            return JsonResponse(
                 {"message": f"Error al realizar la devolución: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -350,12 +363,12 @@ class PrestamoViewSet(viewsets.ModelViewSet):
         try:
             # definimos los campos de "prestamo"
             usuario_id = request.data.get("owner")
-            usuario = User.objects.get(pk=usuario_id)
+            usuario = User.objects.get(email=usuario_id)
             ejemplar_id = request.data.get("ejemplar")
             ejemplar = Ejemplar.objects.get(pk=ejemplar_id)
 
             if get_estado(ejemplar.material) != "Disponible":
-                return Response(
+                return JsonResponse(
                     {"message": "El material no está disponible para préstamo"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -371,23 +384,23 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             if pendiente:
                 tipo = pendiente["tipo"]
                 if tipo == "Reserva":
-                    return Response(
+                    return JsonResponse(
                         {
                             "message": "El usuario ya tiene una reserva vigente para este material"
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 elif tipo == "Prestamo":
-                    return Response(
+                    return JsonResponse(
                         {
                             "message": "El usuario ya tiene préstamo vigente para este material"
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             if estado == "En prestamo":
-                return Response({"message": "El ejemplar ya se encuentra prestado"})
+                return JsonResponse({"message": "El ejemplar ya se encuentra prestado"})
             if limite_reservas_prestamo == "Excede":
-                return Response(
+                return JsonResponse(
                     {
                         "message": "El usuario ha excedido el limite de reservas o prestamos"
                     }
@@ -409,11 +422,12 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             serializer.validated_data["fecha_fin"] = fecha_fin_default
             serializer.save(ejemplar=ejemplar)
 
-            return Response(
-                {"message": "Prestamo creado con exito"}, status=status.HTTP_201_CREATED
+            return JsonResponse(
+                {"message": "Prestamo creado con exito", "success": True},
+                status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response(
+            return JsonResponse(
                 {"message": f"Error al obtener informacion del prestamo: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -434,16 +448,16 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 "ejemplares_disponibles": serializer_ejemplares.data,
             }
 
-            return Response(response_data)
+            return JsonResponse(response_data)
 
         except Reserva.DoesNotExist:
-            return Response(
+            return JsonResponse(
                 {"message": "La reserva no existe"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         except Exception as e:
-            return Response(
+            return JsonResponse(
                 {"message": f"Error al procesar la solicitud: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -459,13 +473,15 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             fecha_fin_reserva = reserva.fecha_fin
 
             if fecha_fin_reserva < timezone.now():
-                return Response(
+                return JsonResponse(
                     {"message": "La reserva ha expirado"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             if not ejemplares_disponibles:
-                return Response({"message": "No se encuentran ejemplares disponibles"})
+                return JsonResponse(
+                    {"message": "No se encuentran ejemplares disponibles"}
+                )
             fecha_fin_default = timezone.now() + timedelta(days=7)
 
             #
@@ -486,18 +502,18 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             reserva.fecha_fin = timezone.now()
             reserva.save()
 
-            return Response(
+            return JsonResponse(
                 {"message": "El prestamo ha sido creado"},
                 status=status.HTTP_201_CREATED,
             )
 
         except Reserva.DoesNotExist:
-            return Response(
+            return JsonResponse(
                 {"message": "La reserva no existe"}, status=status.HTTP_404_NOT_FOUND
             )
 
         except Exception as e:
-            return Response(
+            return JsonResponse(
                 {"message": f"Error al entregar ejemplar desde reserva: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
