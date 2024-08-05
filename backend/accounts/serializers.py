@@ -33,6 +33,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "usuario_prestamos",
             "limite",
             "is_active",
+            "is_authenticated",
             "role",
         ]
 

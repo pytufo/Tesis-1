@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 
 fake = Faker()
+import random
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import IsActive, IsSuperuser
@@ -40,18 +41,38 @@ from .models import User
 @csrf_exempt
 @require_POST
 def generar_aleatorios(request):
+    usuarios = []
     for _ in range(10):
-        User.objects.create(
-            email=fake.email(),
-            password=fake.password(),
-            first_name=fake.first_name(),
-            last_name=fake.last_name(),
-            role=fake.random_element(elements=(1, 2, 3, 4, 5, 6)),
-            is_active=fake.boolean(),
-            is_staff=fake.boolean(),
+        email = fake.email()
+        # password = fake.last_name()
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        role = fake.random_int(min=2, max=6)
+        is_active = fake.boolean()
+        is_staff = fake.boolean()
+
+        numeros_aleatorios = "".join([str(random.randint(0, 9)) for _ in range(4)])
+        password = f"{last_name}{numeros_aleatorios}"
+
+        user = User.objects.create(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            role=role,
+            is_active=is_active,
+            is_staff=is_staff,
+        )
+        usuarios.append(
+            {
+                "email": email,
+                "password": password,
+            }
         )
 
-    return JsonResponse({"message": "Usuarios aleatorios generados exitosamente"})
+    return JsonResponse(
+        {"message": "Usuarios aleatorios generados exitosamente", "usuarios": usuarios}
+    )
 
 
 class UserLoginView(generics.CreateAPIView):
@@ -238,7 +259,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def profile(self, request):
         user = request.user
-        return render(request, "accounts/profile.html", {"user": user})
+        serializer = UserProfileSerializer(user)
+        return render(request, "accounts/profile.html", {"user": serializer.data})
         """ serializer = self.get_serializer(user)
         return Response(serializer.data) """
 

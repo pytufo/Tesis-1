@@ -348,7 +348,8 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 prestamo.ejemplar.material, fecha_fin_anterior
             )
             return JsonResponse(
-                {"message": "Devolución exitosa"}, status=status.HTTP_200_OK
+                {"success": True, "message": "Devolución exitosa"},
+                status=status.HTTP_200_OK,
             )
 
         except Prestamo.DoesNotExist:
@@ -508,7 +509,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             reserva.save()
 
             return JsonResponse(
-                {"message": "El prestamo ha sido creado"},
+                {"success": True, "message": "El prestamo ha sido creado"},
                 status=status.HTTP_201_CREATED,
             )
 

@@ -20,7 +20,6 @@
       <table class="table table-sm table-hover table-secondary table-bordered">
         <thead class="table-secondary text-center">
           <th scope="col">Usuario</th>
-
           <th scope="col">Titulo</th>
           <th scope="col">Autor</th>
           <th scope="col">Finalización</th>
@@ -30,7 +29,10 @@
         <tbody class="table-group-divider bg-dark-subtle">
           {% for reserva in reservas %}
           <tr>
-            <td>{{ reserva.owner.email}}</td>
+            <td>
+              {{ reserva.owner.email}}            
+              
+            </td>
             <td>{{ reserva.material.titulo }}</td>
             <td>
               <p>
@@ -45,7 +47,7 @@
             <td>{{ reserva.fecha_fin}}</td>
             {% endif %}
             <td class="text-center">
-              {% if user.role != 1 %}
+              {% if user.role != 1 and user.rol%}
               <!-- Acciones para usuario -->
               <div class="btn-group">
                 {%if reserva.estado != "Finalizada" and reserva.owner.email == user.email %}

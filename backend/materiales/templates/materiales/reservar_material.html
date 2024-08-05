@@ -30,7 +30,7 @@
         var modal = document.getElementById('materialReservaModal');
         var modalBody = modal.querySelector('.modal-body');
         modalBody.innerHTML = '¿Desea reservar el material: "' + data.titulo + '" ? <br/>' + " Recuerde que al reservar un material este tiene una vigencia de 48hs a partir de este momento, en caso de no retirar el material en el tiempo estimado la reserva del mismo sera finalizada automaticamente."
-        document.getElementById('reservarMaterialForm').action = `material/${material}/reservar/`;
+        document.getElementById('reservarMaterialForm').action = `/material/${material}/reservar/`;
       })
   }
 
