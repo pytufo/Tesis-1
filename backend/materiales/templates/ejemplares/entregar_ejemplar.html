@@ -12,12 +12,15 @@
             <div class="input-group mb-3">
               <div class="input-group mb-3 ">
                 <span class="input-group-text">Material: </span>
-                <input id="material" class="form-control border border-secondary-subtle" name="material"
-                  placeholder="Ingrese o seleccione un Material..." disabled>
+                <input id="material" type="text" class="form-control border border-secondary-subtle" name="material"
+                  placeholder="Ingrese o seleccione un Material..." list="datalistMaterialesOptions" disabled>
+                <datalist id="datalistMaterialesOptions">
+                  <!-- Obtenemos los ejemplares del material dinamicamente -->
+                </datalist>
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">ID Ejemplar:</span>
-                <input id="IdEjemplar" class="form-control border border-secondary-subtle" name="ejemplar"
+                <input id="IdEjemplar" type="number" class="form-control border border-secondary-subtle" name="ejemplar"
                   placeholder="Ingreser o seleccione un Ejemplar..." list="datalistEjemplaresOptions" required>
                 <datalist id="datalistEjemplaresOptions">
                   <!-- Obtenemos los ejemplares del material dinamicamente -->
@@ -34,13 +37,10 @@
 
               </div>
             </div>
-            <p id="IdEjemplar">
-
-            </p>
             <div id="message-prestamo" style="display: none;"></div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="volver()">Cerrar</button>
-              <button type="submit" class="btn btn-primary">Crear
+              <button id="btn-create" type="submit" class="btn btn-primary">Crear
                 Prestamo</button>
             </div>
 
@@ -52,7 +52,7 @@
 </div>
 
 <script>
-
+  ejemplaresDisponibles = null;
   function prestarEjemplar(ejemplarId) {
     Limpiar();
     fetch(`/material/ejemplar/${ejemplarId}/`)
@@ -95,9 +95,11 @@
         let usuario = document.getElementById('owner');
         usuario.value = data.reserva.owner.email;
 
+        let ejemplaresDisponibles = data.reserva.material.ejemplares_disponibles.map(ejemplar => ejemplar.toString());
+
         let datalist = document.getElementById('datalistEjemplaresOptions');
         datalist.innerHTML = '';
-        data.reserva.material.ejemplares_disponibles.forEach(ejemplar => {
+        ejemplaresDisponibles.forEach(ejemplar => {
           let option = document.createElement('option');
           option.value = ejemplar;
           datalist.appendChild(option);
@@ -137,6 +139,67 @@
       })
   }
 
+  function nuevoPrestamo() {
+    fetch(`/material/materiales/`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        document.getElementById('material').disabled = false;
+        let datalistMateriales = document.getElementById('datalistMaterialesOptions');
+        datalistMateriales.innerHTML = '';
+        data.forEach(material => {
+          let option = document.createElement('option');
+          option.value = material.titulo;
+          datalistMateriales.appendChild(option);
+        });
+
+        document.getElementById('material').addEventListener('input', function () {
+          const materialTitulo = this.value;
+          fetch(`/material/materiales/`)
+            .then(response => response.json())
+            .then(data => {
+              const material = data.find(m => m.titulo === materialTitulo);
+              if (material) {
+                let datalistEjemplares = document.getElementById('datalistEjemplaresOptions');
+                datalistEjemplares.innerHTML = '';
+                material.ejemplares_disponibles.forEach(ejemplar => {
+                  let option = document.createElement('option');
+                  option.value = ejemplar;
+                  datalistEjemplares.appendChild(option);
+                });
+              }
+            });
+        });
+
+        document.getElementById('IdEjemplar').addEventListener('input', function () {
+          const ejemplarId = this.value;
+          fetch(`/material/ejemplar/${ejemplarId}/`)
+            .then(response => response.json())
+            .then(data => {
+              if (data && data.material) {
+                document.getElementById('material').value = data.material.titulo;
+              } else {
+                document.getElementById('material').value = '';
+              }
+            });
+        });
+      });
+
+    fetch(`/accounts/users/`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+
+        let datalistUsers = document.getElementById('datalistUsersOptions');
+        datalistUsers.innerHTML = '';
+        data.forEach(user => {
+          let option = document.createElement('option');
+          option.value = user.email;
+          datalistUsers.appendChild(option);
+        });
+      })
+  }
+
   function Limpiar() {
     let messagesPrestamo = document.getElementById('message-prestamo');
     messagesPrestamo.style.display = 'none';
@@ -153,8 +216,22 @@
 
     const form = event.target;
     const formData = new FormData(form);
+    const inputEjemplar = document.getElementById('IdEjemplar').value;
     let messagesPrestamo = document.getElementById('message-prestamo');
     Limpiar();
+
+    console.log(inputEjemplar, ejemplaresDisponibles)
+    if (ejemplaresDisponibles) {
+      console.log('1')
+      if (!ejemplaresDisponibles.includes(inputEjemplar)) {
+        messagesPrestamo.className = 'alert alert-danger';
+        messagesPrestamo.textContent = 'Ejemplar no valido';
+        messagesPrestamo.style.display = 'block'
+        console.log(true)
+        return;
+      }
+
+    }
 
     fetch(form.action, {
       method: 'POST',
@@ -177,6 +254,7 @@
           messagesPrestamo.className = 'alert alert-success';
           messagesPrestamo.textContent = data.message;
           messagesPrestamo.style.display = 'block';
+          document.getElementById('btn-create').style.display = 'none'
 
         } else {
           console.log(data);

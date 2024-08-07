@@ -40,7 +40,7 @@ class ReservasSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reserva
-        fields = ["id", "fecha_fin", "owner", "material", "estado"]
+        fields = ["id", "fecha_inicio", "fecha_fin", "owner", "material", "estado"]
         ordering = ["-fecha_fin"]
 
     def get_estado(self, obj):
@@ -56,7 +56,7 @@ class PrestamosSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Prestamo
-        fields = ["id", "fecha_fin", "created_by", "owner", "ejemplar", "estado"]
+        fields = ["id", "fecha_inicio", "fecha_fin", "created_by", "owner", "ejemplar", "estado"]
         ordering = ["-fecha_fin"]
 
     def get_estado(self, obj):

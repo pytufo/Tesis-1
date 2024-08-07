@@ -191,7 +191,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def retrieve_user(self, request, *args, **kwargs):
         usuario = self.get_object()
-        if request.user.role == User.ADMIN:
+        if request.user.role == User.ADMIN or request.user.role == 2 or request.user.role == 4:
             serializer = UserProfileSerializer(usuario)
             roles = [
                 role
@@ -207,7 +207,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return redirect("/")
 
     def listar_usuarios(self, request, *args, **kwargs):
-        if request.user.role == 1 or request.user.role == 2:
+        if request.user.role == 1 or request.user.role == 2 or request.user.role == 4:
             query = request.GET.get("query", "")
             ordering = request.GET.get("ordering", "id")
             if query:

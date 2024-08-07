@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
+
 
 from datetime import timedelta
 from django.utils import timezone
@@ -13,7 +14,6 @@ from .serializers import CuotaSerializer, CuotaCreateSerializer
 
 from .models import Cuota
 from accounts.models import User
-
 
 class CuotaViewSet(viewsets.ModelViewSet):
     serializer_class = CuotaSerializer
@@ -78,7 +78,7 @@ class CuotaViewSet(viewsets.ModelViewSet):
             "fecha": fecha_default,
         }
 
-        serializer = CuotaSerializer(data=data)
+        serializer = CuotaCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

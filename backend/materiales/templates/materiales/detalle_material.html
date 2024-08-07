@@ -7,13 +7,30 @@
 <div class="d-flex justify-content-between mb-3">
   <a onclick="window.location='{% url 'listar_materiales' %}';" class="btn btn-primary">Volver a la lista</a>
   {% if user.role == 1%}
-  <div>
-    <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#materialModal"
-      onclick="editModal('{{ material.id }}')">Editar</a>
-    <a href="#" class="btn btn-secondary">Ejemplares del material</a>
-    <a href="#" class="btn btn-secondary">Crear un prestamo</a>
-    <a href="{% url 'generar_pdf_material' material.id %}" target="_blank" class="btn btn-secondary">Imprimir
-      material</a>
+  <div class="col-auto">
+    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+      aria-expanded="false">Accion
+    </button>
+    <ul class="dropdown-menu">
+      <li>
+        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
+          onclick="editModal('{{ material.id }}')">Editar</a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{% url 'ejemplares_de_material' material.id%}">Ejemplares del material</a>
+      </li>
+      <li>
+        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal"
+          onclick="prestarMaterialEjemplar('{{material.id}}')">Crear un prestamo</a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{% url 'generar_pdf_material' material.id %}" target="_blank">Imprimir
+          material</a>
+      </li>
+
+
+
+    </ul>
   </div>
   {%else%}
   <div>
@@ -64,4 +81,5 @@
 
 {% include 'materiales/_nuevo_material_modal.html' %}
 {% include 'materiales/reservar_material.html' %}
+{% include 'ejemplares/entregar_ejemplar.html' %}
 {% endblock %}

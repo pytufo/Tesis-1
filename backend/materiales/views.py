@@ -185,6 +185,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = MaterialSerializer
     queryset = Material.objects.all()
+    
 
     def listar_materiales(self, request, *args, **kwargs):
         query = request.GET.get("query", "")

@@ -29,6 +29,15 @@ urlpatterns = [
         name="detalle_reserva",
     ),
     path(
+        "reserva/<int:reserva_pk>",
+        ReservaViewSet.as_view(
+            {
+                "get": "detalle_reserva",
+            }
+        ),
+        name="detalle_reserva",
+    ),
+    path(
         "reservas/<int:reserva_pk>/entregar_ejemplar/",
         PrestamoViewSet.as_view(
             {
@@ -73,6 +82,15 @@ urlpatterns = [
             }
         ),
         name="listar_prestamos",
+    ),
+    path(
+        "prestamo/<int:prestamo_pk>",
+        PrestamoViewSet.as_view(
+            {
+                "get": "detalle_prestamo",
+            }
+        ),
+        name="detalle_prestamo",
     ),
     path(
         "mis_prestamos/",

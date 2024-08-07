@@ -24,6 +24,7 @@
     <!-- Titulos de la tabla -->
     <table class="table table-hover table-secondary table-bordered">
       <thead class="table-secondary table-hover">
+        {% if user.role == 1 or user.role == 2%}
         <th scope="col">Id</th>
         <th scope="col">Nombre</th>
         <th scope="col">E-mail</th>
@@ -33,54 +34,67 @@
           <a href="?query={{ query }}&ordering={% if ordering == 'is_active' %}-is_active{% else %}is_active{% endif %}"
             class="link-offset link-underline link-underline-opacity-0">Activo</a>
         </th>
+        {% elif user.role == 4 %}
+        <th scope="col">Nombre</th>
+        <th scope="col">DNI</th>
+        <th scope="col">Estado</th>        
+        {%endif%}
         <th scope="col">Accion</th>
       </thead>
       <tbody class="table-group-divider bg-dark-subtle">
-        {% for user in usuarios %}
+        {% for usuario in usuarios %}
+        {% if user.role == 1 or user.role == 2%}
         <tr>
-          <td>{{ user.id }}</td>
-          <td>{{ user.last_name }}, {{ user.first_name }}</td>
-          <td>{{ user.email }}</td>
-          {% if user.limite == "Excede" %}
-          <td class="table-danger">{{ user.limite }}</td>
+          <td>{{ usuario.id }}</td>
+          <td>{{ usuario.last_name }}, {{ usuario.first_name }}</td>
+          <td>{{ usuario.email }}</td>
+          {% if usuario.limite == "Excede" %}
+          <td class="table-danger">{{ usuario.limite }}</td>
           {% else %}
-          <td>{{ user.limite }}</td>
+          <td>{{ usuario.limite }}</td>
           {% endif %}
-          <td class="table-success">{{ user.role }}</td>
-          {% if user.is_active %}
+          <td class="table-success">{{ usuario.role }}</td>
+          {% if usuario.is_active %}
           <td class="table-success">Activo</td>
+          
           {% else %}
           <td class="table-danger">Desactivado</td>
           {% endif %}
+          {%elif user.role == 4%}
+          <td>{{ usuario.last_name }}, {{ usuario.first_name }}</td>
+          <td>DNI {{ usuario.id }} </td>
+          <td>Estado</td>
+          {%endif%}
           <td class="text-center">
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" , data-bs-toggle="dropdown"
                 aria-expanded="false">Accion</button>
               <ul class="dropdown-menu">
-                <li><a href="{% url 'detalle_usuario' user.id%}" class="dropdown-item">Informacion del usuario</a>
+                <li><a href="{% url 'detalle_usuario' usuario.id%}" class="dropdown-item">Informacion del usuario</a>
                 </li>
-                {% if not user.email == "admin@mail.com" %}
+                {% if user.role == 1 or user.role == 2 %}
                 <li>
                   <hr class="dropdown-divider">
                 </li>
-                {% if not user.is_active %}
+                {% if not usuario.is_active %}
                 <li><a href="#" class="dropdown-item bg bg-success" data-bs-toggle="modal" data-bs-target="#Modal"
-                    data-user-email="{{ user.email }}" data-user-id="{{ user.id }}"
-                    data-user-active="{{ user.is_active }}">Activar usuario</a></li>
+                    data-user-email="{{ usuario.email }}" data-user-id="{{ usuario.id }}"
+                    data-user-active="{{ usuario.is_active }}">Activar usuario</a></li>
                 {% else %}
                 <li><a href="#" class="dropdown-item bg bg-danger" data-bs-toggle="modal" data-bs-target="#Modal"
-                    data-user-email="{{ user.email }}" data-user-id="{{ user.id }}"
-                    data-user-active="{{ user.is_active }}">Desactivar usuario</a></li>
+                    data-user-email="{{ usuario.email }}" data-user-id="{{ usuario.id }}"
+                    data-user-active="{{ usuario.is_active }}">Desactivar usuario</a></li>
                 {% endif %}
+                <li><a href="/movimientos/reservas/?query={{usuario.id}}" class="dropdown-item">Reservas del usuario</a></li>
+                <li><a href="/movimientos/prestamos/?query={{usuario.id}}" class="dropdown-item">Prestamos</a></li>
                 {% endif %}
-                <li><a href="#" class="dropdown-item">Reservas del usuario</a></li>
-                <li><a href="#" class="dropdown-item">Prestamos</a></li>
               </ul>
 
             </div>
           </td>
 
         </tr>
+        
         {% endfor%}
 
       </tbody>

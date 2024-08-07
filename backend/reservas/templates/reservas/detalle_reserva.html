@@ -1,0 +1,35 @@
+{% extends 'navbar.html' %}
+
+{% block title %} Detalles de la reserva {% endblock %}
+
+{% block content %}
+<br />
+<div class="d-flex justify-content-between mb-3">
+  <a onclick="window.location='{% url 'listar_reservas' %}';" class="btn btn-primary">Volver a la lista</a>
+
+</div>
+<div class="container text-center">
+  <br />
+  {% if user.email != reserva.owner.email%}
+  <p>
+    <b>Usuario: </b>{{reserva.owner.email}}
+  </p>
+  {%endif%}
+  <p>
+    <b>Material: </b>{{reserva.material.titulo}}
+  </p>
+  <p>
+    <b>Fecha Inicio: </b>{{reserva.fecha_inicio}}
+  </p>
+  <p>
+    <b>Fecha Finalizacion: </b>{{reserva.fecha_fin}}
+  </p>
+
+
+
+
+</div>
+
+{% include 'materiales/_nuevo_material_modal.html' %}
+{% include 'materiales/reservar_material.html' %}
+{% endblock %}

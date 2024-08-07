@@ -1,4 +1,5 @@
 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+    {% if user.role == 1 or user.role == 2%}
     <li class="nav-item">
         <a class="nav-link" href="/" role="button">
             Materiales
@@ -19,6 +20,7 @@
             Prestamos
         </a>
     </li>
+    {%endif%}
     {% if user.role == 1 or user.role == 4%}
     <li class="nav-item">
         <a class="nav-link" href="{% url 'listar_usuarios'%}" role="button">

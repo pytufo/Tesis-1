@@ -29,8 +29,8 @@
                     <th scope="col">Id</th>
                     <th scope="col">Usuario</th>
                     <th scope="col">Tesorero</th>
+                    <th scope="col">Monto</th>
                     <th scope="col">Fecha</th>
-                    <th scope="col">Accion</th>
                 </thead>
                 <!-- Tabla de cuotas -->
                 <tbody class="table-group-divider bg-dark-subtle">
@@ -40,77 +40,45 @@
                             {{cuota.id}}
                         </td>
                         <td>
-                            {{ cuota.owner}}
+                            {{ cuota.owner.email}}
 
                         </td>
-                        <td>{{ cuota.material.titulo }}</td>
+                        <td>{{ cuota.created_by.email }}</td>
                         <td>
-                            <p>
-                                {% for autor in cuota.material.autor %}
-                                {{ autor.nombre }} {{autor.apellido }}.
-                                {% endfor %}
-                            </p>
+                            ${{cuota.monto}}
                         </td>
-                        {% if cuota.estado == "Finalizada" or not cuota.fecha_fin %}
-                        <td class="table-danger">{{cuota.estado}}</td>
-                        {% else %}
-                        <td>{{ cuota.fecha_fin}}</td>
-                        {% endif %}
-                        <td class="text-center">
-                            {% if user.role != 1 and user.rol%}
-                            <!-- Acciones para usuario -->
-                            <div class="btn-group">
-                                {%if cuota.estado != "Finalizada" and cuota.owner.email == user.email %}
-                                <button class="btn btn-secondary" type="button" href="#" data-bs-toggle="modal"
-                                    data-bs-target="#cancelarcuotaModal" onclick="cancelarcuotarModal('{{cuota.id}}')">
-                                    Cancelar cuota
-                                </button>
-                                {%endif%}
-                            </div>
-                            {% else %}
-                            <!-- Acciones para admin  -->
-                            {% if cuota.estado != "Finalizada" and cuota.fecha_fin %}
-                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                                data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                                <span class="visually-hidden">Toggle Dropdown</span>
-                                <ul class="dropdown-menu ">
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                            data-bs-target="#crearPrestamoModal"
-                                            onclick="cuotaEntregarEjemplar('{{cuota.id}}')">Entregar ejemplar</a></li>
-                                </ul>
-                                {%endif%}
-        </div>
-        {% endif %}
+                        <td>
+                            {{cuota.fecha}}
+                        </td>
 
-        </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-        </table>
-        {% else %}
-        <div class="alert alert-danger" role="alert">No se encontraron coincidencias</div>
-        {% endif %}
-        <div class="pagination">
-            <span class="step-links">
-                {% if page_obj.has_previous %}
-                <a href="?query={{ query }}&page=1">inicio</a>
-                <a href="?query={{ query }}&page={{ page_obj.previous_page_number }}">anterior</a>
-                {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-danger" role="alert">No se encontraron coincidencias</div>
+            {% endif %}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                    <a href="?query={{ query }}&page=1">inicio</a>
+                    <a href="?query={{ query }}&page={{ page_obj.previous_page_number }}">anterior</a>
+                    {% endif %}
 
-                <span class="current">
-                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                    <span class="current">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?query={{ query }}&page={{ page_obj.next_page_number }}">siguiente ></a>
+                    <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}">ultima >></a>
+                    {% endif %}
                 </span>
+            </div>
+            <br />
 
-                {% if page_obj.has_next %}
-                <a href="?query={{ query }}&page={{ page_obj.next_page_number }}">siguiente ></a>
-                <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}">ultima >></a>
-                {% endif %}
-            </span>
         </div>
-        <br />
-
     </div>
-</div>
 
 </div>
 {% include 'facturacion/nuevo_pago.html' %}

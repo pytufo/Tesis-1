@@ -47,6 +47,11 @@ material_detail = MaterialViewSet.as_view(
 urlpatterns = [
     # path(r"", include(router.urls)),
     path(
+        "materiales/",
+        MaterialViewSet.as_view({"get": "list"}),
+        name="materiales",
+    ),
+    path(
         "<int:material_pk>/",
         MaterialViewSet.as_view({"get": "detalle_material"}),
         name="material",

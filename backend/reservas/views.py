@@ -67,6 +67,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
         if query:
             reservas = reservas.filter(
                 Q(material__titulo__icontains=query)
+                | Q(owner__id__icontains=query)
                 | Q(owner__email__icontains=query)
                 | Q(owner__first_name__icontains=query)
                 | Q(owner__last_name__icontains=query)
@@ -153,6 +154,17 @@ class ReservaViewSet(viewsets.ModelViewSet):
         reserva = Reserva.objects.get(pk=pk)
         serializer = ReservasSerializer(reserva)
         return JsonResponse(serializer.data)
+
+    def detalle_reserva(self, request, reserva_pk=None):
+        reserva_id = Reserva.objects.get(pk=reserva_pk)
+        reserva = ReservasSerializer(reserva_id)
+        return render(
+            request,
+            "reservas/detalle_reserva.html",
+            {
+                "reserva": reserva.data,
+            },
+        )
 
     def retrieve_material(self, request, *args, **kwargs):
         try:
@@ -273,7 +285,8 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
         if query:
             prestamos = prestamos.filter(
-                Q(material__titulo__icontains=query)
+                Q(ejemplar__material__titulo__icontains=query)
+                | Q(owner__id__icontains=query)
                 | Q(owner__email__icontains=query)
                 | Q(owner__first_name__icontains=query)
                 | Q(owner__last_name__icontains=query)
@@ -300,7 +313,8 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
         if query:
             prestamos = prestamos.filter(
-                Q(material__titulo__icontains=query)
+                Q(ejemplar__material__titulo__icontains=query)
+                | Q(owner__id__icontains=query)
                 | Q(owner__email__icontains=query)
                 | Q(owner__first_name__icontains=query)
                 | Q(owner__last_name__icontains=query)
@@ -316,6 +330,17 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             request,
             "prestamos/listar_prestamos.html",
             {"page_obj": page_obj, "prestamos": serializer_prestamos, "query": query},
+        )
+
+    def detalle_prestamo(self, request, prestamo_pk=None):
+        prestamo_id = Prestamo.objects.get(pk=prestamo_pk)
+        prestamo = PrestamosSerializer(prestamo_id)
+        return render(
+            request,
+            "prestamos/detalle_prestamo.html",
+            {
+                "prestamo": prestamo.data,
+            },
         )
 
     def retrieve(self, request, pk=None):
@@ -378,7 +403,6 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                     {"message": "El material no está disponible para préstamo"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
             # definimos variables de estados y aplicamos sus validaciones
             estado = get_estado_ejemplar(ejemplar)
             limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)

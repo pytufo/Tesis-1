@@ -13,11 +13,14 @@
       </form>
     </div>
   </div>
+  {% if user.role == 1 or user.role == 2%}
   <div class="col-auto">
-    <button type="button" class="btn btn-primary" data-bs-toggle="dropdown" aria-expanded="false">Nuevo
+    <button type="button" onclick="nuevoPrestamo()" class="btn btn-primary" data-bs-toggle="modal"
+      data-bs-target="#crearPrestamoModal" aria-expanded="false">Nuevo
       Prestamo
     </button>
   </div>
+  {%endif%}
   <div class="row">
     <div class="col">
       {% if prestamos %}
@@ -59,7 +62,8 @@
               {% if user.role != 1 %}
               <!-- Acciones para usuario -->
               <div class="btn-group">
-                <button class="btn btn-secondary" type="button">
+                <button class="btn btn-secondary" type="button" href="#"
+                  onclick="window.location='{% url 'detalle_prestamo' prestamo.id %}';">
                   Ver
                 </button>
               </div>
@@ -72,7 +76,7 @@
                   Finalizar prestamo
                 </button>
                 {% else %}
-                <button class="btn btn-secondary" type="button" href="#" >
+                <button class="btn btn-secondary" type="button" href="#">
                   Accion
                 </button>
                 {%endif%}
@@ -80,7 +84,9 @@
                   data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
                   <span class="visually-hidden">Toggle Dropdown</span>
                   <ul class="dropdown-menu ">
-                    <li><a class="dropdown-item" href="#">Detalles del prestamo</a></li>
+                    <li><a class="dropdown-item" href="#"
+                        onclick="window.location='{% url 'detalle_prestamo' prestamo.id %}';">Detalles del prestamo</a>
+                    </li>
                   </ul>
               </div>
               {% endif %}
@@ -118,4 +124,6 @@
 </div>
 
 {% include 'prestamos/finalizar_prestamo.html' %}
+{% include 'ejemplares/entregar_ejemplar.html' %}
+
 {% endblock %}

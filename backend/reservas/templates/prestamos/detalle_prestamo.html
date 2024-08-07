@@ -1,0 +1,40 @@
+{% extends 'navbar.html' %}
+
+{% block title %} Detalles del prestamo {% endblock %}
+
+{% block content %}
+<br />
+<div class="d-flex justify-content-between mb-3">
+  <a onclick="window.location='{% url 'listar_prestamos' %}';" class="btn btn-primary">Volver a la lista</a>
+
+</div>
+<div class="container text-center">
+  <br />  
+  {% if user.email != prestamo.owner.email%}
+  <p>
+    <b>Usuario: </b>{{prestamo.owner.email}}
+  </p>
+  {%endif%}
+  <p>
+    <b>Material: </b>{{prestamo.ejemplar.material.titulo}}
+  </p>
+  <p>
+    <b>Id ejemplar: </b>{{prestamo.ejemplar.id}}
+  </p>
+  <p>
+    <b>Fecha Inicio: </b>{{prestamo.fecha_inicio}}
+  </p>
+  <p>
+    <b>Fecha Finalizacion: </b>
+    {% if prestamo.estado == 'Finalizado'%}
+    <b class="text-danger ">(Finalizado)</b>
+    {%endif%}
+    {{prestamo.fecha_fin}}
+  </p>
+
+
+
+
+</div>
+
+{% endblock %}
