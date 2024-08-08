@@ -49,6 +49,20 @@
 </div>
 
 <script>
+    function usuarioNuevoPago(IDusuario) {
+        const userId = Number(IDusuario)
+        fetch(`/accounts/users/`)
+            .then(response => response.json())
+            .then(data => {                
+                let usr = data.find(user => user.id === userId)
+                let inputOwner = document.getElementById('owner')
+                if (usr) {
+                    inputOwner.value = usr.email
+                } else {
+                    console.log('usuario no encontrado')
+                }
+            })
+    }
     document.addEventListener('DOMContentLoaded', () => {
         fetch(`/accounts/users/`)
             .then(response => response.json())
@@ -120,96 +134,3 @@
 
     })
 </script>
-<!--   <script>
-  
-    function prestarEjemplar(ejemplarId) {
-      Limpiar();
-      fetch(`/material/ejemplar/${ejemplarId}/`)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data)
-          console.log(data.material.id)
-          document.getElementById('crearPagoForm').action = `/movimientos/prestamos/nuevo/`
-          document.getElementById('crearPagoModalLabel').textContent = 'Entregar ejemplar'
-          let inputEjemplar = document.getElementById('IdEjemplar');
-          inputEjemplar.value = data.id;
-          let material = document.getElementById('material');
-          material.value = data.material.titulo;
-        });
-  
-      fetch(`/accounts/users/`)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-  
-          let datalistUsers = document.getElementById('datalistUsersOptions');
-          datalistUsers.innerHTML = '';
-          data.forEach(user => {
-            let option = document.createElement('option');
-            option.value = user.email;
-            datalistUsers.appendChild(option);
-          });
-        })
-  
-    }
-    function reservaEntregarEjemplar(reserva) {
-      fetch(`/movimientos/reservas/${reserva}/entregar_ejemplar/`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('crearPagoModalLabel').textContent = 'Entregar ejemplar de reserva'
-          document.getElementById('crearPagoForm').action = `/movimientos/reservas/${reserva}/entregar_ejemplar/`
-          let material = document.getElementById('material');
-          material.value = data.reserva.material.titulo;
-  
-          let usuario = document.getElementById('owner');
-          usuario.value = data.reserva.owner.email;
-  
-          let datalist = document.getElementById('datalistEjemplaresOptions');
-          datalist.innerHTML = '';
-          data.reserva.material.ejemplares_disponibles.forEach(ejemplar => {
-            let option = document.createElement('option');
-            option.value = ejemplar;
-            datalist.appendChild(option);
-          });
-        });
-    }
-  
-    function prestarMaterialEjemplar(material) {
-      fetch(`/material/${material}/detail`)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data)
-          let material = document.getElementById('material');
-          material.value = data.titulo;
-  
-          let datalist = document.getElementById('datalistEjemplaresOptions');
-          datalist.innerHTML = '';
-          data.ejemplares_disponibles.forEach(ejemplar => {
-            let option = document.createElement('option');
-            option.value = ejemplar;
-            datalist.appendChild(option);
-          });
-        });
-  
-      fetch(`accounts/users/`)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-  
-          let datalistUsers = document.getElementById('datalistUsersOptions');
-          datalistUsers.innerHTML = '';
-          data.forEach(user => {
-            let option = document.createElement('option');
-            option.value = user.email;
-            datalistUsers.appendChild(option);
-          });
-        })
-    }
-  
-    
-  
-    
-  
-    
-  
-  </script> -->

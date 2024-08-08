@@ -1,0 +1,53 @@
+{% extends 'navbar.html' %}
+{% block title %} Detalle de cuota {%endblock%}
+
+{%block content%}
+<div class="container">
+    <div class="row justify-content-between mb-3">
+        <div class="col-auto">
+            <a onclick="window.location='{% url 'listar_cuotas' %}';" class="btn btn-primary">Volver a la lista</a>
+        </div>
+        {% if user.role == 1 or user.role == 4%}
+        <div class="col-auto">
+            <div class="dropdown">
+                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false">Accion
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'imprimir_comprobante' cuota.id %}"
+                            target="_blank">Imprimir
+                            comprobante</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {%endif%}
+
+
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">
+                <h3>Detalles de cuota</h3>
+                <div class="row row-cols-2">
+                    <div class="col border border-black text-center">Transaccion Nº: </div>
+                    <div class="col border border-black">{{cuota.id}}</div>
+                    <div class="col border border-black text-center">Usuario ID: </div>
+                    <div class="col border border-black">{{cuota.owner.id}}</div>
+                    <div class="col border border-black text-center">Usuario E-mail: </div>
+                    <div class="col border border-black">{{cuota.owner.email}}</div>
+                    <div class="col border border-black text-center">Fecha de cobro: </div>
+                    <div class="col border border-black">{{cuota.fecha_format}}</div>
+                    <div class="col border border-black text-center">Monto: </div>
+                    <div class="col border border-black">{{cuota.monto}}</div>
+                </div>
+            </div>
+            <div class="col"></div>
+
+        </div>
+
+    </div>
+</div>
+{%endblock%}

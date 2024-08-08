@@ -17,7 +17,7 @@
     </div>
     <div class="col-auto">
         <button type="button" class="btn btn-primary" aria-expanded="false" data-bs-toggle="modal"
-            data-bs-target="#crearPagoModal">Nuevo
+            data-bs-target="#crearPagoModal" onclick="nuevoPago()">Nuevo
             Pago
         </button>
     </div>
@@ -31,6 +31,7 @@
                     <th scope="col">Tesorero</th>
                     <th scope="col">Monto</th>
                     <th scope="col">Fecha</th>
+                    <th scope="col">Accion</th>
                 </thead>
                 <!-- Tabla de cuotas -->
                 <tbody class="table-group-divider bg-dark-subtle">
@@ -49,6 +50,22 @@
                         </td>
                         <td>
                             {{cuota.fecha}}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-secondary dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-expanded="false">Accion
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{%url 'detalle_cuota' cuota.id %}">Detalles del
+                                            pago</a>
+                                        <a class="dropdown-item" href="{% url 'imprimir_comprobante' cuota.id %}"
+                                            target="_blank">Imprimir
+                                            comprobante</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
 
                     </tr>

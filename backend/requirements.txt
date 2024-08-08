@@ -17,5 +17,4 @@ drf_nested_routers==0.93.4
 dj-database-url==0.5.0
 python-decouple==3.5
 reportlab==4.2.2
-django-weasyprint==2.3.0
-weasyprint==2.3.0
+weasyprint==52.5

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -14,6 +14,43 @@ from .serializers import CuotaSerializer, CuotaCreateSerializer
 
 from .models import Cuota
 from accounts.models import User
+
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import simpleSplit
+
+
+def generar_pdf_cuota(request, cuota_pk):
+    cuota = get_object_or_404(Cuota, pk=cuota_pk)
+    # damos formato mas legible a la fecha
+    fecha = cuota.fecha.strftime(("%d/%m/%Y - %H:%M"))
+
+    response = HttpResponse(content_type="application/pdf")
+    response["content-Disposition"] = f'attachment; filename="cuota_{cuota_pk}.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    p.drawString(100, height - 100, f"Trans. Nº: {cuota.id}")
+    y = height - 120
+    p.drawString(100, y, f"Motivo: Pago de membresia bibloteca UTN-Frcon ")
+    y -= 20
+    p.drawString(100, y, f"Fecha de emisión: {fecha}")
+    y -= 20
+    p.drawString(100, y, f"Cliente: ")
+    y -= 20
+    p.drawString(130, y, f"Id del cliente: {cuota.owner.id}")
+    y -= 20
+    p.drawString(130, y, f"Nombres: {cuota.owner.last_name}, {cuota.owner.first_name}")
+    y -= 40
+    p.drawString(400, y, f"Monto: ${cuota.monto}")
+    y -= 20
+
+    p.showPage()
+    p.save()
+
+    return response
+
 
 class CuotaViewSet(viewsets.ModelViewSet):
     serializer_class = CuotaSerializer
@@ -52,13 +89,20 @@ class CuotaViewSet(viewsets.ModelViewSet):
             {"page_obj": page_obj, "cuotas": serializer_cuotas, "query": query},
         )
 
+    def detalle_cuota(self, request, pk=None):
+        cuota = self.get_object()
+        serializer = CuotaSerializer(cuota)
+        return render(
+            request, "facturacion/detalle_cuota.html", {"cuota": serializer.data}
+        )
+
     def retrieve(self, request, pk=None):
         cuota = self.get_object()
         serializer = CuotaSerializer(cuota)
         return JsonResponse(serializer.data)
 
     def create(self, request):
-        owner_email = request.data.get("owner")
+        owner_email = request.data.get("owner") or request.data.get("userID")
         fecha_default = timezone.now()
         monto = request.data.get("monto")
 
@@ -83,6 +127,6 @@ class CuotaViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return JsonResponse(
-            {"status": "success", "message": "Pago efectuado con éxito"},
+            {"success": True, "message": "Pago efectuado con éxito"},
             status=status.HTTP_201_CREATED,
         )

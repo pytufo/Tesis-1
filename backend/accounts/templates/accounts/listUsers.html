@@ -37,7 +37,7 @@
         {% elif user.role == 4 %}
         <th scope="col">Nombre</th>
         <th scope="col">DNI</th>
-        <th scope="col">Estado</th>        
+        <th scope="col">Estado</th>
         {%endif%}
         <th scope="col">Accion</th>
       </thead>
@@ -56,7 +56,7 @@
           <td class="table-success">{{ usuario.role }}</td>
           {% if usuario.is_active %}
           <td class="table-success">Activo</td>
-          
+
           {% else %}
           <td class="table-danger">Desactivado</td>
           {% endif %}
@@ -72,6 +72,11 @@
               <ul class="dropdown-menu">
                 <li><a href="{% url 'detalle_usuario' usuario.id%}" class="dropdown-item">Informacion del usuario</a>
                 </li>
+                {% if user.role == 1 or user.role == 4%}
+                <li><a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPagoModal"
+                    onclick="usuarioNuevoPago('{{usuario.id}}')">Crear un pago</a>
+                </li>
+                {%endif%}
                 {% if user.role == 1 or user.role == 2 %}
                 <li>
                   <hr class="dropdown-divider">
@@ -85,7 +90,8 @@
                     data-user-email="{{ usuario.email }}" data-user-id="{{ usuario.id }}"
                     data-user-active="{{ usuario.is_active }}">Desactivar usuario</a></li>
                 {% endif %}
-                <li><a href="/movimientos/reservas/?query={{usuario.id}}" class="dropdown-item">Reservas del usuario</a></li>
+                <li><a href="/movimientos/reservas/?query={{usuario.id}}" class="dropdown-item">Reservas del usuario</a>
+                </li>
                 <li><a href="/movimientos/prestamos/?query={{usuario.id}}" class="dropdown-item">Prestamos</a></li>
                 {% endif %}
               </ul>
@@ -94,7 +100,7 @@
           </td>
 
         </tr>
-        
+
         {% endfor%}
 
       </tbody>
@@ -177,4 +183,5 @@
     });
   });
 </script>
+{% include 'facturacion/nuevo_pago.html'%}
 {% endblock %}
