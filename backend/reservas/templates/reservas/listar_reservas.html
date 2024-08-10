@@ -44,10 +44,10 @@
             {% if reserva.estado == "Finalizada" or not reserva.fecha_fin %}
             <td class="table-danger">{{reserva.estado}}</td>
             {% else %}
-            <td>{{ reserva.fecha_fin}}</td>
+            <td>{{ reserva.fecha_fin_format}}</td>
             {% endif %}
             <td class="text-center">
-              {% if user.role != 1 or user.role != 2%}
+              {% if user.role != 1 and user.role != 2%}              
               <!-- Acciones para usuario -->
               {%if reserva.estado != "Finalizada" and reserva.owner.email == user.email %}
               <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"

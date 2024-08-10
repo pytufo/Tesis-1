@@ -214,6 +214,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 usuarios = User.objects.filter(
                     Q(email__icontains=query)
                     | Q(first_name__icontains=query)
+                    | Q(dni__icontains=query)
                     | Q(last_name__icontains=query)
                 ).exclude(email="admin@mail.com")
             else:

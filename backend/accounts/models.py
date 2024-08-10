@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils import timezone
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -23,7 +24,7 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("role", 1)
-        extra_fields.setdefault("is_active", True)        
+        extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_superuser") != True:
             raise ValueError("Superuser must have role of Global Admin")
@@ -50,11 +51,20 @@ class User(AbstractUser):
 
     username = models.CharField(max_length=50, blank=True)
     email = models.EmailField(unique=True)
+    dni = models.CharField(
+        max_length=8,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex="^\d{8}$", message="El DNI debe contener exactamente 8 dígitos."
+            )
+        ],
+    )
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=50, blank=True)
     role = models.PositiveSmallIntegerField(
         choices=role, blank=True, null=True, default=6
-    )    
+    )
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)

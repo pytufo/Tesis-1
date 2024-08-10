@@ -73,12 +73,12 @@ def usuario_tiene_reserva_prestamo_pendiente(usuario, material):
     for reserva in reservas_usuario:
         estado_reserva = get_estado_reserva(reserva)
         if estado_reserva != "Finalizada":
-            return {"tipo": "Reserva", "id": reserva.id}
+            return {"tipo": "Reserva" }
     for prestamo in prestamos_usuario:
         estado_prestamo = get_estado_prestamo(prestamo)
         if estado_prestamo != "Finalizado":
-            return {"tipo": "Prestamo", "id": prestamo.id}
-    return False
+            return {"tipo": "Prestamo"}
+    
 
 
 # Definimos la logica para la "lista de espera".

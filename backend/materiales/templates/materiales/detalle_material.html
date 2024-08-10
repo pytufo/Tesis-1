@@ -45,8 +45,8 @@
 </div>
 <div class="container text-center">
   <br />
-  {% if user.role == 1 %}
-  <h2>{{ material.id }}</h2>
+  {% if user.role == 1 or user.id == 2   %}
+  <h2>ID: {{ material.id }}</h2>
   {%endif%}
   <h2>{{ material.titulo }}</h2>
   <p><strong>Autor:</strong>

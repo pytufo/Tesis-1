@@ -107,6 +107,35 @@ urlpatterns = [
         name="reservar_material",
     ),
     path("generar/", generar_datos_aleatorios, name="generar"),
+
+    ### urls de los detalles de material(autor, carrera, genero, etc)
+
+    path(
+        "carrera/",
+        CarreraViewSet.as_view({"get": "listar_carreras"}),
+        name="listar_carreras",
+    ),
+    ## Detalle - Create
+    path(
+        "genero/",
+        GeneroViewSet.as_view({"get": "listar_generos"}),
+        name="listar_generos",
+    ),
+    ## Detalle - Create
+    path(
+        "editorial/",
+        EditorialViewSet.as_view({"get": "listar_editoriales"}),
+        name="listar_editoriales",
+    ),
+
+    ## Detalle - Create
+    path(
+        "tipo/",
+        TipoMaterialViewSet.as_view({"get": "listar_tipo_material"}),
+        name="listar_tipos",
+    ),
+
+
     # path("movimientos/", include("reservas.urls")),
     # path("materiales/", MaterialViewSet.as_view({"get": "listar_materiales"}), name="listar_materiales"),
 ]

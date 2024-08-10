@@ -64,6 +64,7 @@
         document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar'
         let inputEjemplar = document.getElementById('IdEjemplar');
         inputEjemplar.value = data.id;
+        inputEjemplar.disabled = true;
         let material = document.getElementById('material');
         material.value = data.material.titulo;
       });
@@ -124,7 +125,7 @@
         });
       });
 
-    fetch(`accounts/users/`)
+    fetch(`/accounts/users/`)
       .then(response => response.json())
       .then(data => {
         console.log(data);

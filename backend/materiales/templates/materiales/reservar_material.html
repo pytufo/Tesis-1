@@ -22,6 +22,8 @@
 </div>
 
 <script>
+  const btn = document.getElementById('btnCrearReserva')  
+
   function reservarModal(material) {
     fetch(`/material/${material}/detail`)
       .then(response => response.json())
@@ -61,9 +63,10 @@
           Message.className = 'alert alert-success';
           Message.textContent = data.message;
           Message.style.display = 'block';
+          btn.disabled = true;
         } else {
           Message.className = 'alert alert-danger';
-          Message.textContent = data.message;
+          Message.textContent = data.message + '' + data.tipo;
           Message.style.display = 'block';
         }
       })

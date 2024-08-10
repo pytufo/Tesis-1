@@ -2,9 +2,14 @@ from django.utils import timezone
 from .models import Cuota
 from accounts.models import User
 
-def get_estado_cuota():
-    # hay que definir el limite de fechas mensual de cuotas a 30 dias. 
+def get_cuotas_usuario(obj):
+    cuotas_usuario = Cuota.objects.filter(owner=obj.id, fecha_fin__gte=timezone.now())
     pass
+
+
+def get_estado_cuota(obj):
+    # hay que definir el limite de fechas mensual de cuotas a 30 dias. 
+
 
 def sancion():
     # tomamos los 3 ultimos pagos del usuario, si almenos 1 de esos pagos fue demorado; el limite de reservas para este usuario seria de 1

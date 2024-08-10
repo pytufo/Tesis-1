@@ -18,7 +18,7 @@
 </div>
 <!-- Tabla de usuarios -->
 
-{% if usuarios %}
+{% if usuarios  %}
 <div class="row">
   <div class="col">
     <!-- Titulos de la tabla -->
@@ -62,7 +62,7 @@
           {% endif %}
           {%elif user.role == 4%}
           <td>{{ usuario.last_name }}, {{ usuario.first_name }}</td>
-          <td>DNI {{ usuario.id }} </td>
+          <td>{{ usuario.dni }} </td>
           <td>Estado</td>
           {%endif%}
           <td class="text-center">

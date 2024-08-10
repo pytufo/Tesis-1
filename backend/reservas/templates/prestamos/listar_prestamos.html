@@ -54,12 +54,12 @@
             {%else %}
             <td>
 
-              {{prestamo.fecha_fin}}
+              {{prestamo.fecha_fin_format}}
             </td>
             {%endif%}
 
             <td class="text-center">
-              {% if user.role != 1 %}
+              {% if user.role != 1 and user.role != 2%}
               <!-- Acciones para usuario -->
               <div class="btn-group">
                 <button class="btn btn-secondary" type="button" href="#"

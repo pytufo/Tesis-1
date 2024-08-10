@@ -37,14 +37,31 @@ class ReservasSerializer(serializers.ModelSerializer):
     owner = UserProfileSerializer()
     estado = serializers.SerializerMethodField()
     fecha_fin = serializers.DateTimeField()
+    fecha_inicio_format = serializers.SerializerMethodField()
+    fecha_fin_format = serializers.SerializerMethodField()
 
     class Meta:
         model = Reserva
-        fields = ["id", "fecha_inicio", "fecha_fin", "owner", "material", "estado"]
+        fields = [
+            "id",
+            "fecha_inicio",
+            "fecha_inicio_format",
+            "fecha_fin",
+            "fecha_fin_format",
+            "owner",
+            "material",
+            "estado",
+        ]
         ordering = ["-fecha_fin"]
 
     def get_estado(self, obj):
         return get_estado_reserva(obj)
+
+    def get_fecha_inicio_format(self, obj):
+        return obj.fecha_inicio.strftime("%d/%m/%Y - %H:%M")
+
+    def get_fecha_fin_format(self, obj):
+        return obj.fecha_fin.strftime("%d/%m/%Y - %H:%M")
 
 
 class PrestamosSerializer(serializers.ModelSerializer):
@@ -52,15 +69,34 @@ class PrestamosSerializer(serializers.ModelSerializer):
     created_by = UserProfileSerializer()
     ejemplar = EjemplarSerializer()
     estado = serializers.SerializerMethodField()
+    fecha_inicio = serializers.DateTimeField()
     fecha_fin = serializers.DateTimeField()
+    fecha_inicio_format = serializers.SerializerMethodField()
+    fecha_fin_format = serializers.SerializerMethodField()
 
     class Meta:
         model = Prestamo
-        fields = ["id", "fecha_inicio", "fecha_fin", "created_by", "owner", "ejemplar", "estado"]
+        fields = [
+            "id",
+            "fecha_inicio",
+            "fecha_inicio_format",
+            "fecha_fin",
+            "fecha_fin_format",
+            "created_by",
+            "owner",
+            "ejemplar",
+            "estado",
+        ]
         ordering = ["-fecha_fin"]
 
     def get_estado(self, obj):
         return get_estado_prestamo(obj)
+
+    def get_fecha_inicio_format(self, obj):
+        return obj.fecha_inicio.strftime("%d/%m/%Y - %H:%M")
+
+    def get_fecha_fin_format(self, obj):
+        return obj.fecha_fin.strftime("%d/%m/%Y - %H:%M")
 
 
 class EntregaEjemplarReserva(serializers.ModelSerializer):

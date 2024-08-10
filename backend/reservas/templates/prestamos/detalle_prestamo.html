@@ -22,14 +22,14 @@
     <b>Id ejemplar: </b>{{prestamo.ejemplar.id}}
   </p>
   <p>
-    <b>Fecha Inicio: </b>{{prestamo.fecha_inicio}}
+    <b>Fecha Inicio: </b>{{prestamo.fecha_inicio_format}}
   </p>
   <p>
     <b>Fecha Finalizacion: </b>
     {% if prestamo.estado == 'Finalizado'%}
     <b class="text-danger ">(Finalizado)</b>
     {%endif%}
-    {{prestamo.fecha_fin}}
+    {{prestamo.fecha_fin_format}}
   </p>
 
 

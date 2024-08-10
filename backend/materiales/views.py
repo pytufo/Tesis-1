@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -156,11 +156,71 @@ class CarreraViewSet(viewsets.ModelViewSet):
     serializer_class = CarreraSerializer
     queryset = Carrera.objects.all()
 
+    def listar_carreras(self, request):
+        query = request.GET.get("query", "")
+        carrera = Carrera.objects.all()
+
+        if query:
+            carreras = Carrera.objects.filter(
+                Q(nombre__icontains=query) | Q(apellido__icontains=query)
+            ).distinct()
+        else:
+            carreras = Carrera.objects.all()
+
+        paginator = Paginator(carreras, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        carrera_serializer = CarreraSerializer(page_obj, many=True)
+        serializer_carrera = carrera_serializer.data
+
+        materiales = Material.objects.filter(carrera__in=carreras).count
+        return render(
+            request,
+            "materiales/carreras/listar_carreras.html",
+            {
+                "page_obj": page_obj,
+                "query": query,
+                "carreras": serializer_carrera,
+                "materiales": materiales,
+            },
+        )
+
 
 class GeneroViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = GeneroSerializer
     queryset = Genero.objects.all()
+
+    def listar_generos(self, request):
+        query = request.GET.get("query", "")
+        genero = Genero.objects.all()
+
+        if query:
+            generos = Genero.objects.filter(
+                Q(nombre__icontains=query) | Q(apellido__icontains=query)
+            ).distinct()
+        else:
+            generos = Genero.objects.all()
+
+        paginator = Paginator(generos, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        genero_serializer = GeneroSerializer(page_obj, many=True)
+        serializer_genero = genero_serializer.data
+
+        materiales = Material.objects.filter(genero__in=generos).distinct().count
+        return render(
+            request,
+            "materiales/generos/listar_generos.html",
+            {
+                "page_obj": page_obj,
+                "query": query,
+                "generos": serializer_genero,
+                "materiales": materiales,
+            },
+        )
 
 
 class EditorialViewSet(viewsets.ModelViewSet):
@@ -168,11 +228,70 @@ class EditorialViewSet(viewsets.ModelViewSet):
     serializer_class = EditorialSerializer
     queryset = Editorial.objects.all()
 
+    def listar_editoriales(self, request):
+        query = request.GET.get("query", "")
+        editorial = Genero.objects.all()
+
+        if query:
+            editoriales = Editorial.objects.filter(
+                Q(nombre__icontains=query)
+            ).distinct()
+        else:
+            editoriales = Editorial.objects.all()
+
+        paginator = Paginator(editoriales, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        editorial_serializer = EditorialSerializer(page_obj, many=True)
+        serializer_editorial = editorial_serializer.data
+
+        
+        materiales = Material.objects.annotate(carrera_count=Count('carrera')).count()
+        return render(
+            request,
+            "materiales/editoriales/listar_editoriales.html",
+            {
+                "page_obj": page_obj,
+                "query": query,
+                "editoriales": serializer_editorial,
+                "materiales": materiales,
+            },
+        )
+
 
 class TipoMaterialViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
     serializer_class = TipoMaterialSerializer
     queryset = TipoMaterial.objects.all()
+
+    def listar_tipo_material(self, request):
+        query = request.GET.get("query", "")
+        tipoMaterial = TipoMaterial.objects.all()
+
+        if query:
+            tipos = TipoMaterial.objects.filter(Q(nombre__icontains=query)).distinct()
+        else:
+            tipos = TipoMaterial.objects.all()
+
+        paginator = Paginator(tipos, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        tipoMaterial_serializer = TipoMaterialSerializer(page_obj, many=True)
+        serializer_tipoMaterial = tipoMaterial_serializer.data
+
+        materiales = Material.objects.filter(tipo__in=tipos).distinct().count()
+        return render(
+            request,
+            "materiales/tipos/listar_tipos.html",
+            {
+                "page_obj": page_obj,
+                "query": query,
+                "tipos": serializer_tipoMaterial,
+                "materiales": materiales,
+            },
+        )
 
 
 class AutorViewSet(viewsets.ModelViewSet):
@@ -185,7 +304,6 @@ class MaterialViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = MaterialSerializer
     queryset = Material.objects.all()
-    
 
     def listar_materiales(self, request, *args, **kwargs):
         query = request.GET.get("query", "")
@@ -200,6 +318,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
                 Q(titulo__icontains=query)
                 | Q(autor__nombre__icontains=query)
                 | Q(descripcion__icontains=query)
+                | Q(editorial__nombre__icontains=query)
             ).distinct()
         else:
             materiales = Material.objects.all()

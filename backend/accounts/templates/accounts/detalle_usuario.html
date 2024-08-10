@@ -24,6 +24,7 @@
         <div class="col">
             <ul class="list-group">       
                 {% if usuario.first_name %}
+                <li class="list-group-item"><p class="fw-semibold">DNI: {{ usuario.dni }}</p></li>
                 <li class="list-group-item"><p class="fw-semibold">Nombre: {{ usuario.first_name }}</p></li>
                 {% endif %}
                 {% if usuario.last_name %}

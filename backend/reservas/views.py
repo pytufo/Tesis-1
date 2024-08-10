@@ -210,9 +210,18 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             ### El usuario no podrá resepetir una reserva.
 
-            if usuario_tiene_reserva_prestamo_pendiente(usuario, material):
+            reserva_prestamo_pendiente = usuario_tiene_reserva_prestamo_pendiente(
+                usuario, material
+            )
+            if reserva_prestamo_pendiente:
+                if reserva_prestamo_pendiente["tipo"] == "Prestamo":
+                    message = "Ya tienes un prestamo con este material."
+                elif reserva_prestamo_pendiente["tipo"] == "Reserva":
+                    message = "Ya tienes una reserva con este material."
                 return JsonResponse(
-                    {"message": "Ya tienes una reserva para este material..."},
+                    {
+                        "message": message,
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -411,7 +420,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             pendiente = usuario_tiene_reserva_prestamo_pendiente(
                 usuario, ejemplar.material
             )
-            if pendiente:
+            if pendiente:   
                 tipo = pendiente["tipo"]
                 if tipo == "Reserva":
                     return JsonResponse(
@@ -423,7 +432,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 elif tipo == "Prestamo":
                     return JsonResponse(
                         {
-                            "message": "El usuario ya tiene préstamo vigente para este material"
+                            "message": "El usuario ya tiene prestamo vigente para este material"
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
