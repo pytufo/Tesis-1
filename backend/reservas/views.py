@@ -409,7 +409,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
             if get_estado(ejemplar.material) != "Disponible":
                 return JsonResponse(
-                    {"message": "El material no está disponible para préstamo"},
+                    {"message": "El material no cuenta con ejemplares disponibles para realizar prestamo"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # definimos variables de estados y aplicamos sus validaciones
@@ -446,7 +446,10 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 )
 
             fecha_fin_default = timezone.now() + timedelta(days=7)
-
+            if not usuario.is_active:
+                return JsonResponse({
+                    "message": "El usuario a efectuar el prestamo no se encuentra habilidado para esta accion"
+                })
             # asignamos los valores a cargar en "prestamo"
             data = {
                 "created_by": request.user.id,

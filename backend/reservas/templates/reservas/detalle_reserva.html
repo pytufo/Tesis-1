@@ -22,9 +22,12 @@
     <b>Fecha Inicio: </b>{{reserva.fecha_inicio_format}}
   </p>
   <p>
-    <b>Fecha Finalizacion: </b>{{reserva.fecha_fin_format}}
+    <b>Fecha Finalizacion: </b>
+    {% if reserva.estado == 'Finalizada'%}
+    <b class="text-danger ">(Finalizada)</b>
+    {%endif%}
+    {{reserva.fecha_fin_format}}
   </p>
-
 
 
 

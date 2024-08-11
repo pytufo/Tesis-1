@@ -30,7 +30,7 @@
                 console.log(data);
                 var modal = document.getElementById('cancelarReservaModal');
                 var modalBody = modal.querySelector('.modal-body');
-                modalBody.innerHTML = '¿Desea cancelar la reserva de el material: "' + data.material.titulo + '" ? <br/>'
+                modalBody.innerHTML = '¿Desea cancelar la reserva del material: "' + data.material.titulo + '" ? <br/>'
                 document.getElementById('cancelarReservaForm').action = `/movimientos/reservas/${reserva}/cancelar/`;
             })
     }
