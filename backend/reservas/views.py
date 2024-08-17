@@ -429,6 +429,9 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             # definimos variables de estados y aplicamos sus validaciones
             estado = get_estado_ejemplar(ejemplar)
             limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
+            morosidad = es_moroso(usuario_id)
+            if morosidad == 'Adeuda':
+                return JsonResponse({"success": False, "message": "La reserva no pudo realizarse. \u000A Al parecer tienes algún pago pendiente, por favor comunicarse con tesoreria."})
 
             # Verificar si el usuario existe o tiene una reserva o prestamo pendiente par el mismo material
             if usuario.DoesNotExist:

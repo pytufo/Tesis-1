@@ -24,3 +24,5 @@ def total_cuotas_atrasadas(user):
     cuotas_atrasadas = Cuota.objects.filter(owner=user, fecha__lt=fecha_limite)
     total_cuotas = cuotas_atrasadas.aggregate(total=models.Sum("monto"))["total"] or 0
     return total_cuotas
+
+##Si el usuario adeuda solamente 1 cuota podra reservar solo un material

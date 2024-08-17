@@ -191,7 +191,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def retrieve_user(self, request, *args, **kwargs):
         usuario = self.get_object()
-        if request.user.role == User.ADMIN or request.user.role == 2 or request.user.role == 4:
+        if (
+            request.user.role == User.ADMIN
+            or request.user.role == 2
+            or request.user.role == 4
+        ):
             serializer = UserProfileSerializer(usuario)
             roles = [
                 role
@@ -216,9 +220,11 @@ class UserViewSet(viewsets.ModelViewSet):
                     | Q(first_name__icontains=query)
                     | Q(dni__icontains=query)
                     | Q(last_name__icontains=query)
-                ).exclude(email="admin@mail.com")
+                ).exclude(Q(email="admin@mail.com") | Q(email=request.user.email))
             else:
-                usuarios = User.objects.exclude(email="admin@mail.com")
+                usuarios = User.objects.exclude(
+                    (Q(email="admin@mail.com") | Q(email=request.user.email))
+                )
 
             usuarios = usuarios.order_by(ordering)
 
@@ -244,7 +250,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
     def no_admin(self, request, pk=None):
         # users = User.objects.exclude(role=User.ADMIN)
-        users = User.objects.exclude(email="admin@mail.com") and User.objects.exclude(email=request.user.email)
+        users = User.objects.exclude(email="admin@mail.com") and User.objects.exclude(
+            email=request.user.email
+        )
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
 
