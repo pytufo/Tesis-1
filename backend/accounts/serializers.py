@@ -6,6 +6,11 @@ from reservas.utils import (
     get_reservas_prestamos_usuario,
     get_limite_reservas_prestamo,
 )
+
+from facturacion.utils import (
+    es_moroso,
+    total_cuotas_atrasadas
+)
 from rest_framework import serializers
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -18,6 +23,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
     cantidad_prestamos = serializers.SerializerMethodField()
     limite = serializers.SerializerMethodField()
     role = serializers.CharField(source="get_role_display", read_only=False)
+
+    morosidad = serializers.SerializerMethodField()
+    cuotas_atrasadas = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -35,6 +43,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "limite",
             "is_active",
             "is_authenticated",
+            "morosidad",
+            "cuotas_atrasadas",
             "role",
         ]
 
@@ -52,6 +62,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_limite(self, obj):
         return get_limite_reservas_prestamo(obj)
+    
+    def get_morosidad(self,obj):
+        return es_moroso(obj)
+    
+    def get_cuotas_atrasadas(self, obj):
+        return total_cuotas_atrasadas(obj)
 
 
 """ 

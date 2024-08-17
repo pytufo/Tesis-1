@@ -1,5 +1,5 @@
 from django.utils import timezone
-from materiales.models import Ejemplar
+from materiales.models import Ejemplar, Carrera, TipoMaterial, Genero, Editorial, Autor, Material
 from reservas.models import Reserva, Prestamo
 
 # Definimos consultas para el seguimiento de los ejemplares (cantidades de prestamos, reservas, etc) y asignamos un estado segun el criterio del seguimiento. y tambien establecemos parametros de vencimiento en los prestamos.
@@ -79,3 +79,20 @@ def get_estado(obj):
         return "Disponible (Lista de espera)"
     elif cantidad_disponible <= 1 and cantidad_existente <= 1:
         return "No disponible (Solo lectura)"
+
+
+### funciones para los detalles de los materiales
+def get_carreras_de_material(carrera):
+    return Material.objects.filter(carrera=carrera)
+
+def get_generos_de_material(genero):
+    return Material.objects.filter(genero=genero)
+
+def get_editoriales_de_material(editorial):
+    return Material.objects.filter(editorial=editorial)
+
+def get_tipos_de_material(tipo):
+    return Material.objects.filter(tipo=tipo)
+
+def get_autores_de_material(autor):
+    return Material.objects.filter(autor=autor)

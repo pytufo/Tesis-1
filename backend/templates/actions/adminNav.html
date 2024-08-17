@@ -8,13 +8,13 @@
         <ul class="dropdown-menu" aria-labelledby="materialesDropdown">
             <li><a class="dropdown-item" href="/"><b>Listar materiales</b></a></li>
             <li><a class="dropdown-item" href="{% url 'listar_ejemplares'%}"><b>Ejemplares</b></a></li>
-            <li><a class="dropdown-item" href="#">Autores</a></li>
+            <li><a class="dropdown-item" href="{% url 'listar_autores' %}">Autores</a></li>
             <li><a class="dropdown-item" href="{% url 'listar_generos'%}">Generos</a></li>
             <li><a class="dropdown-item" href="{% url 'listar_carreras'%}">Carreras</a></li>
             <li><a class="dropdown-item" href="{% url 'listar_editoriales'%}">Editoriales</a></li>
             <li><a class="dropdown-item" href="{% url 'listar_tipos'%}">Tipos</a></li>
         </ul>
-    </li>        
+    </li>
     <li class="nav-item">
         <a class="nav-link" href="{% url 'listar_reservas' %}" role="button">
             Reservas
@@ -27,17 +27,29 @@
     </li>
     {%endif%}
     {% if user.role == 1 or user.role == 4%}
+    {% if user.role == 4 %}
+    <li class="nav-item">
+        <a class="nav-link" href="/" role="button">
+            Materiales
+        </a>
+
+    </li>
+    {%endif%}
     <li class="nav-item">
         <a class="nav-link" href="{% url 'listar_usuarios'%}" role="button">
             Usuarios
         </a>
 
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'listar_cuotas'%}" role="button">
+    <li class="nav-item dropdown">
+        <button class="btn border border-secondary-subtle dropdown-toggle" type="button" id="facturacionDropdown"
+            data-bs-toggle="dropdown" aria-expanded="false">
             Facturacion
-        </a>
-
+        </button>
+        <ul class="dropdown-menu text-center" aria-labelledby="facturacionDropdown">
+            <li><a class="dropdown-item" href="{% url 'listar_cuotas'%}"><b>Listar cuotas</b></a></li>
+            <li><a class="dropdown-item" href="{% url 'gestion_cuotas'%}">Configurar parametros</a></li>
+        </ul>
     </li>
     {% endif %}
 

@@ -19,37 +19,67 @@ from .utils import (
     get_estado,
     get_estado_ejemplar,
     get_ejemplares_disponibles,
+    get_carreras_de_material,
+    get_autores_de_material,
+    get_editoriales_de_material,
+    get_generos_de_material,
+    get_tipos_de_material,
 )
 
 
 class AutorSerializer(serializers.ModelSerializer):
+    cant_materiales = serializers.SerializerMethodField()
+
     class Meta:
         model = Autor
-        fields = "__all__"
+        fields = ["id", "nombre", "apellido", "cant_materiales"]
+
+    def get_cant_materiales(self, obj):
+        return get_autores_de_material(obj).count()
 
 
 class CarreraSerializer(serializers.ModelSerializer):
+    cant_materiales = serializers.SerializerMethodField()
+
     class Meta:
         model = Carrera
-        fields = "__all__"
+        fields = ["id", "nombre", "cant_materiales"]
+
+    def get_cant_materiales(self, obj):
+        return get_carreras_de_material(obj).count()
 
 
 class EditorialSerializer(serializers.ModelSerializer):
+    cant_materiales = serializers.SerializerMethodField()
+
     class Meta:
         model = Editorial
-        fields = "__all__"
+        fields = ["id", "nombre", "cant_materiales"]
+
+    def get_cant_materiales(self, obj):
+        return get_editoriales_de_material(obj).count()
 
 
 class GeneroSerializer(serializers.ModelSerializer):
+    cant_materiales = serializers.SerializerMethodField()
+
     class Meta:
         model = Genero
-        fields = "__all__"
+        fields = ["id", "nombre", "cant_materiales"]
+
+    def get_cant_materiales(self, obj):
+        return get_generos_de_material(obj).count()
 
 
 class TipoMaterialSerializer(serializers.ModelSerializer):
+    cant_materiales = serializers.SerializerMethodField()
+
     class Meta:
         model = TipoMaterial
-        fields = "__all__"
+        fields = ["id", "nombre", "cant_materiales"]
+
+    def get_cant_materiales(self, obj):
+        return get_tipos_de_material(obj).count()
 
 
 class EjemplarMaterialSerializer(serializers.ModelSerializer):

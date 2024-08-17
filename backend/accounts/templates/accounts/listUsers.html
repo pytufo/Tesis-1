@@ -63,7 +63,7 @@
           {%elif user.role == 4%}
           <td>{{ usuario.last_name }}, {{ usuario.first_name }}</td>
           <td>{{ usuario.dni }} </td>
-          <td>Estado</td>
+          <td>{{usuario.morosidad}}</td>
           {%endif%}
           <td class="text-center">
             <div class="dropdown">
@@ -72,9 +72,14 @@
               <ul class="dropdown-menu">
                 <li><a href="{% url 'detalle_usuario' usuario.id%}" class="dropdown-item">Informacion del usuario</a>
                 </li>
-                {% if user.role == 1 or user.role == 4%}
+                {% if user.role == 4%}
                 <li><a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPagoModal"
                     onclick="usuarioNuevoPago('{{usuario.id}}')">Crear un pago</a>
+                </li>
+                <li>
+                  <a href="/facturacion/cuotas/?query={{usuario.email}}" class="dropdown-item">
+                    Pagos del usuario
+                  </a>
                 </li>
                 {%endif%}
                 {% if user.role == 1 or user.role == 2 %}

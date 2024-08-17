@@ -39,6 +39,7 @@
                         <th>#</th>
                         <th>Nombre</th>
                         <th>Cant Materiales</th>
+                        <th>Accion</th>
                     </thead>
                     <tbody class="table-group-divider bg-dark-subtle">
                         {% for carrera in carreras %}
@@ -50,7 +51,19 @@
                                 {{carrera.nombre}}
                             </td>
                             <td>
-                                {{materiales}}
+                                {{carrera.cant_materiales}}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                      Acción
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                      <li><a class="dropdown-item" href="#">Opción 1</a></li>
+                                      <li><a class="dropdown-item" href="#">Opción 2</a></li>
+                                    </ul>
+                                  </div>
                             </td>
 
                         </tr>
@@ -85,8 +98,7 @@
                         <a class="page-link" href="#">{{ num }}</a>
                     </li>
                     {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %} <li class="page-item">
-                        <a class="page-link" href="?{% if query %}query={{ query }}&{% endif %}page={{ num }}">{{ num
-                            }}</a>
+                        <a class="page-link" href="?{% if query %}query={{ query }}&{% endif %}page={{ num }}">{{ num }}</a>
                         </li>
                         {% endif %}
                         {% endfor %}

@@ -1,4 +1,5 @@
 from faker import Faker
+import csv
 from django.http import JsonResponse, Http404, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -6,6 +7,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import simpleSplit
@@ -52,6 +56,126 @@ from materiales.models import (
     Genero,
     Editorial,
 )
+
+
+def export_materials_csv(request):
+    # Crear la respuesta HTTP con el tipo de contenido para CSV
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="materials.csv"'
+
+    writer = csv.writer(response)
+
+    serializer = MaterialSerializer(Material.objects.all(), many=True)
+    data = serializer.data
+
+    # Cabeceras del csv
+    header = [
+        "ID",
+        "Titulo",
+        "Descripcion",
+        "Tipo",
+        "Editorial",
+        "Autor",
+        "Carrera",
+        "Género",
+        "Cantidad Existente",
+    ]
+    writer.writerow(header)
+    for material in data:
+        row = [
+            material["id"],
+            material["titulo"],
+            material["descripcion"],
+            ", ".join([tipo["nombre"] for tipo in material["tipo"]]),
+            ", ".join([editorial["nombre"] for editorial in material["editorial"]]),
+            ", ".join(
+                [
+                    f"{autor['nombre']} {autor['apellido']}"
+                    for autor in material["autor"]
+                ]
+            ),
+            ", ".join([carrera["nombre"] for carrera in material["carrera"]]),
+            ", ".join([genero["nombre"] for genero in material["genero"]]),
+            material["cantidad_existente"],
+        ]
+        writer.writerow(row)
+    return response
+
+
+def generar_pdf_materiales(request):
+    # Crear la respuesta HTTP con el tipo de contenido para PDF
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="materials.pdf"'
+
+    # Crear el PDF en memoria
+    buffer = BytesIO()
+    pdf = SimpleDocTemplate(buffer, pagesize=letter)
+
+    # Serializar los datos
+    serializer = MaterialSerializer(Material.objects.all(), many=True)
+    data = serializer.data
+
+    # Cabeceras del PDF
+    header = [
+        "ID",
+        "Titulo",
+        "Descripcion",
+        "Tipo",
+        "Editorial",
+        "Autor",
+        "Carrera",
+        "Género",
+        "Cantidad Existente",
+    ]
+    table_data = [header]
+
+    # Filas del PDF
+    for material in data:
+        row = [
+            material["id"],
+            material["titulo"],
+            material["descripcion"],
+            ", ".join([tipo["nombre"] for tipo in material["tipo"]]),
+            ", ".join([editorial["nombre"] for editorial in material["editorial"]]),
+            ", ".join(
+                [
+                    f"{autor['nombre']} {autor['apellido']}"
+                    for autor in material["autor"]
+                ]
+            ),
+            ", ".join([carrera["nombre"] for carrera in material["carrera"]]),
+            ", ".join([genero["nombre"] for genero in material["genero"]]),
+            material["cantidad_existente"],
+        ]
+        table_data.append(row)
+
+    # Crear la tabla
+    table = Table(table_data)
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+            ]
+        )
+    )
+
+    # Añadir la tabla al PDF
+    elements = [table]
+    pdf.build(elements)
+
+    # Obtener el contenido del buffer y devolverlo como respuesta
+    buffer.seek(0)
+    response.write(buffer.getvalue())
+    buffer.close()
+
+    return response
 
 
 def generar_pdf_material(request, material_pk):
@@ -174,7 +298,6 @@ class CarreraViewSet(viewsets.ModelViewSet):
         carrera_serializer = CarreraSerializer(page_obj, many=True)
         serializer_carrera = carrera_serializer.data
 
-        materiales = Material.objects.filter(carrera__in=carreras).count
         return render(
             request,
             "materiales/carreras/listar_carreras.html",
@@ -182,7 +305,6 @@ class CarreraViewSet(viewsets.ModelViewSet):
                 "page_obj": page_obj,
                 "query": query,
                 "carreras": serializer_carrera,
-                "materiales": materiales,
             },
         )
 
@@ -246,8 +368,7 @@ class EditorialViewSet(viewsets.ModelViewSet):
         editorial_serializer = EditorialSerializer(page_obj, many=True)
         serializer_editorial = editorial_serializer.data
 
-        
-        materiales = Material.objects.annotate(carrera_count=Count('carrera')).count()
+        materiales = Material.objects.annotate(carrera_count=Count("carrera")).count()
         return render(
             request,
             "materiales/editoriales/listar_editoriales.html",
@@ -296,8 +417,37 @@ class TipoMaterialViewSet(viewsets.ModelViewSet):
 
 class AutorViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsSuperUserOrReadOnly,)
+    """serializer_class = AutorSerializer
+    queryset = Autor.objects.all()
+    """
     serializer_class = AutorSerializer
     queryset = Autor.objects.all()
+
+    def listar_autores(self, request):
+        query = request.GET.get("query", "")
+        autor = Autor.objects.all()
+
+        if query:
+            autores = Autor.objects.filter(Q(nombre__icontains=query)).distinct()
+        else:
+            autores = Autor.objects.all()
+
+        paginator = Paginator(autores, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        autor_serializer = AutorSerializer(page_obj, many=True)
+        serializer_autor = autor_serializer.data
+
+        return render(
+            request,
+            "materiales/autores/listar_autores.html",
+            {
+                "page_obj": page_obj,
+                "query": query,
+                "autores": serializer_autor,
+            },
+        )
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
@@ -312,23 +462,46 @@ class MaterialViewSet(viewsets.ModelViewSet):
         autor = Autor.objects.all()
         carrera = Carrera.objects.all()
         genero = Genero.objects.all()
-        ordering = request.GET.get("ordering", "titulo")
+        ordering = request.GET.get("ordering", "")
+
         if query:
             materiales = Material.objects.filter(
                 Q(titulo__icontains=query)
                 | Q(autor__nombre__icontains=query)
                 | Q(descripcion__icontains=query)
                 | Q(editorial__nombre__icontains=query)
+                | Q(tipo__nombre__icontains=query)
+                | Q(genero__nombre__icontains=query)
             ).distinct()
         else:
             materiales = Material.objects.all()
+        
+        if ordering == 'cantidad_existente':
+            materials_serializer = MaterialSerializer(materiales, many=True)
+            serializer_materials = materials_serializer.data
+            serializer_materials = sorted(serializer_materials, key=lambda x: x['cantidad_existente'])
+        elif ordering == '-cantidad_existente':
+            materials_serializer = MaterialSerializer(materiales, many=True)
+            serializer_materials = materials_serializer.data
+            serializer_materials = sorted(serializer_materials, key=lambda x: x['cantidad_existente'], reverse=True)
+        elif ordering == 'estado':
+            materials_serializer = MaterialSerializer(materiales, many=True)
+            serializer_materials = materials_serializer.data
+            serializer_materials = sorted(serializer_materials, key=lambda x: x['estado'])
+        elif ordering == '-estado':
+            materials_serializer = MaterialSerializer(materiales, many=True)
+            serializer_materials = materials_serializer.data
+            serializer_materials = sorted(serializer_materials, key=lambda x: x['estado'], reverse=True)
+        else:
+            if ordering:
+                materiales = materiales.order_by(ordering)
+            materials_serializer = MaterialSerializer(materiales, many=True)
+            serializer_materials = materials_serializer.data
 
-        paginator = Paginator(materiales, 10)
+        paginator = Paginator(serializer_materials, 10)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
 
-        materials_serializer = MaterialSerializer(page_obj, many=True)
-        serializer_materials = materials_serializer.data
         return render(
             request,
             "materiales/listar_materiales.html",
@@ -342,6 +515,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
                 "autores": autor,
                 "carreras": carrera,
                 "generos": genero,
+                "ordering": ordering,
             },
         )
 

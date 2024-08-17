@@ -1,14 +1,16 @@
 <!-- Acciones para el usuario NO Admin -->
+{%block content%}
 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
     {% if user.is_authenticated %}
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="{% url 'perfil'%}" role="button" data-bs-toggle="dropdown"
             aria-expanded="false">
             {{ user.email }}
+            
         </a>
         <ul class="dropdown-menu text-center">
             <li><a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a></li>
-            <li><a class="dropdown-item" href="{% url 'reservas_usuario' %}">Mis Reservas </a></li>
+            <li><a class="dropdown-item" href="{% url 'reservas_usuario' %}">Mis Reservas ({{ user.cantidad_reservas }})</a></li>
             <li><a class="dropdown-item" href="{% url 'prestamos_usuario' %}">Mis Prestamos</a></li>
             <li>
                 <hr class="dropdown-divider">
@@ -23,3 +25,4 @@
     </li>
 </ul>
 
+{%endblock%}

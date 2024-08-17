@@ -15,6 +15,8 @@ from .views import (
     TipoMaterialViewSet,
     generar_datos_aleatorios,
     generar_pdf_material,
+    generar_pdf_materiales,
+    export_materials_csv,
 )
 from reservas.views import ReservaViewSet, PrestamoViewSet
 
@@ -73,6 +75,16 @@ urlpatterns = [
         name="generar_pdf_material",
     ),
     path(
+        "exportar/pdf/",
+        generar_pdf_materiales,
+        name="exportar_materiales_pdf",
+    ),
+    path(
+        "exportar/csv/",
+        export_materials_csv,
+        name="exportar_material_csv",
+    ),
+    path(
         "<int:material_pk>/ejemplares/",
         MaterialViewSet.as_view(
             {
@@ -110,6 +122,11 @@ urlpatterns = [
 
     ### urls de los detalles de material(autor, carrera, genero, etc)
 
+    path(
+        "autor/",
+        AutorViewSet.as_view({"get": "listar_autores"}),
+        name="listar_autores",
+    ),
     path(
         "carrera/",
         CarreraViewSet.as_view({"get": "listar_carreras"}),

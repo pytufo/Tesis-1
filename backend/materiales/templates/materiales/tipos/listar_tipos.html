@@ -39,6 +39,7 @@
                         <th>#</th>
                         <th>Nombre</th>
                         <th>Cant Materiales</th>
+                        <th>Accion</th>
                     </thead>
                     <tbody class="table-group-divider bg-dark-subtle">
                         {% for tipo in tipos %}
@@ -50,7 +51,19 @@
                                 {{tipo.nombre}}
                             </td>
                             <td>
-                                {{materiales}}
+                                {{tipo.cant_materiales}}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        Acción
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#">Opción 1</a></li>
+                                        <li><a class="dropdown-item" href="#">Opción 2</a></li>
+                                    </ul>
+                                </div>
                             </td>
 
                         </tr>

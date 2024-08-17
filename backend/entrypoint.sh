@@ -14,6 +14,7 @@ if [ "$DATABASE" = "postgres" ]; then
   python manage.py makemigrations
   python manage.py migrate
 
+  echo "from facturacion.models import Configuracion; Configuracion.objects.create(dias_tolerancia=30, monto=3600)" | python manage.py shell
   echo "from accounts.models import User; User.objects.create_superuser('admin@mail.com', 'adminpassword')" | python manage.py shell
   echo "Migrations created succesfully"
 fi

@@ -27,27 +27,27 @@
 
     </div>
     <div class="container">
-        <div class="row">
-            <div class="col"></div>
-            <div class="col">
-                <h3>Detalles de cuota</h3>
-                <div class="row row-cols-2">
-                    <div class="col border border-black text-center">Transaccion Nº: </div>
-                    <div class="col border border-black">{{cuota.id}}</div>
-                    <div class="col border border-black text-center">Usuario ID: </div>
-                    <div class="col border border-black">{{cuota.owner.id}}</div>
-                    <div class="col border border-black text-center">Usuario E-mail: </div>
-                    <div class="col border border-black">{{cuota.owner.email}}</div>
-                    <div class="col border border-black text-center">Fecha de cobro: </div>
-                    <div class="col border border-black">{{cuota.fecha_format}}</div>
-                    <div class="col border border-black text-center">Monto: </div>
-                    <div class="col border border-black">${{cuota.monto}}</div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-sm-12">
+                <h3 class="text-center">Detalles de cuota</h3>
+                <div class="row">
+                    <div class="col-6 border border-black text-center text-wrap">Transaccion Nº:</div>
+                    <div class="col-6 border border-black text-wrap">{{ cuota.id }}</div>
+
+                    <div class="col-6 border border-black text-center text-wrap">Usuario ID:</div>
+                    <div class="col-6 border border-black text-wrap">{{ cuota.owner.id }}</div>
+
+                    <div class="col-6 border border-black text-center text-wrap">Usuario E-mail:</div>
+                    <div class="col-6 border border-black text-wrap">{{ cuota.owner.email }}</div>
+
+                    <div class="col-6 border border-black text-center text-wrap">Fecha de cobro:</div>
+                    <div class="col-6 border border-black text-wrap">{{ cuota.fecha_format }}</div>
+
+                    <div class="col-6 border border-black text-center text-wrap">Monto:</div>
+                    <div class="col-6 border border-black text-wrap">${{ cuota.monto }}</div>
                 </div>
             </div>
-            <div class="col"></div>
-
         </div>
-
     </div>
 </div>
 {%endblock%}

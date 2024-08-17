@@ -1,7 +1,7 @@
 {% extends 'navbar.html' %}
 {% block title %} Lista de Materiales{% endblock %}
 {% block content %}
-<div class="container-fluid">
+<div class="container-sm">
   <br />
   <div class="row">
     <div class="col-12">
@@ -21,6 +21,7 @@
     <div class="col">
     </div>
     <div class="col-auto">
+
       <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
         aria-expanded="false">Nuevo
       </button>
@@ -31,6 +32,19 @@
         </li>
 
       </ul>
+      <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+        aria-expanded="false">Exportar
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="#" data-bs-toggle="modal" data-bs-target="#Modal" class="dropdown-item">Exportar a
+            "CSV"</a>
+        </li>
+        <!-- <li><a class="dropdown-item" href="{% url 'exportar_materiales_pdf' %}" >Exportar a
+            "PDF"</a>
+        </li> -->
+
+      </ul>
+
     </div>
 
   </div>
@@ -40,19 +54,74 @@
       {% if materials %}
       <table class="table table-sm table-hover table-secondary table-bordered">
         <thead class="table-secondary text-center">
-          <th scope="col">Titulo</th>
-          <th scope="col">Autor</th>
-          <th scope="col">Descripcion</th>
+          <th scope="col">
+            <a href="??query={{query}}&ordering={% if ordering == 'cantidad_existente' %}-cantidad_existente{%else%}cantidad_existente{%endif%}"
+              class="text-dark">
+              Cant. Existente
+              {% if ordering == 'cantidad_existente' %}
+              ▲
+              {%elif ordering == '-cantidad_existente' %}
+              ▼
+              {%endif%}
+            </a>
+          </th>
+          <th scope="col">
+
+            <a href="?query={{query}}&ordering={% if ordering == 'titulo' %}-titulo{%else%}titulo{%endif%}"
+              class="text-dark">
+              Titulo
+              {% if ordering == 'titulo' %}
+              ▲
+              {%elif ordering == '-titulo' %}
+              ▼
+              {%endif%}
+            </a>
+          </th>
+          <th scope="col">
+            <a href="?query={{query}}&ordering={% if ordering == 'autor' %}-autor{%else%}autor{%endif%}"
+              class="text-dark">
+              Autor
+              {% if ordering == 'autor' %}
+              ▲
+              {%elif ordering == '-autor' %}
+              ▼
+              {%endif%}
+            </a>
+          </th>
+          <th scope="col"><a
+              href="?query={{query}}&ordering={% if ordering == 'descripcion' %}-descripcion{%else%}descripcion{%endif%}"
+              class="text-dark">
+              Descripcion
+              {% if ordering == 'descripcion' %}
+              ▲
+              {%elif ordering == '-descripcion' %}
+              ▼
+              {%endif%}
+            </a></th>
           {% if user.role == 1 %}
-          <th scope="col">Estado</th>
+          <th scope="col">
+            <a href="?query={{query}}&ordering={% if ordering == 'estado' %}-estado{%else%}estado{%endif%}"
+              class="text-dark">
+              Estado
+            </a>
+          </th>
           {%endif%}
-          <th scope="col">Tipo</th>
+          <th scope="col"><a href="?query={{query}}&ordering={% if ordering == 'tipo' %}-tipo{%else%}tipo{%endif%}"
+              class="text-dark">
+              Tipo
+              {% if ordering == 'descripcion' %}
+              ▲
+              {%elif ordering == '-descripcion' %}
+              ▼
+              {%endif%}
+            </a></th>
           <th scope="col">Accion</th>
         </thead>
         <!-- Tabla de materiales -->
         <tbody class="table-group-divider bg-dark-subtle">
           {% for material in materials %}
           <tr>
+            <td>{{ material.cantidad_existente }}</td>
             <td>{{ material.titulo }}</td>
             <td>
               <p>
@@ -75,39 +144,82 @@
 
             </td>
             <td class="text-center">
-              <!-- Acciones para usuario -->
+              <!-- Acciones para usuario  -->
+
+
               <div class="btn-group">
+                {%if user.role != 1%}
+                {% if not material.estado == "No disponible (Solo lectura)"  %}
                 <button class="btn btn-secondary" type="button" data-bs-toggle="modal"
                   data-bs-target="#materialReservaModal" onclick="reservarModal('{{material.id}}')">
-                  {% if material.estado == "Disponible (Lista de espera)" %}
+                  {% if material.estado == "Disponible (Lista de espera)"%}
                   Añadirse a lista de espera
                   {% elif material.estado == "Disponible" %}
                   Reservar
-                  {% else %}
-                  Sólo lectura
-                  {% endif %}
+                  {%endif%}
                 </button>
+                {% else %}
+                <button class="btn btn-warning" type="button" data-bs-toggle="modal" data-bs-target="#ModalLectura">
+                  Sólo lectura
+
+                </button>
+                {% endif %}
                 <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                  <span class="visually-hidden">Toggle Dropdown</span>
-                  <ul class="dropdown-menu ">
-                    <li onclick="window.location='{% url 'material' material.id %}';"><a
-                        href="{% url 'material' material.id %}" class="dropdown-item">Informacion del
-                        material</a></li>
-                    {% if user.role == 1 or user.role == 2%}
+                  data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent"
+                  aria-labelledby="accionMasterialesDropdown"></button>
+                <span class="visually-hidden">Toggle Dropdown</span>
+                <ul class="dropdown-menu ">
+                  <li onclick="window.location='{% url 'material' material.id %}';"><a
+                      href="{% url 'material' material.id %}" class="dropdown-item">Informacion del
+                      material</a></li>
+                  {% if user.role == 1 or user.role == 2%}
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li><a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal"
+                      onclick="prestarMaterialEjemplar('{{material.id}}')">Crear
+                      prestamo</a></li>
+                  <li><a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
+                      onclick="editModal('{{ material.id }}')">Editar
+                      material</a></li>
+                  <li onclick="window.location='{% url 'ejemplares_de_material' material.id %}';"><a
+                      class="dropdown-item" href="{% url 'ejemplares_de_material' material.id%}">Ejemplares del
+                      material: ({{material.cantidad_existente}}) </a></li>
+                  {%endif%}
+                </ul>
+
+                <!-- Acciones para admin -->
+                {% else %}
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    Acción
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a href="{% url 'material' material.id %}" class="dropdown-item">Información del material</a>
+                    </li>
                     <li>
                       <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal" onclick="prestarMaterialEjemplar('{{material.id}}')">Crear
-                        prestamo</a></li>
-                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
-                        onclick="editModal('{{ material.id }}')">Editar
-                        material</a></li>
-                    <li onclick="window.location='{% url 'ejemplares_de_material' material.id %}';"><a
-                        class="dropdown-item" href="{% url 'ejemplares_de_material' material.id%}">Ejemplares del
-                        material: ({{material.cantidad_existente}}) </a></li>
+                    {% if user.role == 1 or user.role == 2 %}
+                    <li>
+                      <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal"
+                        onclick="prestarMaterialEjemplar('{{ material.id }}')">Crear préstamo</a>
+                    </li>
+                    <li>
+                      <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#materialModal"
+                        onclick="editModal('{{ material.id }}')">Editar material</a>
+                    </li>
+                    <li>
+                      <a href="{% url 'ejemplares_de_material' material.id %}" class="dropdown-item">Ejemplares del
+                        material: ({{ material.cantidad_existente }})</a>
+                    </li>
                     {%endif%}
                   </ul>
+                </div>
+                {% endif %}
+
               </div>
 
             </td>
@@ -158,6 +270,49 @@
     </div>
   </div>
 
+</div>
+
+<!-- Modal exportar csv -->
+<div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="ModalLabel"> Se descargará un archivo '.csv' con la lista completa de
+          materiales. ¿Desea descargar el archivo? </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text center">
+        <!-- El contenido del mensaje se actualiza dinamicamente -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><a
+            href="{% url 'exportar_material_csv' %}" class="text-decoration-none link-light">Confirmar</a></button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal alerta material solo lectura -->
+<div class="modal fade" id="ModalLectura" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title fs-5" id="ModalLectura"> Material no disponible. </h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text center">
+        Lo sentimos, el material no cuenta con ejemplares disponibles
+          para realizar una reserva o prestamo, solo podra acceder a el en el establecimiento. 
+      </div>
+      <div class="modal-footer">        
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><a
+            href="#" class="text-decoration-none link-light">Entendido</a></button>
+
+      </div>
+    </div>
+  </div>
 </div>
 <!-- Modal para nuevo material -->
 {% include 'materiales/_nuevo_material_modal.html' %}

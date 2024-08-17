@@ -1,0 +1,71 @@
+{% extends 'navbar.html' %}
+{%block content%}
+<div class="container container-fluid">
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-auto text-center">
+            <br />
+            <h2>Cónfigurar parámetros de facturacion</h2>
+            <form id="configurar_parametros" method="post" action="{%url 'gestion_cuotas'%}">
+                {% csrf_token %}
+                <div>
+                    <label for="dias_tolerancia">Días de Intervalo: </label>
+                    <input type="number" name="dias_tolerancia" id="dias_tolerancia" value="{{data.dias_tolerancia}}">
+                </div>
+                <div>
+                    <label for="monto">Monto:</label>
+                    <input type="number" name="monto" id="monto" value="{{data.monto}}">
+                </div>
+                <br/>
+                <button type="button" onclick="submitForm()" class="btn btn-primary">Guardar cambios</button>
+            </form>
+            <br />
+            <div id="message"></div>
+
+        </div>
+        <div class="col"></div>
+
+    </div>
+
+</div>
+
+<script>
+    function submitForm() {
+        const form = document.getElementById('configurar_parametros')
+        const formData = new FormData(form)
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                console.log(response)
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log(data.success);
+                    console.log(data.message);
+                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('message').className = 'alert alert-success'
+
+                } else {
+                    console.log(data);
+                    clearMensajes();
+                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('message').className = 'alert alert-danger'
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+{% endblock%}

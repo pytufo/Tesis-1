@@ -44,6 +44,7 @@
             {% if reserva.estado == "Finalizada" or not reserva.fecha_fin %}
             <td class="table-danger">{{reserva.estado}}</td>
             {% else %}
+            
             <td>{{ reserva.fecha_fin_format}}</td>
             {% endif %}
             <!-- Acciones admin -->
@@ -52,8 +53,8 @@
                 id="accionReservasDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 Accion
               </button>
-              {% if user.role == 1 or user.role == 2%}
               <ul class="dropdown-menu" aria-labelledby="accionReservasDropdown">
+                {% if user.role == 1 or user.role == 2%}
                 {% if reserva.estado != "Finalizada" %}
                 {% if reserva.owner.email == user.email%}
                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#cancelarReservaModal"
@@ -63,7 +64,7 @@
                     onclick="reservaEntregarEjemplar('{{reserva.id}}')">Entregar ejemplar</a></li>
                 {%endif%}
                 {%else %}
-                {% if reserva.owner.email == user.email%}
+                {% if reserva.owner.email == user.email and reserva.estado != "Finalizada"%}
                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#cancelarReservaModal"
                     onclick="cancelarReservarModal('{{reserva.id}}')"> Cancelar reserva</a></li>
                 {%endif%}

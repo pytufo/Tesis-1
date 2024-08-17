@@ -1,7 +1,7 @@
 <div class="modal fade" id="materialReservaModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" id="title">
         <h1 class="modal-title fs-5" id="ModalLabel"> Reservar <!-- Id y Titulo del material --> </h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -31,7 +31,13 @@
         console.log(data);
         var modal = document.getElementById('materialReservaModal');
         var modalBody = modal.querySelector('.modal-body');
-        modalBody.innerHTML = '¿Desea reservar el material: "' + data.titulo + '" ? <br/>' + " Recuerde que al reservar un material este tiene una vigencia de 48hs a partir de este momento, en caso de no retirar el material en el tiempo estimado la reserva del mismo sera finalizada automaticamente."
+        if (data.estado == "Disponible"){
+          document.getElementById('title').innerHTML = '<h5>Reservar.</h5>'
+          modalBody.innerHTML = '¿Desea reservar el material: "' + data.titulo + '" ? <br/>' + " Recuerde que al reservar un material este tiene una vigencia de 24hs a partir de este momento, en caso de no retirar el material en el tiempo estimado la reserva del mismo sera finalizada automaticamente."
+        } else {
+          document.getElementById('title').innerHTML = '<h5>Añadirse a lista de espera.</h5>'
+          modalBody.innerHTML = '¿Desea añadirse a la lista de espera del material: <b>"' + data.titulo + '"</b> ?. <br/>' + " Cuando el material se encuentre disponible se creara automaticamente una reserva, la cual será notificado. Recuerde que al crearse la reserva tiene una vigencia de 24hs a partir de ese momento, en caso de no retirar el material en el tiempo estimado la reserva del mismo sera finalizada automaticamente. ."
+        }
         document.getElementById('reservarMaterialForm').action = `/material/${material}/reservar/`;
       })
   }
@@ -66,7 +72,7 @@
           btn.disabled = true;
         } else {
           Message.className = 'alert alert-danger';
-          Message.textContent = data.message + '' + data.tipo;
+          Message.textContent = data.message
           Message.style.display = 'block';
         }
       })

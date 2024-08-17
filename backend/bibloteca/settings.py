@@ -46,8 +46,6 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    # "weasyprint",    
-    # "dashboard",
     "accounts",
     "materiales",
     "reservas",
@@ -96,13 +94,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1:5173",
-    "http://127.0.0.1:19006",
-    "http://localhost:19006",
+    "http://127.0.0.1:8081",
+    "http://localhost:8081",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
-    "http://127.0.0.1:19006",
-    "http://localhost:19006",
+    "http://127.0.0.1:8081",
+    "http://localhost:8081",
 ]
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST", "").split(" ") + ["localhost"]
@@ -214,18 +212,12 @@ USE_TZ = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIR = [
+    os.path.join(BASE_DIR, "static")
+]
+# STATIC_ROOT = (BASE_DIR,"staticfiles")
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "juan.pujol285@gmail.com"
-EMAIL_HOST_PASSWORD = "3Nano094~JP285"
-DEFAULT_FROM_EMAIL = "juan.pujol285@gmail.com"

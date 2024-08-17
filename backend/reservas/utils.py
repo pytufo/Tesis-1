@@ -130,8 +130,10 @@ def get_reserva_lista_espera(material):
 
 def habilitar_reserva_lista_espera(material, fecha_fin_anterior):
     reserva_lista_espera = get_reserva_lista_espera(material)
+    
 
     if reserva_lista_espera:
+        
         reserva_lista_espera.fecha_inicio = fecha_fin_anterior
         reserva_lista_espera.fecha_fin = timezone.now() + timedelta(days=1)
         reserva_lista_espera.save()

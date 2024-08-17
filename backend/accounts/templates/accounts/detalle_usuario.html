@@ -1,93 +1,116 @@
 {% extends "navbar.html" %}
 
 {% block title %} Detalles de usuario {% endblock %}
- 
+
 {% block content %}
 <div class="container">
     <br />
     <div class="row">
-      <div class="col"></div>
-      <div class="col"></div>
-      <div class="col-auto">        
-      </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col-auto">
+        </div>
 
     </div>
-    <div class="row">        
+    <div class="row">
         <div class="col-auto "></div>
-        <div class="col-auto text-center">            
+        <div class="col-auto text-center">
             <br />
-            <svg xmlns="http://www.w3.org/2000/svg" width="156" height="156" fill="currentColor" class="bi bi-person-square" viewBox="0 0 16 16">
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
-              </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="156" height="156" fill="currentColor"
+                class="bi bi-person-square" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                <path
+                    d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
+            </svg>
         </div>
         <div class="col">
-            <ul class="list-group">       
+            <ul class="list-group">
                 {% if usuario.first_name %}
-                <li class="list-group-item"><p class="fw-semibold">DNI: {{ usuario.dni }}</p></li>
-                <li class="list-group-item"><p class="fw-semibold">Nombre: {{ usuario.first_name }}</p></li>
+                <li class="list-group-item">
+                    <p class="fw-semibold">DNI: {{ usuario.dni }}</p>
+                </li>
+                <li class="list-group-item">
+                    <p class="fw-semibold">Nombre: {{ usuario.first_name }}</p>
+                </li>
                 {% endif %}
                 {% if usuario.last_name %}
-                <li class="list-group-item"><p class="fw-semibold">Apellido: {{ usuario.last_name }}</p></li>
+                <li class="list-group-item">
+                    <p class="fw-semibold">Apellido: {{ usuario.last_name }}</p>
+                </li>
                 {% endif %}
-                <li class="list-group-item"><p class="fw-semibold">E-mail: {{ usuario.email }}</p></li>
+                <li class="list-group-item">
+                    <p class="fw-semibold">E-mail: {{ usuario.email }}</p>
+                </li>
                 {% if user.role == 1 %}
-                <li class="list-group-item"><p class="fw-semibold">Rol: {{ usuario.role }}</p></li>                       
+                <li class="list-group-item">
+                    <p class="fw-semibold">Rol: {{ usuario.role }}</p>
+                </li>
                 {% endif %}
-                <li class="list-group-item"><p class="fw-semibold">Reservas: {{ usuario.cantidad_reservas }}</p></li>
-                <li class="list-group-item"><p class="fw-semibold">Prestamos: {{ usuario.cantidad_prestamos }}</p></li>
+                <li class="list-group-item">
+                    <p class="fw-semibold">Reservas: {{ usuario.cantidad_reservas }}</p>
+                </li>
+                <li class="list-group-item">
+                    <p class="fw-semibold">Prestamos: {{ usuario.cantidad_prestamos }}</p>
+                </li>
+                {% if user.role == 4%}
+                <li class="list-group-item">
+                    <p class="fw-semibold">Pagos: Adeuda</p>
+                </li>
+                {%endif%}
             </ul>
-        </div>  
-        
+        </div>
+
         <div class="container text-center">
             <a href="{% url 'listar_usuarios' %}" class="btn btn-primary text-center">Volver a la lista</a>
             {% if user.role == 1 %}
-            <button type="button" class="btn btn-secondary" href="#" data-bs-toggle="modal" data-bs-target="#Modal" data-user-id="{{ user.id }}">Editar </button>        
+            <button type="button" class="btn btn-secondary" href="#" data-bs-toggle="modal" data-bs-target="#Modal"
+                data-user-id="{{ user.id }}">Editar </button>
             {% endif %}
-            
+
         </div>
     </div>
-</div>  
+</div>
 <!-- Modal editar usuario -->
 <div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="ModalLabel">Editar usuario: {{ usuario.email }} </h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="ModalLabel">Editar usuario: {{ usuario.email }} </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text center">
+                <form method="post" action="{% url 'editar_usuario' usuario.id %}">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="inputGroupSelect01">Rol</label>
+                        <select class="form-select" id="inputGroupSelect01" name="role">
+                            {% for value, display in roles %}
+                            <option value="{{ value }}" {% if usuario.role == display %}selected{% endif %}>{{ display }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="user_id" id="edit-user" value="">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-body text center">
-            <form method="post" action="{% url 'editar_usuario' usuario.id %}">
-                {% csrf_token %}
-                <div class="input-group mb-3">
-                    <label class="input-group-text" for="inputGroupSelect01">Rol</label>
-                    <select class="form-select" id="inputGroupSelect01" name="role">
-                      {% for value, display in roles %}
-                          <option value="{{ value }}" {% if usuario.role == display %}selected{% endif %}>{{ display }}</option>
-                      {% endfor %}
-                    </select>
-                </div>
-                <input type="hidden" name="user_id" id="edit-user" value="">
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </div>
-            </form>
-        </div>
-      </div>
     </div>
 </div>
 
- </div>
- <script>
-    document.addEventListener('DOMContentLoaded', function() {
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
         var modal = document.getElementById('Modal');
         modal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget; 
+            var button = event.relatedTarget;
             var userId = button.getAttribute('data-user-id');
             var input = modal.querySelector('#edit-user');
             input.value = userId;
         });
     });
 </script>
-{% endblock %} 
+{% endblock %}

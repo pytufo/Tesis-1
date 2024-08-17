@@ -23,6 +23,7 @@ from materiales.utils import (
     get_ejemplares_disponibles,
     get_estado_ejemplar,
 )
+from facturacion.utils import (es_moroso )
 
 from rest_framework import viewsets, filters, generics, status
 
@@ -201,6 +202,14 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
     def create(self, request, material_pk=None):
         usuario = request.user
+
+        if not usuario.is_authenticated:
+            return JsonResponse(
+                {
+                    "message": "Usuario no valido, por favor inicie sesion",
+                    "success": False,
+                }
+            )
         try:
 
             material = Material.objects.get(pk=material_pk)
@@ -213,6 +222,9 @@ class ReservaViewSet(viewsets.ModelViewSet):
             reserva_prestamo_pendiente = usuario_tiene_reserva_prestamo_pendiente(
                 usuario, material
             )
+            morosidad = es_moroso(usuario)
+            if morosidad == 'Adeuda':
+                return JsonResponse({"success": False, "message": "La reserva no pudo realizarse. \u000A Al parecer tienes algún pago pendiente, por favor comunicarse con tesoreria."})
             if reserva_prestamo_pendiente:
                 if reserva_prestamo_pendiente["tipo"] == "Prestamo":
                     message = "Ya tienes un prestamo con este material."
@@ -274,7 +286,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return JsonResponse(
-                {"message": f"Error al obtener información de la reserva: {str(e)}"}
+                ({"message": f"Error al obtener información de la reserva: {str(e)}"})
             )
 
 
@@ -409,18 +421,23 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
             if get_estado(ejemplar.material) != "Disponible":
                 return JsonResponse(
-                    {"message": "El material no cuenta con ejemplares disponibles para realizar prestamo"},
+                    {
+                        "message": "El material no cuenta con ejemplares disponibles para realizar prestamo"
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # definimos variables de estados y aplicamos sus validaciones
             estado = get_estado_ejemplar(ejemplar)
             limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
 
-            # Verificar si el usuario tiene una reserva o prestamo pendiente par el mismo material
+            # Verificar si el usuario existe o tiene una reserva o prestamo pendiente par el mismo material
+            if usuario.DoesNotExist:
+                return JsonResponse({"message": "El usuario no existe", "success": False})
+
             pendiente = usuario_tiene_reserva_prestamo_pendiente(
                 usuario, ejemplar.material
             )
-            if pendiente:   
+            if pendiente:
                 tipo = pendiente["tipo"]
                 if tipo == "Reserva":
                     return JsonResponse(
@@ -447,9 +464,11 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
             fecha_fin_default = timezone.now() + timedelta(days=7)
             if not usuario.is_active:
-                return JsonResponse({
-                    "message": "El usuario a efectuar el prestamo no se encuentra habilidado para esta accion"
-                })
+                return JsonResponse(
+                    {
+                        "message": "El usuario a efectuar el prestamo no se encuentra habilidado para esta accion"
+                    }
+                )
             # asignamos los valores a cargar en "prestamo"
             data = {
                 "created_by": request.user.id,

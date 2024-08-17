@@ -61,7 +61,10 @@ class ReservasSerializer(serializers.ModelSerializer):
         return obj.fecha_inicio.strftime("%d/%m/%Y - %H:%M")
 
     def get_fecha_fin_format(self, obj):
-        return obj.fecha_fin.strftime("%d/%m/%Y - %H:%M")
+        if obj.fecha_fin:
+            return obj.fecha_fin.strftime("%d/%m/%Y - %H:%M")
+        else:
+            pass
 
 
 class PrestamosSerializer(serializers.ModelSerializer):

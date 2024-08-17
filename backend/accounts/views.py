@@ -244,7 +244,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
     def no_admin(self, request, pk=None):
         # users = User.objects.exclude(role=User.ADMIN)
-        users = User.objects.exclude(email="admin@mail.com")
+        users = User.objects.exclude(email="admin@mail.com") and User.objects.exclude(email=request.user.email)
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
 

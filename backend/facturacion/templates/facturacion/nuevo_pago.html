@@ -78,6 +78,19 @@
                 });
             })
     })
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch(`/facturacion/gestionar/data/`)
+            .then(response => response.json())
+            .then(data => {
+                data = data[0]
+                console.log(data);
+
+                let monto = document.getElementById('monto');
+                monto.value = data.monto;
+                
+                
+            })
+    })
     function Limpiar() {
         let messagesPrestamo = document.getElementById('message-prestamo');
         messagesPrestamo.style.display = 'none';
