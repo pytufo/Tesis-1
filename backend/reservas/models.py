@@ -20,9 +20,14 @@ class Reserva(models.Model):
     material = models.ForeignKey(
         Material, related_name="material", on_delete=models.CASCADE
     )
+    visto = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse("reservas-view", args=[str(self.id)])
+    
+    def marcar_como_visto(self):
+        self.visto = True
+        self.save()
 
     def __str__(self):
         return str(self.material.titulo)
@@ -39,9 +44,14 @@ class Prestamo(models.Model):
     ejemplar = models.ForeignKey(
         Ejemplar, related_name="ejemplar", on_delete=models.CASCADE
     )
+    visto = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse("prestamos-view", args=[str(self.id)])
+    
+    def marcar_como_visto(self):
+        self.visto = True
+        self.save()
 
     def __str__(self):
         return f"Prestamo de {self.ejemplar}  ({self.fecha_inicio} - {self.fecha_fin})"

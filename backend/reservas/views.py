@@ -134,7 +134,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
                 habilitar_reserva_lista_espera(reserva.material, fecha_fin_anterior)
                 return JsonResponse(
-                    {"message": "Reserva cancelada. ", "status": 200, "success": True}
+                    {"message": "Reserva cancelada. ", "id": reserva.id, "status": 200, "success": True}
                 )
 
             except Reserva.DoesNotExist:
@@ -208,6 +208,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 {
                     "message": "Usuario no valido, por favor inicie sesion",
                     "success": False,
+                    "status": status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED
                 }
             )
         try:

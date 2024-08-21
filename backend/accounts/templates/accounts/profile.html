@@ -53,6 +53,13 @@
                     <p class="fw-semibold">Prestamos: {{ user.cantidad_prestamos }}</p>
                 </li>
             </ul>            
+            <div>
+                {% for reserva in user_profile.usuario_reservas %}
+                {{ reserva.id}}
+                {{reserva.visto}}
+                {%endfor%}
+                ---
+            </div>
         </div>
     </div>
 </div>

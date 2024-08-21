@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime
 from datetime import timedelta
@@ -6,35 +7,64 @@ from datetime import timedelta
 from materiales.utils import get_cantidad_disponible
 from .models import Reserva, Prestamo
 
+
 # Segun el resultado del seguimiento en "Materiales", establecemos un limite de reservas y prestamos para los usuarios.
 # Hay que filtrar que el usuario no exeda un limite de reservas y prestamos
 # Y por ultimo chequeamos que la el usuario no realize la misma reserva...
 
 
 def get_reservas_prestamos_usuario(obj):
-    reservas_usuario = Reserva.objects.filter(
-        owner=obj.id, fecha_fin__gte=timezone.now()
-    )
-    prestamos_usuario = Prestamo.objects.filter(
-        owner=obj.id, fecha_fin__gte=timezone.now()
-    )
+    reservas_usuario = Reserva.objects.filter(owner=obj.id)
+    prestamos_usuario = Prestamo.objects.filter(owner=obj.id)
 
     cantidad_reservas = reservas_usuario.count()
     cantidad_prestamos = prestamos_usuario.count()
 
+    movimientos = [
+        {
+            "id": reserva.id,
+            "material": reserva.material.id,
+            "fecha_inicio": reserva.fecha_inicio,
+            "fecha_fin": reserva.fecha_fin,
+            "estado": get_estado_reserva(reserva),
+            "visto": reserva.visto,
+            "tipo": "reserva",  # Identificador de tipo de movimiento
+        }
+        for reserva in reservas_usuario
+    ] + [
+        {
+            "id": prestamo.id,
+            "material": prestamo.ejemplar.material.id,
+            "fecha_inicio": prestamo.fecha_inicio,
+            "fecha_fin": prestamo.fecha_fin,
+            "estado": get_estado_prestamo(prestamo),
+            "visto": prestamo.visto,
+            "tipo": "prestamo",  # Identificador de tipo de movimiento
+        }
+        for prestamo in prestamos_usuario
+    ]
+
+    movimientos_ordenados = sorted(movimientos, key=lambda x: x['fecha_inicio'])
+
     reservas_list = [
         {
             "id": reserva.id,
+            "material": reserva.material.id,
             "fecha_inicio": reserva.fecha_inicio,
             "fecha_fin": reserva.fecha_fin,
+            "estado": get_estado_reserva(reserva),
+            "visto": reserva.visto,
         }
         for reserva in reservas_usuario
     ]
     prestamos_list = [
         {
             "id": prestamo.id,
+            "material": prestamo.ejemplar.material,
             "fecha_inicio": prestamo.fecha_inicio,
             "fecha_fin": prestamo.fecha_fin,
+            "estado": get_estado_prestamo(prestamo),
+            "visto": prestamo.visto,
         }
         for prestamo in prestamos_usuario
     ]
@@ -44,13 +74,23 @@ def get_reservas_prestamos_usuario(obj):
         "cantidad_prestamos": cantidad_prestamos,
         "reservas_usuario": reservas_list,
         "prestamos_usuario": prestamos_list,
+        "movimientos": movimientos_ordenados,
     }
 
 
 def get_limite_reservas_prestamo(obj):
+    fecha_actual = timezone.now()
     limite = 4
-    cantidad_reservas = get_reservas_prestamos_usuario(obj)["cantidad_reservas"]
-    cantidad_prestamos = get_reservas_prestamos_usuario(obj)["cantidad_prestamos"]
+    reservas = Reserva.objects.filter(owner=obj.id).filter(
+        Q(fecha_fin__gte=fecha_actual) | Q(fecha_fin__isnull=True)
+    )
+    # get_reservas_prestamos_usuario(obj)["cantidad_reservas"]
+    prestamos = Prestamo.objects.filter(owner=obj.id).filter(
+        Q(fecha_fin__gte=fecha_actual) | Q(fecha_fin__isnull=True)
+    )
+    cantidad_reservas = reservas.count()
+    cantidad_prestamos = prestamos.count()
+    #get_reservas_prestamos_usuario(obj)["cantidad_prestamos"]
 
     if (cantidad_reservas + cantidad_prestamos) >= limite:
         return "Excede"
@@ -73,12 +113,11 @@ def usuario_tiene_reserva_prestamo_pendiente(usuario, material):
     for reserva in reservas_usuario:
         estado_reserva = get_estado_reserva(reserva)
         if estado_reserva != "Finalizada":
-            return {"tipo": "Reserva" }
+            return {"tipo": "Reserva"}
     for prestamo in prestamos_usuario:
         estado_prestamo = get_estado_prestamo(prestamo)
         if estado_prestamo != "Finalizado":
             return {"tipo": "Prestamo"}
-    
 
 
 # Definimos la logica para la "lista de espera".
@@ -130,10 +169,9 @@ def get_reserva_lista_espera(material):
 
 def habilitar_reserva_lista_espera(material, fecha_fin_anterior):
     reserva_lista_espera = get_reserva_lista_espera(material)
-    
 
     if reserva_lista_espera:
-        
+
         reserva_lista_espera.fecha_inicio = fecha_fin_anterior
         reserva_lista_espera.fecha_fin = timezone.now() + timedelta(days=1)
         reserva_lista_espera.save()

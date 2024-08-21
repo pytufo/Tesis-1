@@ -68,8 +68,10 @@
         if (data.success) {
           Message.className = 'alert alert-success';
           Message.textContent = data.message;
-          Message.style.display = 'block';
-          btn.disabled = true;
+          Message.style.display = 'block';          
+          btn.type = 'button';
+          btn.textContent = 'Ir a reserva'
+          form.action = "/movimientos/reserva/" + data.id
         } else {
           Message.className = 'alert alert-danger';
           Message.textContent = data.message

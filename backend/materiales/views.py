@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import simpleSplit
 
+from reservas.utils import get_reservas_prestamos_usuario
 from .utils import (
     get_cantidad_existente,
     get_cantidad_disponible,
@@ -456,6 +457,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     queryset = Material.objects.all()
 
     def listar_materiales(self, request, *args, **kwargs):
+        user = request.user
         query = request.GET.get("query", "")
         tipo = TipoMaterial.objects.all()
         editorial = Editorial.objects.all()
@@ -475,28 +477,36 @@ class MaterialViewSet(viewsets.ModelViewSet):
             ).distinct()
         else:
             materiales = Material.objects.all()
-        
-        if ordering == 'cantidad_existente':
-            materials_serializer = MaterialSerializer(materiales, many=True)
-            serializer_materials = materials_serializer.data
-            serializer_materials = sorted(serializer_materials, key=lambda x: x['cantidad_existente'])
-        elif ordering == '-cantidad_existente':
-            materials_serializer = MaterialSerializer(materiales, many=True)
-            serializer_materials = materials_serializer.data
-            serializer_materials = sorted(serializer_materials, key=lambda x: x['cantidad_existente'], reverse=True)
-        elif ordering == 'estado':
-            materials_serializer = MaterialSerializer(materiales, many=True)
-            serializer_materials = materials_serializer.data
-            serializer_materials = sorted(serializer_materials, key=lambda x: x['estado'])
-        elif ordering == '-estado':
-            materials_serializer = MaterialSerializer(materiales, many=True)
-            serializer_materials = materials_serializer.data
-            serializer_materials = sorted(serializer_materials, key=lambda x: x['estado'], reverse=True)
+
+        ####
+        materials_serializer = MaterialSerializer(
+            materiales, many=True, context={"user": user}
+        )
+        serializer_materials = materials_serializer.data
+
+        if ordering == "-cantidad_existente":
+            serializer_materials = sorted(
+                serializer_materials, key=lambda x: x["cantidad_existente"]
+            )
+        elif ordering == "cantidad_existente":
+            serializer_materials = sorted(
+                serializer_materials,
+                key=lambda x: x["cantidad_existente"],
+                reverse=True,
+            )
+        elif ordering == "estado":
+            serializer_materials = sorted(
+                serializer_materials, key=lambda x: x["estado"]
+            )
+        elif ordering == "-estado":
+            serializer_materials = sorted(
+                serializer_materials, key=lambda x: x["estado"], reverse=True
+            )
         else:
             if ordering:
                 materiales = materiales.order_by(ordering)
-            materials_serializer = MaterialSerializer(materiales, many=True)
-            serializer_materials = materials_serializer.data
+                materials_serializer = MaterialSerializer(materiales, many=True)
+                serializer_materials = materials_serializer.data
 
         paginator = Paginator(serializer_materials, 10)
         page_number = request.GET.get("page")
@@ -508,7 +518,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
             {
                 "page_obj": page_obj,
                 "query": query,
-                "materials": serializer_materials,
+                "materials": page_obj.object_list,
                 "materiales": materiales,
                 "tipos": tipo,
                 "editoriales": editorial,

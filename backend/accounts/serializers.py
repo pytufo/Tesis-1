@@ -22,10 +22,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     usuario_prestamos = serializers.SerializerMethodField()
     cantidad_prestamos = serializers.SerializerMethodField()
     limite = serializers.SerializerMethodField()
+    movimientos = serializers.SerializerMethodField()
     role = serializers.CharField(source="get_role_display", read_only=False)
 
     morosidad = serializers.SerializerMethodField()
     cuotas_atrasadas = serializers.SerializerMethodField()
+
 
     class Meta:
         model = User
@@ -36,6 +38,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
+            "movimientos",
             "cantidad_reservas",
             "usuario_reservas",
             "cantidad_prestamos",
@@ -48,6 +51,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "role",
         ]
 
+    def get_movimientos(self, obj):
+        return get_reservas_prestamos_usuario(obj)["movimientos"]
     def get_cantidad_reservas(self, obj):
         return get_reservas_prestamos_usuario(obj)["cantidad_reservas"]
 

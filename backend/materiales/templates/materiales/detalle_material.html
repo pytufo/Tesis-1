@@ -3,6 +3,8 @@
 {% block title %} Detalles del Material {% endblock %}
 
 {% block content %}
+{{material.es_reservado_por_usuario}}
+{{material.en_propiedad}}
 <br />
 <div class="d-flex justify-content-between mb-3">
   <a onclick="window.location='{% url 'listar_materiales' %}';" class="btn btn-primary">Volver a la lista</a>
@@ -34,18 +36,27 @@
   </div>
   {%else%}
   <div>
+
     {%if material.estado == "Disponible"%}
-    <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#materialReservaModal"
-      onclick="reservarModal('{{material.id}}')">Reservar</a>
-    {%elif material.estado == "No disponible (lista de espera)" %}
-    <a href="#" class="btn btn-secondary">Añadirse a la lista de espera</a>
-    {%endif%}
+
+    {% if user.is_authenticated == False %}
+    <a href="{% url 'login' %}" class="btn btn-secondary">
+
+      {%else%}
+      <a class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#materialReservaModal"
+        onclick="reservarModal('{{material.id}}')">
+        {%endif%}
+        Reservar</a>
+
+      {%elif material.estado == "No disponible (lista de espera)" %}
+      <a href="#" class="btn btn-secondary">Añadirse a la lista de espera</a>
+      {%endif%}
   </div>
   {%endif%}
 </div>
 <div class="container text-center">
   <br />
-  {% if user.role == 1 or user.id == 2   %}
+  {% if user.role == 1 or user.id == 2 %}
   <h2>ID: {{ material.id }}</h2>
   {%endif%}
   <h2>{{ material.titulo }}</h2>

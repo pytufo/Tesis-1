@@ -84,31 +84,12 @@ class UserLoginView(generics.CreateAPIView):
         if serializer.is_valid():
             owner = serializer.validated_data["owner"]
             login(request, owner)
-            """ refresh = RefreshToken.for_user(owner)
-            access_token = refresh.access_token
-
-            response_data = {
-                "success": True,
-                "refresh_token": str(refresh),
-                "access_token": str(access_token),
-                "owner": {
-                    "id": owner.id,
-                    "email": owner.email,
-                    "role": owner.role,
-                },
-            } """
             return redirect("/")
         else:
             error_message = "Usuario o contraseña inválidos"
             return render(
                 request, "accounts/login.html", {"error_message": error_message}
             )
-            return Response(response_data, status=status.HTTP_200_OK)
-
-        return Response(
-            {"success": False, "message": "Credenciales invalidas."},
-            status=status.HTTP_404_NOT_FOUND,
-        )
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:

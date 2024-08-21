@@ -8,9 +8,13 @@ from materiales.models import (
     Genero,
     TipoMaterial,
 )
+from reservas.models import Reserva, Prestamo
+from reservas.utils import get_estado_prestamo, get_estado_reserva
+
+# from reservas.serializers import ReservasSerializer, PrestamosSerializer
 
 
-from reservas.utils import get_limite_epera
+from reservas.utils import get_limite_epera, get_reservas_prestamos_usuario
 from .utils import (
     get_cantidad_disponible,
     get_cantidad_en_reserva,
@@ -93,6 +97,26 @@ class EjemplarMaterialSerializer(serializers.ModelSerializer):
         return get_estado_ejemplar(obj)
 
 
+class ReservaSerializer(serializers.ModelSerializer):
+    estado = serializers.SerializerMethodField()
+    class Meta:
+        model = Reserva
+        fields = ["id", "fecha_inicio", "fecha_fin", "owner", "visto", "estado"]
+
+    def get_estado(self, obj):
+        return get_estado_reserva(obj)
+
+
+class PrestamoSerializer(serializers.ModelSerializer):
+    estado = serializers.SerializerMethodField()
+    class Meta:
+        model = Prestamo
+        fields = ["id", "fecha_inicio", "fecha_fin", "owner", "visto", "estado"]
+
+    def get_estado(self,obj):
+        return get_estado_prestamo(obj)
+
+
 class MaterialSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
     cantidad_en_reserva = serializers.SerializerMethodField()
@@ -100,6 +124,9 @@ class MaterialSerializer(serializers.ModelSerializer):
     cantidad_disponible = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
     ejemplares_disponibles = serializers.SerializerMethodField()
+
+    reserva = serializers.SerializerMethodField()
+    prestamo = serializers.SerializerMethodField()
 
     # Ya que por defecto los subcampos de material serian indices, convertimos estos en cadenas de texto correspondiente a cada campo
     tipo = TipoMaterialSerializer(many=True, read_only=True)
@@ -125,7 +152,25 @@ class MaterialSerializer(serializers.ModelSerializer):
             "cantidad_disponible",
             "estado",
             "ejemplares_disponibles",
+            "reserva",
+            "prestamo",
         ]
+
+    def get_reserva(self, obj):
+        reserva = Reserva.objects.filter(material=obj).order_by("-fecha_inicio").first()
+        if reserva:
+            return ReservaSerializer(reserva).data
+        return None
+
+    def get_prestamo(self, obj):
+        prestamo = (
+            Prestamo.objects.filter(ejemplar__material=obj)
+            .order_by("-fecha_inicio")
+            .first()
+        )
+        if prestamo:
+            return PrestamoSerializer(prestamo).data
+        return None
 
     def get_cantidad_existente(self, obj):
         return get_cantidad_existente(obj)

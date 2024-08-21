@@ -14,7 +14,9 @@
                 <form id="cancelarReservaForm" method="post">
                     {% csrf_token %}
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        onclick="volver()">Volver</button>
+                        onclick="volver()">Volver</button>                        
+                    <button type="button" class="btn btn-primary" href="/movimientos/reserva/{reserva.id} " id="Reserva" disabled>Ir a
+                        reserva</button>
                     <button type="submit" class="btn btn-primary" id="btnCrearReserva">Confirmar</button>
                 </form>
             </div>
@@ -23,6 +25,8 @@
 </div>
 
 <script>
+    const btn = document.getElementById('btnCrearReserva')
+    const btnReserva = document.getElementById('Reserva')
     function cancelarReservarModal(reserva) {
         fetch(`/movimientos/reservas/${reserva}/`)
             .then(response => response.json())
@@ -46,7 +50,7 @@
     }
 
     document.getElementById('cancelarReservaForm').addEventListener('submit', function (event) {
-        event.preventDefault();
+        event.preventDefault();        
         const form = event.target;
         const formReserva = new FormData(form);
         Limpiar();
@@ -66,11 +70,14 @@
                     Message.className = 'alert alert-success';
                     Message.textContent = data.message;
                     Message.style.display = 'block';
+                    btn.disabled = true;            
+                    btnReserva.disabled = false;        
                 } else {
                     console.log(data)
                     Message.className = 'alert alert-danger';
                     Message.textContent = data.message;
                     Message.style.display = 'block';
+                    
                 }
             })
             .catch(error => {

@@ -17,7 +17,7 @@
   <div class="row">
     <div class="col">
       {% if reservas %}
-      <table class="table table-sm table-hover table-secondary table-bordered">
+      <table class="table table-sm table-hover table-secondary table-bordered mi-tabla">
         <thead class="table-secondary text-center">
           <th scope="col">Usuario</th>
           <th scope="col">Titulo</th>
@@ -29,6 +29,9 @@
         <tbody class="table-group-divider bg-dark-subtle">
           {% for reserva in reservas %}
           <tr>
+            <div class="">
+
+            </div>
             <td>
               {{ reserva.owner.email}}
 

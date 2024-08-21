@@ -22,7 +22,7 @@
 <div class="row">
   <div class="col">
     <!-- Titulos de la tabla -->
-    <table class="table table-hover table-secondary table-bordered">
+    <table class="table table-hover table-secondary table-bordered mi-tabla">
       <thead class="table-secondary table-hover">
         {% if user.role == 1 or user.role == 2%}
         <th scope="col">Id</th>
@@ -63,7 +63,14 @@
           {%elif user.role == 4%}
           <td>{{ usuario.last_name }}, {{ usuario.first_name }}</td>
           <td>{{ usuario.dni }} </td>
-          <td>{{usuario.morosidad}}</td>
+          {% if usuario.morosidad == 'Adeuda' %}
+          <td class="table-danger text-center mb-2">            
+            {%else%}
+            <td class="table-success text-center">
+              {%endif%}
+            {{usuario.morosidad}}
+            
+          </td>
           {%endif%}
           <td class="text-center">
             <div class="dropdown">
