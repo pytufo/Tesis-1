@@ -530,9 +530,10 @@ class MaterialViewSet(viewsets.ModelViewSet):
         )
 
     def retrieve_material(self, request, material_pk=None):
+        user = request.user
         material = Material.objects.get(pk=material_pk)
         serializer = MaterialSerializer(material)
-        return Response(serializer.data)
+        return Response(serializer.data, user)
 
     def ejemplares(self, request, material_pk=None):
         ejemplar = Ejemplar.objects.filter(material=material_pk)
@@ -544,6 +545,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         )
 
     def detalle_material(self, request, material_pk=None):
+        user = request.user
         material = Material.objects.get(pk=material_pk)
         tipo = TipoMaterial.objects.all()
         editorial = Editorial.objects.all()
@@ -561,6 +563,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
                 "autores": autor,
                 "carreras": carrera,
                 "generos": genero,
+                "user": user,
             },
         )
 

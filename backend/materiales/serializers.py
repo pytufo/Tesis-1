@@ -135,6 +135,7 @@ class MaterialSerializer(serializers.ModelSerializer):
     carrera = CarreraSerializer(many=True, read_only=True)
     genero = GeneroSerializer(many=True, read_only=True)
 
+    ##Añadir movimientos del material
     class Meta:
         model = Material
         fields = [

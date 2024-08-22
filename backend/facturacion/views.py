@@ -20,65 +20,68 @@ from django.conf import settings
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 from reportlab.lib.utils import simpleSplit
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 
 def generar_pdf_cuota(request, cuota_pk):
     cuota = get_object_or_404(Cuota, pk=cuota_pk)
-    # damos formato mas legible a la fecha
-    fecha = cuota.fecha.strftime(("%d/%m/%Y - %H:%M"))
+    fecha = cuota.fecha.strftime("%d/%m/%Y - %H:%M")
 
-    # Definimos un margen base
-    margen_x = 100
-    margen_y = 100
-    y_offset = margen_y
-
-    # altura por cada linea impresa
-    y_offset += 20
-    y_offset += 20
-    y_offset += 20
-    y_offset += 20
-    y_offset += 20
-    y_offset += 20
-
-    height = y_offset + margen_y
-    width = letter[0]
-
+    # Configuración del PDF
     response = HttpResponse(content_type="application/pdf")
-    response["content-Disposition"] = f'attachment; filename="cuota_{cuota_pk}.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="cuota_{cuota_pk}.pdf"'
 
-    p = canvas.Canvas(response, pagesize=(width, height))
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
 
-    image_path = os.path.join(
-        settings.BASE_DIR, "static", "images", "png-transparent-utn-hd-logo.png"
-    )
-    watermark = ImageReader(image_path)
+    # Agregar logo y encabezado
+    image_path = os.path.join(settings.BASE_DIR, "static", "images", "png-transparent-utn-hd-logo.png")
+    logo = ImageReader(image_path)
 
-    p.saveState()
-    p.setFillAlpha(0.17)
-    p.drawImage(watermark, 0, 0, width=width, height=height, mask="auto")
-    p.restoreState()
+    # Estilos
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='TitleStyle', fontSize=20, spaceAfter=20))
+    styles.add(ParagraphStyle(name='HeadingStyle', fontSize=12, spaceAfter=10, fontName="Helvetica-Bold"))
 
-    y = height - margen_y
-    p.drawString(margen_x, y, f"Trans. Nº: {cuota.id}")
-    y -= 20
-    p.drawString(margen_x, y, f"Motivo: Pago de membresia bibloteca UTN-Frcon ")
-    y -= 20
-    p.drawString(margen_x, y, f"Fecha de emisión: {fecha}")
-    y -= 20
-    p.drawString(margen_x, y, f"Cliente: ")
-    y -= 20
-    p.drawString(margen_x, y, f"DNI del cliente: {cuota.owner.dni}")
-    y -= 20
-    p.drawString(
-        margen_x, y, f"Nombres: {cuota.owner.last_name}, {cuota.owner.first_name}"
-    )
-    y -= 40
-    p.drawString(width - 200, y, f"Monto: ${cuota.monto}")
-    y -= 20
+    # Título
+    elements.append(Paragraph("Factura de Pago", styles['TitleStyle']))
+    elements.append(Spacer(1, 12))
 
-    p.showPage()
-    p.save()
+    # Tabla con la información de la cuota
+    data = [
+        [f"Trans. Nº: {cuota.id}", f"Fecha de emisión: {fecha}"],
+        [f"Motivo: Pago de membresía biblioteca UTN-Frcon", ""],
+        ["Cliente:", f"DNI del cliente: {cuota.owner.dni}"],
+        [f"Nombres: {cuota.owner.last_name}, {cuota.owner.first_name}", ""],
+        ["", f"Monto: ${cuota.monto}"]
+    ]
+
+    table = Table(data, colWidths=[4 * inch, 2.5 * inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 48))
+
+    # Firma o pie de página
+    elements.append(Paragraph("Firma y Sello", styles['HeadingStyle']))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph("_________________________", styles['Normal']))
+    elements.append(Paragraph("UTN - Facultad Regional Concordia", styles['Normal']))
+
+    # Construcción del documento PDF
+    doc.build(elements)
 
     return response
 

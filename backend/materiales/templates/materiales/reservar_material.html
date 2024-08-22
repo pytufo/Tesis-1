@@ -22,16 +22,17 @@
 </div>
 
 <script>
-  const btn = document.getElementById('btnCrearReserva')  
+  const btn = document.getElementById('btnCrearReserva')
 
   function reservarModal(material) {
+
     fetch(`/material/${material}/detail`)
       .then(response => response.json())
       .then(data => {
         console.log(data);
         var modal = document.getElementById('materialReservaModal');
         var modalBody = modal.querySelector('.modal-body');
-        if (data.estado == "Disponible"){
+        if (data.estado == "Disponible") {
           document.getElementById('title').innerHTML = '<h5>Reservar.</h5>'
           modalBody.innerHTML = '¿Desea reservar el material: "' + data.titulo + '" ? <br/>' + " Recuerde que al reservar un material este tiene una vigencia de 24hs a partir de este momento, en caso de no retirar el material en el tiempo estimado la reserva del mismo sera finalizada automaticamente."
         } else {
@@ -68,10 +69,19 @@
         if (data.success) {
           Message.className = 'alert alert-success';
           Message.textContent = data.message;
-          Message.style.display = 'block';          
+          Message.style.display = 'block';
           btn.type = 'button';
           btn.textContent = 'Ir a reserva'
-          form.action = "/movimientos/reserva/" + data.id
+          btn.onclick = function () { window.location.href = "/movimientos/reserva/" + data.id; }
+        } else if (data.status == 511) {
+          console.log("Usuario no logueado")
+
+          btn.type = 'button';
+          btn.textContent = 'iniciar sesion'
+          btn.onclick = function () { window.location.href = '/accounts/login/'; }
+          Message.className = 'alert alert-danger';
+          Message.textContent = data.message
+          Message.style.display = 'block';
         } else {
           Message.className = 'alert alert-danger';
           Message.textContent = data.message

@@ -285,36 +285,48 @@
     </ul>
   </nav>
   <br />
-  {%if user.is_authenticated %}  
-  <h5 class="text-center"> Ultimos movimientos: </h5>  
+  {%if user.is_authenticated %}
+  <div class="container">
+
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-auto">
+        <h5 class="text-center"> Ultimos movimientos: </h5>
   
-  {% if user.role == 1 or user.role == 2%}
-  <table class="table table-dark table-hover">
-
-  </table>
-  {%else %}
-  <table class="table table-dark table-hover">
-    <tr>
-      <thead>
-        <th scope="col" >#</th>
-        <th scope="col" >##</th>
-        <th scope="col" >###</th>
-      </thead>    
-
-    </tr>
-    <tbody>
-      {% for movimiento in user_profile.movimientos|slice:":5"%}
-      <tr>
-        <td class="table-info">{{ movimiento.id}}</td>
-        <td>{{movimiento.fecha_fin}}</td>
-        <td>{{movimiento.tipo}}</td>
-        
-      </tr>
-      {%endfor%}
-    </tbody>
-  </table>
-  {% endif %}
-  {%endif%}
+        {% if user.role == 1 or user.role == 2%}
+        <table class="table table-dark table-hover">
+  
+        </table>
+        {%else %}
+        <table class="table table-dark-subtle table-hover">
+          <tr>
+            <thead class="text-center">
+              <th scope="col">#</th>
+              <th scope="col">Fecha creacion</th>
+              <th scope="col">Tipo</th>
+            </thead>
+  
+          </tr>
+          <tbody>
+            {% for movimiento in user_profile.movimientos|slice:":5"%}
+            <tr>
+              <td class="table-info text-center">{{ movimiento.id}}</td>
+              <td class="text-center">{{movimiento.fecha_fin}}</td>
+              <td>{{movimiento.tipo}}</td>
+  
+            </tr>
+            {%endfor%}
+          </tbody>
+        </table>
+        {% endif %}
+        {%endif%}
+  
+      </div>
+      <div class="col"></div>
+  
+  
+    </div>
+  </div>
 
 
 
