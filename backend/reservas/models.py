@@ -53,8 +53,7 @@ class Prestamo(models.Model):
         self.visto = True
         self.save()
 
-    def __str__(self):
-        return f"Prestamo de {self.ejemplar}  ({self.fecha_inicio} - {self.fecha_fin})"
+    
 
     class Meta:
         ordering = ["-fecha_fin"]

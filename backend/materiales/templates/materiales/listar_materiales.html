@@ -143,6 +143,7 @@
 
         </td>
         <td class="text-center">
+          
           <!-- Acciones para usuario  -->
 
           {% if user.is_authenticated and user.limite == 'Excede' %}
@@ -157,10 +158,14 @@
             Estás en espera...
             {%endif%}
           </a>
-          {% elif user.is_authenticated and material.prestamo.owner == user.id %}
-          <a class="btn btn-primary" onmouseover="changeText(this, 'Ver prestamo')"
-            onmouseout="changeText(this, 'Tienes un prestamo')"
-            href="/movimientos/prestamo/{{ material.prestamo.id }}">Tienes un prestamo</a>
+          {% elif user_profile.is_authenticated and material.prestamo %}
+          {% for prestamo in material.prestamo %}          
+          {%if prestamo.owner == user_profile.id %}
+            <a class="btn btn-primary" onmouseover="changeText(this, 'Ver prestamo')"
+              onmouseout="changeText(this, 'Tienes un prestamo')"
+              href="/movimientos/prestamo/{{ prestamo.id }}">Tienes un prestamo</a>
+          {%endif%}
+          {%endfor%}          
           {%else%}
           <div class="btn-group">
             {%if user.role != 1%}

@@ -48,6 +48,7 @@ from materiales.serializers import (
     EditorialSerializer,
     EjemplarSerializer,
     EjemplarMaterialSerializer,
+    customMaterializer,
 )
 
 from accounts.models import User
@@ -483,7 +484,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
 
         ####
         materials_serializer = MaterialSerializer(
-            materiales, many=True, context={"user": user}
+            materiales, many=True, context={"request": request}
         )
         serializer_materials = materials_serializer.data
 
@@ -534,7 +535,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
 
     def retrieve_material(self, request, material_pk=None):        
         material = Material.objects.get(pk=material_pk)
-        serializer = MaterialSerializer(material)
+        serializer = customMaterializer(material)
         return Response(serializer.data)
 
     def ejemplares(self, request, material_pk=None):

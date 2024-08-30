@@ -89,21 +89,23 @@
     fetch(`/movimientos/reservas/${reserva}/entregar_ejemplar/`)
       .then(response => response.json())
       .then(data => {
+        console.log(data.reserva)
+        console.log(data.ejemplares_disponibles)
         document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar de reserva'
         document.getElementById('crearPrestamoForm').action = `/movimientos/reservas/${reserva}/entregar_ejemplar/`
         let material = document.getElementById('material');
-        material.value = data.reserva.material.titulo;
+        material.value = data.reserva.material[1];
 
         let usuario = document.getElementById('owner');
-        usuario.value = data.reserva.owner.email;
+        usuario.value = data.reserva.owner[1];
 
-        let ejemplaresDisponibles = data.reserva.material.ejemplares_disponibles.map(ejemplar => ejemplar.toString());
+        let ejemplaresDisponibles = data.ejemplares_disponibles
 
         let datalist = document.getElementById('datalistEjemplaresOptions');
         datalist.innerHTML = '';
         ejemplaresDisponibles.forEach(ejemplar => {
           let option = document.createElement('option');
-          option.value = ejemplar;
+          option.value = ejemplar.id;
           datalist.appendChild(option);
         });
       });
@@ -178,6 +180,7 @@
           fetch(`/material/ejemplar/${ejemplarId}/`)
             .then(response => response.json())
             .then(data => {
+              console.log(data)
               if (data && data.material) {
                 document.getElementById('material').value = data.material.titulo;
               } else {

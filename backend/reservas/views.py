@@ -44,7 +44,7 @@ from .serializers import (
     ReservaCreateSerializer,
     EjemplarSerializer,
     SimplePrestamoSerializer,
-    SimpleReservaSerializer
+    SimpleReservaSerializer,
 )
 
 
@@ -149,7 +149,10 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             except Exception as e:
                 return JsonResponse(
-                    {"message": f"Error al realizar la cancelación: {str(e)}","reserva":reserva},
+                    {
+                        "message": f"Error al realizar la cancelación: {str(e)}",
+                        "reserva": reserva,
+                    },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         else:
@@ -378,8 +381,10 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None):
         prestamo = Prestamo.objects.get(pk=pk)
-        serializer = SimplePrestamoSerializer(prestamo)        
-        return JsonResponse(serializer.data, )
+        serializer = SimplePrestamoSerializer(prestamo)
+        return JsonResponse(
+            serializer.data,
+        )
 
     @action(detail=True, methods=["get"])
     def retrieve_ejemplar(self, request, ejemplar_pk=None):
@@ -453,7 +458,11 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             # Verificar si el usuario existe o tiene una reserva o prestamo pendiente par el mismo material
             if not usuario:
                 return JsonResponse(
-                    {"message": "El usuario no existe", "success": False, "usuario": usuario}
+                    {
+                        "message": "El usuario no existe",
+                        "success": False,
+                        "usuario": usuario,
+                    }
                 )
 
             pendiente = usuario_tiene_reserva_prestamo_pendiente(
@@ -506,7 +515,11 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             serializer.save(ejemplar=ejemplar)
 
             return JsonResponse(
-                {"message": "Prestamo creado con exito", "success": True, "id": serializer.data["id"]},
+                {
+                    "message": "Prestamo creado con exito",
+                    "success": True,
+                    "id": serializer.data["id"],
+                },
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
@@ -525,7 +538,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             material = reserva.material
             ejemplares_disponibles = Ejemplar.objects.filter(material=material)
 
-            serializer_reserva = ReservasSerializer(reserva)
+            serializer_reserva = SimpleReservaSerializer(reserva)
             serializer_ejemplares = EjemplarSerializer(
                 ejemplares_disponibles, many=True, context={"request": request}
             )
@@ -590,7 +603,11 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             reserva.save()
 
             return JsonResponse(
-                {"success": True, "message": "El prestamo ha sido creado"},
+                {
+                    "success": True,
+                    "message": "El prestamo ha sido creado",
+                    "id": serializer.data["id"],
+                },
                 status=status.HTTP_201_CREATED,
             )
 

@@ -28,7 +28,7 @@
         <th scope="col">Id</th>
         <th scope="col">Nombre</th>
         <th scope="col">E-mail</th>
-        <th scope="col">Dispone para reservar </th>
+        
         <th scope="col">Rol</th>
         <th scope="col col-hover">
           <a href="?query={{ query }}&ordering={% if ordering == 'is_active' %}-is_active{% else %}is_active{% endif %}"
@@ -47,12 +47,7 @@
         <tr>
           <td>{{ usuario.id }}</td>
           <td>{{ usuario.last_name }}, {{ usuario.first_name }}</td>
-          <td>{{ usuario.email }}</td>
-          {% if usuario.limite == "Excede" %}
-          <td class="table-danger">{{ usuario.limite }}</td>
-          {% else %}
-          <td>{{ usuario.limite }}</td>
-          {% endif %}
+          <td>{{ usuario.email }}</td>          
           <td class="table-success">{{ usuario.role }}</td>
           {% if usuario.is_active %}
           <td class="table-success">Activo</td>

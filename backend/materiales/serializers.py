@@ -11,6 +11,7 @@ from materiales.models import (
 from reservas.models import Reserva, Prestamo
 from reservas.utils import get_estado_prestamo, get_estado_reserva
 from django.utils import timezone
+
 # from reservas.serializers import ReservasSerializer, PrestamosSerializer
 
 
@@ -91,7 +92,7 @@ class EjemplarMaterialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ejemplar
-        fields = ["id", "estado"]
+        fields = ["id", "estado", "material"]
 
     def get_estado(self, obj):
         return get_estado_ejemplar(obj)
@@ -99,6 +100,7 @@ class EjemplarMaterialSerializer(serializers.ModelSerializer):
 
 class ReservaSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
+
     class Meta:
         model = Reserva
         fields = ["id", "fecha_inicio", "fecha_fin", "owner", "visto", "estado"]
@@ -109,18 +111,49 @@ class ReservaSerializer(serializers.ModelSerializer):
 
 class PrestamoSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
+    ejemplar = serializers.SerializerMethodField()
+    material = serializers.SerializerMethodField()
     class Meta:
         model = Prestamo
-        fields = ["id", "fecha_inicio", "fecha_fin", "owner", "visto", "estado"]
+        fields = [
+            "id",
+            "fecha_inicio",
+            "fecha_fin",
+            "owner",
+            "ejemplar",
+            "material",
+            "visto",
+            "estado",
+        ]
 
-    def get_estado(self,obj):
+    def get_ejemplar(self,obj):
+        data = {
+            "id": obj,
+            "material": obj.ejemplar.material.id,
+            "material_nombre": obj.ejemplar.material.titulo,
+            "estado": get_estado_ejemplar(obj.ejemplar),
+        }
+        return data
+        #return [obj.ejemplar.id,obj.ejemplar.material.id,obj.ejemplar.material.titulo]
+    
+    def get_material(self,obj):        
+        data = {
+            "id": obj.ejemplar.material.id,
+            "titulo": obj.ejemplar.material.titulo,
+            "estado": get_estado_ejemplar(obj.ejemplar),
+        }
+        return data
+        #return (obj.ejemplar.material.id,obj.ejemplar.material.titulo)
+    def get_estado(self, obj):
         return get_estado_prestamo(obj)
+
 
 class customMaterializer(serializers.ModelSerializer):
     class Meta:
         model = Material
-        fields = '__all__'
-      
+        fields = "__all__"
+
+
 class MaterialSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
     cantidad_en_reserva = serializers.SerializerMethodField()
@@ -131,7 +164,7 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     reserva = serializers.SerializerMethodField()
     prestamo = serializers.SerializerMethodField()
-
+    ejemplares = serializers.SerializerMethodField()
     tipo = TipoMaterialSerializer(many=True, read_only=True)
     editorial = EditorialSerializer(many=True, read_only=True)
     autor = AutorSerializer(many=True, read_only=True)
@@ -154,47 +187,79 @@ class MaterialSerializer(serializers.ModelSerializer):
             "cantidad_en_prestamo",
             "cantidad_disponible",
             "estado",
+            "ejemplares",
             "ejemplares_disponibles",
             "reserva",
             "prestamo",
         ]
 
+    def get_ejemplares(self,obj):
+        return EjemplarMaterialSerializer(
+            Ejemplar.objects.filter(material=obj), many=True
+        ).data
+        
     def get_reserva(self, obj):
-        reserva = Reserva.objects.filter(material=obj, fecha_fin__gte=timezone.now()).order_by("-fecha_inicio").first()
-        if reserva:
-            return ReservaSerializer(reserva).data  # Asegúrate de usar el serializador correcto
-        return None
-
-    def get_prestamo(self, obj):
-        prestamo = (
-            Prestamo.objects.filter(ejemplar__material=obj, fecha_fin__gte=timezone.now())
+        reserva = (
+            Reserva.objects.filter(material=obj, fecha_fin__gte=timezone.now())
             .order_by("-fecha_inicio")
             .first()
         )
-        if prestamo:
-            return PrestamoSerializer(prestamo).data  # Asegúrate de usar el serializador correcto
+        if reserva:
+            return ReservaSerializer(
+                reserva
+            ).data  # Asegúrate de usar el serializador correcto
+        return None
+
+    def get_prestamo(self, obj):
+        user = self.context['request'].user if 'request' in self.context else None
+
+        if user and user.is_authenticated:
+            prestamo = Prestamo.objects.filter(
+                ejemplar__material=obj.id, fecha_fin__gte=timezone.now(), owner=user
+            ).order_by("-fecha_inicio")
+        else:
+            prestamo = Prestamo.objects.filter(
+                ejemplar__material=obj.id, fecha_fin__gte=timezone.now()
+            ).order_by("-fecha_inicio")
+
+        if prestamo.exists():
+            return PrestamoSerializer(prestamo, many=True, context=self.context).data
         return None
 
     def get_cantidad_existente(self, obj):
-        return get_cantidad_existente(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_existente(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_cantidad_en_reserva(self, obj):
-        return get_cantidad_en_reserva(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_en_reserva(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_cantidad_en_prestamo(self, obj):
-        return get_cantidad_en_prestamo(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_en_prestamo(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_cantidad_disponible(self, obj):
-        return get_cantidad_disponible(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_disponible(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_estado(self, obj):
-        return get_estado(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_estado(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_limite_espera(self, obj):
-        return get_limite_epera(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_limite_epera(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_ejemplares_disponibles(self, obj):
-        return get_ejemplares_disponibles(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_ejemplares_disponibles(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
 
 class EjemplarSerializer(serializers.ModelSerializer):
@@ -213,7 +278,6 @@ class EjemplarSerializer(serializers.ModelSerializer):
         return get_estado_ejemplar(obj)
 
 
-
 class CustomMaterialSerializer(serializers.ModelSerializer):
     cantidad_existente = serializers.SerializerMethodField()
     cantidad_en_reserva = serializers.SerializerMethodField()
@@ -221,7 +285,6 @@ class CustomMaterialSerializer(serializers.ModelSerializer):
     cantidad_disponible = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
     ejemplares_disponibles = serializers.SerializerMethodField()
-
 
     tipo = TipoMaterialSerializer(many=True, read_only=True)
     editorial = EditorialSerializer(many=True, read_only=True)
@@ -248,27 +311,40 @@ class CustomMaterialSerializer(serializers.ModelSerializer):
             "ejemplares_disponibles",
         ]
 
-
     def get_cantidad_existente(self, obj):
-        return get_cantidad_existente(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_existente(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_cantidad_en_reserva(self, obj):
-        return get_cantidad_en_reserva(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_en_reserva(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_cantidad_en_prestamo(self, obj):
-        return get_cantidad_en_prestamo(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_en_prestamo(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_cantidad_disponible(self, obj):
-        return get_cantidad_disponible(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_cantidad_disponible(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_estado(self, obj):
-        return get_estado(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_estado(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_limite_espera(self, obj):
-        return get_limite_epera(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_limite_epera(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
     def get_ejemplares_disponibles(self, obj):
-        return get_ejemplares_disponibles(obj)  # Asegúrate de que este método devuelva un valor serializable
+        return get_ejemplares_disponibles(
+            obj
+        )  # Asegúrate de que este método devuelva un valor serializable
 
 
 class EjemplarSerializer(serializers.ModelSerializer):

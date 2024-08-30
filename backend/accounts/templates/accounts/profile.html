@@ -47,19 +47,14 @@
                 </li>
                 {% endif %}
                 <li class="list-group-item">
-                    <p class="fw-semibold">Reservas: {{ user.cantidad_reservas }}</p>
+                    <p class="fw-semibold">Reservas: {{ user_profile.cantidad_reservas }} <a href="/movimientos/mis_reservas/"> -> Ir</a></p>
                 </li>
                 <li class="list-group-item">
-                    <p class="fw-semibold">Prestamos: {{ user.cantidad_prestamos }}</p>
+                    <p class="fw-semibold">Prestamos: {{ user_profile.cantidad_prestamos }}. <a href="/movimientos/mis_prestamos/"> -> Ir</a></p>
+                    
                 </li>
             </ul>            
-            <div>
-                {% for reserva in user_profile.usuario_reservas %}
-                {{ reserva.id}}
-                {{reserva.visto}}
-                {%endfor%}
-                ---
-            </div>
+
         </div>
     </div>
 </div>
