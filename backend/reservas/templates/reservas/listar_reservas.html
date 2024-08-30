@@ -20,8 +20,7 @@
       <table class="table table-sm table-hover table-secondary table-bordered mi-tabla">
         <thead class="table-secondary text-center">
           <th scope="col">Usuario</th>
-          <th scope="col">Titulo</th>
-          <th scope="col">Autor</th>
+          <th scope="col">Titulo</th>          
           <th scope="col">Finalización</th>
           <th scope="col">Accion</th>
         </thead>
@@ -36,14 +35,7 @@
               {{ reserva.owner.email}}
 
             </td>
-            <td>{{ reserva.material.titulo }}</td>
-            <td>
-              <p>
-                {% for autor in reserva.material.autor %}
-                {{ autor.nombre }} {{autor.apellido }}.
-                {% endfor %}
-              </p>
-            </td>
+            <td>{{ reserva.material.titulo }}</td>                      
             {% if reserva.estado == "Finalizada" or not reserva.fecha_fin %}
             <td class="table-danger">{{reserva.estado}}</td>
             {% else %}
@@ -51,7 +43,7 @@
             <td>{{ reserva.fecha_fin_format}}</td>
             {% endif %}
             <!-- Acciones admin -->
-            <td>
+            <td>          
               <button class="btn btn-secondary border border-secondary-subtle dropdown-toggle" type="button"
                 id="accionReservasDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 Accion
@@ -61,8 +53,9 @@
                 {% if reserva.estado != "Finalizada" %}
                 {% if reserva.owner.email == user.email%}
                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#cancelarReservaModal"
-                    onclick="cancelarReservarModal('{{reserva.id}}')"> Cancelar reserva</a></li>
+                    onclick="cancelarReservarModal('{{reserva.id}}')"> Cancelar reserva </a></li>
                 {%endif%}
+
                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#crearPrestamoModal"
                     onclick="reservaEntregarEjemplar('{{reserva.id}}')">Entregar ejemplar</a></li>
                 {%endif%}

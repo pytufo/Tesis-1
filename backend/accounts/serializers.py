@@ -16,6 +16,22 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+class CustomUserSerializer(serializers.ModelSerializer):    
+    role = serializers.CharField(source="get_role_display", read_only=False)
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "dni",
+            "username",
+            "first_name",
+            "last_name",
+            "email",                
+            "is_active",
+            "is_authenticated",            
+            "role",
+        ]
+
 class UserProfileSerializer(serializers.ModelSerializer):
     usuario_reservas = serializers.SerializerMethodField()
     cantidad_reservas = serializers.SerializerMethodField()
@@ -128,13 +144,7 @@ class UserLoginSerializer(serializers.Serializer):
                 "refresh": refresh_token,
                 "id": owner.id,
                 "email": owner.email,
-                "role": owner.role,
-                "reservas": serializers.PrimaryKeyRelatedField(
-                    many=True, queryset=Material.objects.all()
-                ),
-                "en propiedad": serializers.PrimaryKeyRelatedField(
-                    many=True, queryset=Ejemplar.objects.all()
-                ),
+                "role": owner.role,                
             }
 
             return validation

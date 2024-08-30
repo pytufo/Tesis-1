@@ -16,18 +16,7 @@
         </div>
     </div>
 
-    <!-- Boton de acciones de "nuevo" -->
-    {% if user.role == 1 or user.role == 2%}
-    <div class="row">
-        <div class="col"></div>
-        <div class="col"></div>
-        <div class="col-auto">
-            <button type="button" class="btn btn-primary">
-                Nuevo
-            </button>
-        </div>
-    </div>
-    {% endif %}
+
 
     <!-- Cuerpo y tablas -->
     <div class="row">
@@ -38,8 +27,7 @@
                     <thead class="table-secondary text-center">
                         <th>#</th>
                         <th>Nombre</th>
-                        <th>Cant Materiales</th>
-                        <th>Accion</th>
+                        <th>Cant Materiales</th>                        
                     </thead>
                     <tbody class="table-group-divider bg-dark-subtle">
                         {% for editorial in editoriales %}
@@ -52,19 +40,7 @@
                             </td>
                             <td>
                                 {{editorial.cant_materiales}}
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                      Acción
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                      <li><a class="dropdown-item" href="#">Opción 1</a></li>
-                                      <li><a class="dropdown-item" href="#">Opción 2</a></li>
-                                    </ul>
-                                  </div>
-                            </td>
+                            </td>                            
 
                         </tr>
                         {%endfor%}

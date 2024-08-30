@@ -17,6 +17,7 @@ import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,17 +36,20 @@ DEBUG = 1
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "corsheaders",
     "rest_framework",
     "django_filters",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "channels",
     "accounts",
     "materiales",
     "reservas",
@@ -105,8 +109,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8081",
 ]
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST", "").split(" ") + ["localhost"]
-# ALLOWED_HOSTS = ["django-project.eba-tmhvachc.us-west-2.elasticbeanstalk.com"]
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOST", "").split(" ") + ["localhost", "*"]
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.BasicAuthentication",
@@ -196,6 +200,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+ASGI_APPLICATION = "bibloteca.routing.application"
+
+CHANNEL_LAYERS = {
+    'default':{        
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [('redis', 6379)],
+            },
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

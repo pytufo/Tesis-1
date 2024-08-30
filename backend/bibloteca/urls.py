@@ -4,8 +4,11 @@ from materiales.views import MaterialViewSet, index
 from django.http import Http404
 from django.shortcuts import render
 
+
+
 def custom_404(request, exception):
     return render(request, "err/404.html", {})
+
 
 urlpatterns = [
     # path("admin/", admin.site.urls),
@@ -21,6 +24,7 @@ urlpatterns = [
     # path("admin/", include("dashboard.urls")),
     path("movimientos/", include("reservas.urls")),
     path("facturacion/", include("facturacion.urls")),
-    path("error", custom_404, name='404')
-    
-] 
+    path("error", custom_404, name="404"),
+    # path("ws/notificacion/$", consumers.NotificationConsumer.as_asgi()),
+    # path("", index),
+]

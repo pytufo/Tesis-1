@@ -31,12 +31,16 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from accounts.serializers import (
     UserProfileSerializer,
+    CustomUserSerializer,
     UserLoginSerializer,
     RegisterSerializer,
 )
 
 from .models import User
 
+#### Canales y notificacion
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 @csrf_exempt
 @require_POST
@@ -156,7 +160,7 @@ class RegisterView(generics.CreateAPIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
-    serializer_class = UserProfileSerializer
+    serializer_class = CustomUserSerializer
     queryset = User.objects.all()
 
     @action(detail=True, methods=["post"])
@@ -177,7 +181,7 @@ class UserViewSet(viewsets.ModelViewSet):
             or request.user.role == 2
             or request.user.role == 4
         ):
-            serializer = UserProfileSerializer(usuario)
+            serializer = CustomUserSerializer(usuario)
             roles = [
                 role
                 for role in User._meta.get_field("role").choices
@@ -213,7 +217,7 @@ class UserViewSet(viewsets.ModelViewSet):
             page_number = request.GET.get("page")
             page_obj = paginator.get_page(page_number)
 
-            user_serializer = UserProfileSerializer(page_obj, many=True)
+            user_serializer = CustomUserSerializer(page_obj, many=True)
             serializer_user = user_serializer.data
             (page_number)
             return render(
@@ -231,9 +235,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
     def no_admin(self, request, pk=None):
         # users = User.objects.exclude(role=User.ADMIN)
-        users = User.objects.exclude(email="admin@mail.com") and User.objects.exclude(
-            email=request.user.email
-        )
+        users = User.objects.exclude(Q(email="admin@mail.com") | Q(email=request.user.email))
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
 
@@ -249,7 +251,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def profile(self, request):
         user = request.user
-        serializer = UserProfileSerializer(user)
+        serializer = CustomUserSerializer(user)
         return render(request, "accounts/profile.html", {"user": serializer.data})
         """ serializer = self.get_serializer(user)
         return Response(serializer.data) """
@@ -267,3 +269,15 @@ def activar(request):
         user.save()
         return redirect("listar_usuarios")
     return HttpResponseForbidden()
+
+
+
+def send_user_notification(user_id, message):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{user_id}",
+        {
+            'type': 'send_notification',
+            'notification': message
+        }
+    )

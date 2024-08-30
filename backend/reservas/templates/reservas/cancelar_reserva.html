@@ -2,22 +2,22 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="ModalLabel"> Cancelar reserva <!-- Id y Titulo del material --> </h1>
+                <h1 class="modal-title fs-5" id="ModalLabel"> Cancelar reserva {{reserva}}
+                    <!-- Id y Titulo del material --> </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text center">
                 <!-- El contenido del mensaje se actualiza dinamicamente -->
+
             </div>
             <div id="message-success" style="display: none;"></div>
 
             <div class="modal-footer">
-                <form id="cancelarReservaForm" method="post">
+                <form id="cancelarReservaForm" method="post" action="/movimientos/reservas/{{reserva}}/cancelar/">
                     {% csrf_token %}
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        onclick="volver()">Volver</button>                        
-                    <button type="button" class="btn btn-primary" href="/movimientos/reserva/{reserva.id} " id="Reserva" disabled>Ir a
-                        reserva</button>
-                    <button type="submit" class="btn btn-primary" id="btnCrearReserva">Confirmar</button>
+                        onclick="volver()">Volver</button>
+                    <button type="submit" class="btn btn-primary" id="btnCancelarReserva">Confirmar</button>
                 </form>
             </div>
         </div>
@@ -25,8 +25,7 @@
 </div>
 
 <script>
-    const btn = document.getElementById('btnCrearReserva')
-    const btnReserva = document.getElementById('Reserva')
+    const btn = document.getElementById('btnCancelarReserva')
     function cancelarReservarModal(reserva) {
         fetch(`/movimientos/reservas/${reserva}/`)
             .then(response => response.json())
@@ -34,7 +33,7 @@
                 console.log(data);
                 var modal = document.getElementById('cancelarReservaModal');
                 var modalBody = modal.querySelector('.modal-body');
-                modalBody.innerHTML = '¿Desea cancelar la reserva del material: "' + data.material.titulo + '" ? <br/>'
+                modalBody.innerHTML = '¿Desea cancelar la reserva del material: "' + data.material[1] + '" ? <br/>'
                 document.getElementById('cancelarReservaForm').action = `/movimientos/reservas/${reserva}/cancelar/`;
             })
     }
@@ -50,7 +49,7 @@
     }
 
     document.getElementById('cancelarReservaForm').addEventListener('submit', function (event) {
-        event.preventDefault();        
+        event.preventDefault();
         const form = event.target;
         const formReserva = new FormData(form);
         Limpiar();
@@ -70,14 +69,17 @@
                     Message.className = 'alert alert-success';
                     Message.textContent = data.message;
                     Message.style.display = 'block';
-                    btn.disabled = true;            
-                    btnReserva.disabled = false;        
+                    btn.type = 'button';
+                    btn.textContent = 'Ir a reserva'
+                    btn.onclick = function () { window.location.href = "/movimientos/reserva/" + data.id }
+
+
                 } else {
                     console.log(data)
                     Message.className = 'alert alert-danger';
                     Message.textContent = data.message;
                     Message.style.display = 'block';
-                    
+
                 }
             })
             .catch(error => {

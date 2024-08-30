@@ -7,6 +7,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
@@ -529,11 +532,10 @@ class MaterialViewSet(viewsets.ModelViewSet):
             },
         )
 
-    def retrieve_material(self, request, material_pk=None):
-        user = request.user
+    def retrieve_material(self, request, material_pk=None):        
         material = Material.objects.get(pk=material_pk)
         serializer = MaterialSerializer(material)
-        return Response(serializer.data, user)
+        return Response(serializer.data)
 
     def ejemplares(self, request, material_pk=None):
         ejemplar = Ejemplar.objects.filter(material=material_pk)

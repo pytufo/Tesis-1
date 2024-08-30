@@ -30,7 +30,7 @@
               <div class="input-group mb-3">
                 <span class="input-group-text">Usuario E-mail:</span>
                 <input type="text" class="form-control border border-secondary-subtle" id="owner" name="owner"
-                  placeholder="Ingrese un e-mail..." list="datalistUsersOptions" required>
+                  placeholder="Ingrese un e-mail..." list="datalistUsersOptions"  required>
                 <datalist id="datalistUsersOptions">
                   <!-- Obtenemos los ejemplares del material dinamicamente -->
                 </datalist>
@@ -58,8 +58,8 @@
     fetch(`/material/ejemplar/${ejemplarId}/`)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
-        console.log(data.material.id)
+        console.log('material: ' +  data)
+        console.log('material: ' +  data.material.id)
         document.getElementById('crearPrestamoForm').action = `/movimientos/prestamos/nuevo/`
         document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar'
         let inputEjemplar = document.getElementById('IdEjemplar');
@@ -72,13 +72,14 @@
     fetch(`/accounts/users/`)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        console.log('user' + data);
 
         let datalistUsers = document.getElementById('datalistUsersOptions');
         datalistUsers.innerHTML = '';
         data.forEach(user => {
           let option = document.createElement('option');
           option.value = user.email;
+          console.log('material:' + option.value)
           datalistUsers.appendChild(option);
         });
       })
@@ -132,7 +133,7 @@
 
         let datalistUsers = document.getElementById('datalistUsersOptions');
         datalistUsers.innerHTML = '';
-        data.forEach(user => {
+        datalistUsers.forEach(user => {
           let option = document.createElement('option');
           option.value = user.email;
           datalistUsers.appendChild(option);
@@ -144,7 +145,7 @@
     fetch(`/material/materiales/`)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
+        console.log('material: '+data)
         document.getElementById('material').disabled = false;
         let datalistMateriales = document.getElementById('datalistMaterialesOptions');
         datalistMateriales.innerHTML = '';
@@ -189,7 +190,7 @@
     fetch(`/accounts/users/`)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        console.log('user: ' + data);
 
         let datalistUsers = document.getElementById('datalistUsersOptions');
         datalistUsers.innerHTML = '';
@@ -218,12 +219,13 @@
     const form = event.target;
     const formData = new FormData(form);
     const inputEjemplar = document.getElementById('IdEjemplar').value;
+    const inputOwner = document.getElementById('owner').value
     let messagesPrestamo = document.getElementById('message-prestamo');
     Limpiar();
 
-    console.log(inputEjemplar, ejemplaresDisponibles)
-    if (ejemplaresDisponibles) {
-      console.log('1')
+    console.log('ejemplares: ' + inputEjemplar)
+    console.log('usuario: ' + inputOwner)
+    if (ejemplaresDisponibles) {      
       if (!ejemplaresDisponibles.includes(inputEjemplar)) {
         messagesPrestamo.className = 'alert alert-danger';
         messagesPrestamo.textContent = 'Ejemplar no valido';
@@ -245,7 +247,7 @@
         if (!response.ok) {
           return response.text().then(text => { throw new Error(text) });
         }
-        console.log(response);
+        console.log('response: '+ response);
         return response.json();
       })
       .then(data => {
@@ -255,7 +257,11 @@
           messagesPrestamo.className = 'alert alert-success';
           messagesPrestamo.textContent = data.message;
           messagesPrestamo.style.display = 'block';
-          document.getElementById('btn-create').style.display = 'none'
+          let btn = document.getElementById('btn-create')
+          btn.textContent = 'ir al prestamo'
+          btn.onclick = function () { window.location.href = "/movimientos/prestamo/" + data.id }
+          
+
 
         } else {
           console.log(data);

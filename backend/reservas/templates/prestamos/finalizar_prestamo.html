@@ -15,7 +15,7 @@
                     {% csrf_token %}
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                         onclick="volver()">Volver</button>
-                    <button type="submit" class="btn btn-primary" id="btnCrearReserva">Confirmar</button>
+                    <button type="submit" class="btn btn-primary" id="btnCrearPrestamo">Confirmar</button>
                 </form>
             </div>
         </div>
@@ -23,14 +23,15 @@
 </div>
 
 <script>
+    const btn = document.getElementById('btnCrearPrestamo')
     function finalizarPrestamoModal(prestamo) {
-        fetch(`/movimientos/prestamo/${prestamo}/`)
+        fetch(`/movimientos/prestamos/${prestamo}`)
             .then(response => response.json())
             .then(data => {
-                console.log(data.ejemplar.material.titulo);
+                console.log(data);
                 let modal = document.getElementById('finalizarPrestamoModal');
                 let modalBody = modal.querySelector('.modal-body');
-                modalBody.innerHTML = '¿Desea finalizar el prestamo de : "<b>"' + data.ejemplar.material.titulo + '"</b>del usuario <b>"' + data.owner.email + '</b>"?'
+                modalBody.innerHTML = '¿Desea finalizar el prestamo de : "<b>"' + data.material + '"</b>del usuario <b>"' + data.owner + '</b>"?'
                 document.getElementById('finalizarPrestamoForm').action = `/movimientos/prestamo/${prestamo}/devolucion/`;
             })
     }
@@ -66,6 +67,9 @@
                     Message.className = 'alert alert-success';
                     Message.textContent = data.message;
                     Message.style.display = 'block';
+                    btn.type = 'button';
+                    btn.textContent = 'Ir al prestamo'
+                    btn.onclick = function () { window.location.href = "/movimientos/prestamo/" + data.id }
                 } else {
                     console.log(data)
                     Message.className = 'alert alert-danger';

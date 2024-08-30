@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_protect
 from datetime import timedelta, date, datetime
 from django.utils import timezone
+from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import render, redirect
 from materiales.serializers import MaterialSerializer
@@ -23,18 +24,12 @@ from materiales.utils import (
     get_ejemplares_disponibles,
     get_estado_ejemplar,
 )
-from facturacion.utils import (es_moroso )
+from facturacion.utils import es_moroso
 
 from rest_framework import viewsets, filters, generics, status
 
-# from rest_framework.response import JsonResponse
-from django_filters.rest_framework import DjangoFilterBackend
-from .filters import PrestamoFilter
-
-# from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-# from rest_framework.permissions import IsAuthenticated
-
-# from rest_framework.filters import SearchFilter
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from .models import Reserva, Prestamo
 from accounts.models import User
@@ -48,12 +43,14 @@ from .serializers import (
     PrestamoCreateSerializer,
     ReservaCreateSerializer,
     EjemplarSerializer,
+    SimplePrestamoSerializer,
+    SimpleReservaSerializer
 )
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
-    serializer_class = ReservaCreateSerializer
+    serializer_class = SimpleReservaSerializer
     queryset = Reserva.objects.all()
 
     def list(self, request, *args, **kwargs):
@@ -132,9 +129,16 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 reserva.fecha_fin = timezone.now()
                 reserva.save()
 
+                ### Notificacion al usuario
+
                 habilitar_reserva_lista_espera(reserva.material, fecha_fin_anterior)
                 return JsonResponse(
-                    {"message": "Reserva cancelada. ", "id": reserva.id, "status": 200, "success": True}
+                    {
+                        "message": "Reserva cancelada. ",
+                        "id": reserva.id,
+                        "status": 200,
+                        "success": True,
+                    }
                 )
 
             except Reserva.DoesNotExist:
@@ -145,16 +149,16 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             except Exception as e:
                 return JsonResponse(
-                    {"message": f"Error al realizar la cancelación: {str(e)}"},
+                    {"message": f"Error al realizar la cancelación: {str(e)}","reserva":reserva},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         else:
             return redirect("/")
 
-    def retrieve(self, request, pk=None):
-        reserva = Reserva.objects.get(pk=pk)
-        serializer = ReservasSerializer(reserva)
-        return JsonResponse(serializer.data)
+    def retrieve(self, request, *args, **kwargs):
+        reserva = self.get_object()
+        serializer = SimpleReservaSerializer(reserva)
+        return Response(serializer.data)
 
     def detalle_reserva(self, request, reserva_pk=None):
         reserva_id = Reserva.objects.get(pk=reserva_pk)
@@ -208,7 +212,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 {
                     "message": "Usuario no valido, por favor inicie sesion",
                     "success": False,
-                    "status": status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED
+                    "status": status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED,
                 }
             )
         try:
@@ -224,8 +228,13 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 usuario, material
             )
             morosidad = es_moroso(usuario)
-            if morosidad == 'Adeuda':
-                return JsonResponse({"success": False, "message": "La reserva no pudo realizarse. \u000A Al parecer tienes algún pago pendiente, por favor comunicarse con tesoreria."})
+            if morosidad == "Adeuda":
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "La reserva no pudo realizarse. \u000A Al parecer tienes algún pago pendiente, por favor comunicarse con tesoreria.",
+                    }
+                )
             if reserva_prestamo_pendiente:
                 if reserva_prestamo_pendiente["tipo"] == "Prestamo":
                     message = "Ya tienes un prestamo con este material."
@@ -274,6 +283,8 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
             serializer.validated_data["fecha_fin"] = fecha_fin_default
             serializer.save(material=material)
+
+            ####Notificacion
 
             return JsonResponse(
                 {
@@ -367,8 +378,8 @@ class PrestamoViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None):
         prestamo = Prestamo.objects.get(pk=pk)
-        serializer = PrestamosSerializer(prestamo)
-        return JsonResponse(serializer.data)
+        serializer = SimplePrestamoSerializer(prestamo)        
+        return JsonResponse(serializer.data, )
 
     @action(detail=True, methods=["get"])
     def retrieve_ejemplar(self, request, ejemplar_pk=None):
@@ -395,7 +406,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
                 prestamo.ejemplar.material, fecha_fin_anterior
             )
             return JsonResponse(
-                {"success": True, "message": "Devolución exitosa"},
+                {"success": True, "message": "Devolución exitosa", "id": prestamo.id},
                 status=status.HTTP_200_OK,
             )
 
@@ -430,13 +441,20 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             # definimos variables de estados y aplicamos sus validaciones
             estado = get_estado_ejemplar(ejemplar)
             limite_reservas_prestamo = get_limite_reservas_prestamo(usuario)
-            morosidad = es_moroso(usuario_id)
-            if morosidad == 'Adeuda':
-                return JsonResponse({"success": False, "message": "La reserva no pudo realizarse. \u000A Al parecer tienes algún pago pendiente, por favor comunicarse con tesoreria."})
+            morosidad = es_moroso(usuario.id)
+            if morosidad == "Adeuda":
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "La reserva no pudo realizarse. \u000A Al parecer tienes algún pago pendiente, por favor comunicarse con tesoreria.",
+                    }
+                )
 
             # Verificar si el usuario existe o tiene una reserva o prestamo pendiente par el mismo material
-            if usuario.DoesNotExist:
-                return JsonResponse({"message": "El usuario no existe", "success": False})
+            if not usuario:
+                return JsonResponse(
+                    {"message": "El usuario no existe", "success": False, "usuario": usuario}
+                )
 
             pendiente = usuario_tiene_reserva_prestamo_pendiente(
                 usuario, ejemplar.material
@@ -488,12 +506,16 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             serializer.save(ejemplar=ejemplar)
 
             return JsonResponse(
-                {"message": "Prestamo creado con exito", "success": True},
+                {"message": "Prestamo creado con exito", "success": True, "id": serializer.data["id"]},
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
             return JsonResponse(
-                {"message": f"Error al obtener informacion del prestamo: {str(e)}"},
+                {
+                    "message": f"Error al obtener informacion del prestamo: {str(e)}",
+                    "usuario": usuario.id,
+                    "ejemplar": ejemplar.id,
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

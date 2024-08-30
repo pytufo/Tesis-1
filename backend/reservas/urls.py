@@ -75,10 +75,10 @@ urlpatterns = [
         name="listar_prestamos",
     ),
     path(
-        "prestamos/<int:prestamo_pk>",
+        "prestamos/<int:pk>",
         PrestamoViewSet.as_view(
             {
-                "get": "list",
+                "get": "retrieve",
             }
         ),
         name="listar_prestamos",
