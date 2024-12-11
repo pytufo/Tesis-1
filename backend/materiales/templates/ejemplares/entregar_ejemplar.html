@@ -20,6 +20,7 @@
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">ID Ejemplar:</span>
+                <input type="hidden" id="hiddenEjemplarId" name="ejemplar">
                 <input id="IdEjemplar" type="number" class="form-control border border-secondary-subtle" name="ejemplar"
                   placeholder="Ingreser o seleccione un Ejemplar..." list="datalistEjemplaresOptions" required>
                 <datalist id="datalistEjemplaresOptions">
@@ -30,7 +31,7 @@
               <div class="input-group mb-3">
                 <span class="input-group-text">Usuario E-mail:</span>
                 <input type="text" class="form-control border border-secondary-subtle" id="owner" name="owner"
-                  placeholder="Ingrese un e-mail..." list="datalistUsersOptions"  required>
+                  placeholder="Ingrese un e-mail..." list="datalistUsersOptions" required>
                 <datalist id="datalistUsersOptions">
                   <!-- Obtenemos los ejemplares del material dinamicamente -->
                 </datalist>
@@ -58,12 +59,12 @@
     fetch(`/material/ejemplar/${ejemplarId}/`)
       .then(response => response.json())
       .then(data => {
-        console.log('material: ' +  data)
-        console.log('material: ' +  data.material.id)
-        document.getElementById('crearPrestamoForm').action = `/movimientos/prestamos/nuevo/`
+        console.log('material: ' + data)
+        console.log('material: ' + data.material.id)
         document.getElementById('crearPrestamoModalLabel').textContent = 'Entregar ejemplar'
         let inputEjemplar = document.getElementById('IdEjemplar');
         inputEjemplar.value = data.id;
+        document.getElementById('hiddenEjemplarId').value = data.id;
         inputEjemplar.disabled = true;
         let material = document.getElementById('material');
         material.value = data.material.titulo;
@@ -147,7 +148,7 @@
     fetch(`/material/materiales/`)
       .then(response => response.json())
       .then(data => {
-        console.log('material: '+data)
+        console.log('material: ' + data)
         document.getElementById('material').disabled = false;
         let datalistMateriales = document.getElementById('datalistMaterialesOptions');
         datalistMateriales.innerHTML = '';
@@ -224,11 +225,16 @@
     const inputEjemplar = document.getElementById('IdEjemplar').value;
     const inputOwner = document.getElementById('owner').value
     let messagesPrestamo = document.getElementById('message-prestamo');
+
+    if (!inputEjemplar) {
+      console.log("El campo IdEjemplar está vacío");
+      return;
+    }
     Limpiar();
 
     console.log('ejemplares: ' + inputEjemplar)
     console.log('usuario: ' + inputOwner)
-    if (ejemplaresDisponibles) {      
+    if (ejemplaresDisponibles) {
       if (!ejemplaresDisponibles.includes(inputEjemplar)) {
         messagesPrestamo.className = 'alert alert-danger';
         messagesPrestamo.textContent = 'Ejemplar no valido';
@@ -250,7 +256,7 @@
         if (!response.ok) {
           return response.text().then(text => { throw new Error(text) });
         }
-        console.log('response: '+ response);
+        console.log('response: ' + response);
         return response.json();
       })
       .then(data => {
@@ -263,7 +269,7 @@
           let btn = document.getElementById('btn-create')
           btn.textContent = 'ir al prestamo'
           btn.onclick = function () { window.location.href = "/movimientos/prestamo/" + data.id }
-          
+
 
 
         } else {

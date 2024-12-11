@@ -434,6 +434,14 @@ class PrestamoViewSet(viewsets.ModelViewSet):
             usuario_id = request.data.get("owner")
             usuario = User.objects.get(email=usuario_id)
             ejemplar_id = request.data.get("ejemplar") or request.data.get("IdEjemplar")
+
+            try:
+                ejemplar_id = int(ejemplar_id)
+            except (ValueError, TypeError):
+                return JsonResponse(
+                    {"message": "El ID del ejemplar debe ser un número válido.", "ejemplar": ejemplar_id},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             ejemplar = Ejemplar.objects.get(pk=ejemplar_id)
 
             if get_estado(ejemplar.material) != "Disponible":
